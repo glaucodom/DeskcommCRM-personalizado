@@ -27,7 +27,9 @@ import { useT } from "@/hooks/i18n/useT";
 import { useState } from "react";
 import {
   BookOpen,
+  Eye,
   FileText,
+  Pencil,
   HelpCircle,
   MessageSquare,
   Package,
@@ -40,6 +42,9 @@ import { Button } from "@/components/ui/button";
 import { SourceStatusBadge, deriveBadgeStatus } from "@/components/ai/SourceStatusBadge";
 import { TrechosDoMaterialDialog } from "@/components/ai/TrechosDoMaterialDialog";
 import { EditarFaqDialog } from "@/components/ai/EditarFaqDialog";
+import { VerArquivoDialog } from "@/components/ai/VerArquivoDialog";
+import { EditarTextoDialog } from "@/components/ai/EditarTextoDialog";
+import { temTextoEditavel } from "@/hooks/ai/useTextoDoMaterial";
 import {
   TIPO_DE_FONTE_POR_ID,
   canonizarTipoDeFonte,
@@ -94,6 +99,8 @@ export function KnowledgeSourceCard({
   const tagDoIdioma = useTagDeIdioma();
   const [vendoTrechos, setVendoTrechos] = useState(false);
   const [editando, setEditando] = useState(false);
+  const [vendoArquivo, setVendoArquivo] = useState(false);
+  const [editandoTexto, setEditandoTexto] = useState(false);
 
   const tipo = canonizarTipoDeFonte(source.source_type) ?? "faq";
   const meta = TIPO_DE_FONTE_POR_ID.get(tipo);
@@ -104,6 +111,8 @@ export function KnowledgeSourceCard({
   const mostraErro =
     (derived === "failed" || derived === "sem_credencial") && source.last_index_error;
   const temTrechos = (source.chunks_count ?? 0) > 0;
+  // Documento em .md/.txt (inclusive texto colado, guardado como .md). PDF e CSV não.
+  const textoEditavel = temTextoEditavel(source);
 
   return (
     <Card className="flex h-full flex-col" data-testid={`material-${source.id}`}>
@@ -210,6 +219,51 @@ export function KnowledgeSourceCard({
                 nome={source.name}
                 aberto
                 onFechar={() => setEditando(false)}
+                onSalvo={onMudou}
+              />
+            ) : null}
+          </>
+        ) : null}
+
+        {textoEditavel ? (
+          <>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setVendoArquivo(true)}
+              data-testid={`material-ver-arquivo-${source.id}`}
+            >
+              <Eye className="mr-2 h-3.5 w-3.5" aria-hidden />
+              {t("Ver arquivo enviado")}
+            </Button>
+            {vendoArquivo ? (
+              <VerArquivoDialog
+                sourceId={source.id}
+                nome={source.name}
+                aberto
+                onFechar={() => setVendoArquivo(false)}
+              />
+            ) : null}
+          </>
+        ) : null}
+
+        {textoEditavel && !arquivado ? (
+          <>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setEditandoTexto(true)}
+              data-testid={`material-editar-texto-${source.id}`}
+            >
+              <Pencil className="mr-2 h-3.5 w-3.5" aria-hidden />
+              {t("Editar texto")}
+            </Button>
+            {editandoTexto ? (
+              <EditarTextoDialog
+                sourceId={source.id}
+                nome={source.name}
+                aberto
+                onFechar={() => setEditandoTexto(false)}
                 onSalvo={onMudou}
               />
             ) : null}
