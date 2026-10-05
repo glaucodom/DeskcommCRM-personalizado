@@ -8,9 +8,10 @@ import { cn } from "@/lib/utils";
 
 /**
  * Controle essencial da instalação: não é removível pela interface do vínculo.
- * Versão instalada no rodapé da sidebar. Vira um aviso clicável só para quem
- * é dono do servidor E tem versão nova — quem não pode atualizar não é
- * alertado sobre algo que não pode resolver.
+ * Versão instalada no rodapé da sidebar. Para quem é dono do servidor ela é
+ * sempre um link para a tela de atualização (é lá que se confere a versão e se
+ * atualiza); só acende o aviso quando existe versão nova. Quem não pode
+ * atualizar vê apenas o número, sem link para uma tela que não abre para ele.
  */
 export function VersionFooter({
   collapsed,
@@ -31,7 +32,7 @@ export function VersionFooter({
   // número vazio, apontando para uma tela que não tem o que oferecer.
   const alerta = data.is_owner && data.update_available;
 
-  if (!alerta) {
+  if (!data.is_owner) {
     return (
       <p
         className={cn(
@@ -50,23 +51,30 @@ export function VersionFooter({
     <Link
       href="/app/settings/atualizacao"
       onClick={onNavigate}
-      title={`${t("Nova versão")} ${novo} ${t("disponível")}`}
+      title={
+        alerta
+          ? `${t("Nova versão")} ${novo} ${t("disponível")}`
+          : `${t("Versão")} ${label}`
+      }
       className={cn(
         "flex items-center gap-2 rounded-md px-3 py-2 text-xs text-foreground hover:bg-accent/50",
         collapsed && "justify-center px-2",
       )}
     >
-      <span className="relative flex h-2 w-2 shrink-0">
-        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary/60" />
-        <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
-      </span>
-      {!collapsed && (
-        <span className="truncate">
-          {t("Nova versão")}
-          {novo ? ` · ${novo}` : ""}
+      {alerta && (
+        <span className="relative flex h-2 w-2 shrink-0">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary/60" />
+          <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
         </span>
       )}
-      {collapsed && <ArrowCircleUp size={16} aria-hidden />}
+      {!collapsed && (
+        <span className="truncate">
+          {alerta
+            ? `${t("Nova versão")}${novo ? ` · ${novo}` : ""}`
+            : `${t("versão")} ${label}`}
+        </span>
+      )}
+      {collapsed && (alerta ? <ArrowCircleUp size={16} aria-hidden /> : label.split(".").slice(0, 2).join("."))}
     </Link>
   );
 }
