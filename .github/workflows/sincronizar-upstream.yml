@@ -86,5 +86,8 @@ jobs:
           git tag -a "$tag" -m "Release oficial ${{ steps.alvo.outputs.tag }} com as nossas mudanças"
           git push origin HEAD:main
           git push origin "$tag"
+          # A VPS só enxerga versão nova pela API de releases.
+          gh release create "$tag" --verify-tag --latest --title "$tag" \
+            --notes "Release oficial ${{ steps.alvo.outputs.tag }} com as mudanças deste fork."
           gh workflow run publish-image.yml --ref "$tag"
           echo "Tag publicada: $tag"

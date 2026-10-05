@@ -52,6 +52,8 @@ const DIR = join(process.cwd(), ".github/workflows");
  * acrescente, e acrescentar sem razão é visível em code review.
  */
 const ESCRITA_JUSTIFICADA: Record<string, string> = {
+  "release-do-fork.yml::contents: write":
+    "cria a release da tag do fork — é a release que o botão Atualizar agora da VPS procura",
   "sincronizar-upstream.yml::contents: write":
     "faz push da main e da tag de release do fork — é a única forma de a sincronização entregar " +
     "a versão que as VPS vão instalar",

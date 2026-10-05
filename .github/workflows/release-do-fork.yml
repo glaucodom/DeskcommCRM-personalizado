@@ -1,0 +1,34 @@
+name: Release do fork
+
+# O "Atualizar agora" da VPS pergunta à API de releases do repositório de origem
+# qual é a última versão (`ultima_release_estavel`, em hostgator-setup-kit/_common.sh).
+# Tag sozinha não basta: sem release, a VPS acha que não há versão nova.
+#
+# Este workflow publica a release de toda tag vX.Y.Z-glauco.N enviada por push.
+# O robô de sincronização cria a release ele mesmo (push feito pelo GITHUB_TOKEN
+# não dispara este workflow), então os dois caminhos terminam iguais.
+
+on:
+  push:
+    tags: ["v*-glauco.*"]
+
+permissions:
+  contents: write
+
+jobs:
+  criar-release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Publicar a release da tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release $TAG já existe."
+            exit 0
+          fi
+          gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --verify-tag --latest \
+            --title "$TAG" \
+            --notes "Versão do fork: release oficial com as mudanças deste repositório. Notas detalhadas no CHANGELOG.md e em .changes/."

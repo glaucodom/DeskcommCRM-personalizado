@@ -65,6 +65,12 @@ const DIR = join(process.cwd(), ".github/workflows");
  */
 const GATILHO_ESPERADO: Record<string, { condicao: string | null; efeito: string }> = {
   // --- sincronização diária com a versão oficial (fork) ----------------------------
+  "release-do-fork.yml::criar-release": {
+    condicao: null,
+    efeito:
+      "Este job publica a release de cada tag vX.Y.Z-glauco.N. Sem ele a VPS não enxerga " +
+      "versão nova e o botão Atualizar agora diz que está tudo em dia.",
+  },
   "sincronizar-upstream.yml::sincronizar": {
     condicao: null,
     efeito:
