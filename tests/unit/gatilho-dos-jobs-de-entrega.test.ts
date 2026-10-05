@@ -64,6 +64,14 @@ const DIR = join(process.cwd(), ".github/workflows");
  * que desliga um job de entrega fica visível em code review.
  */
 const GATILHO_ESPERADO: Record<string, { condicao: string | null; efeito: string }> = {
+  // --- sincronização diária com a versão oficial (fork) ----------------------------
+  "sincronizar-upstream.yml::sincronizar": {
+    condicao: null,
+    efeito:
+      "Este job traz a última release oficial para a main do fork, roda typecheck e testes " +
+      "e só então publica a tag das imagens. Desligado, o fork para de receber atualizações " +
+      "oficiais em silêncio; as VPS continuam na versão que já têm.",
+  },
   // --- a cadeia que leva o conserto até a VPS ---------------------------------
   "release.yml::abrir-pr-de-release": {
     condicao: "github.event_name == 'workflow_dispatch'",

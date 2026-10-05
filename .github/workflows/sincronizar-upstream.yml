@@ -1,0 +1,90 @@
+name: Sincronizar com o projeto oficial
+
+# Todo dia, traz a última release oficial do DeskcommCRM para a main deste
+# repositório, junto com as nossas mudanças. A main só muda se a integração
+# passar no typecheck e nos testes unitários. Conflito ou falha param aqui, sem
+# tocar na main, e o GitHub avisa o dono do repositório pelo próprio sistema de
+# notificação de workflow com falha.
+#
+# Depois de publicar a main, o robô cria a tag vX.Y.Z-glauco.N e pede o build
+# das imagens: a VPS fixa uma tag, então um rollback é voltar uma tag.
+
+on:
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: sincronizar-upstream
+  cancel-in-progress: false
+
+jobs:
+  sincronizar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Clonar com histórico
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Descobrir a última release oficial
+        id: alvo
+        run: |
+          tag=$(curl -fsS https://api.github.com/repos/melgarafael/DeskcommCRM/releases/latest \
+            | python3 -c 'import sys, json; print(json.load(sys.stdin)["tag_name"])')
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "Última release oficial: $tag"
+
+      - name: Ver se já está incluída
+        id: ja
+        run: |
+          git remote add upstream https://github.com/melgarafael/DeskcommCRM.git
+          git fetch --quiet upstream --tags
+          if git merge-base --is-ancestor "${{ steps.alvo.outputs.tag }}" HEAD; then
+            echo "pular=sim" >> "$GITHUB_OUTPUT"
+            echo "Essa release já está na main. Nada a fazer."
+          else
+            echo "pular=nao" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Integrar a release oficial à main
+        if: steps.ja.outputs.pular == 'nao'
+        run: |
+          git config user.name "sincronizacao-automatica"
+          git config user.email "sincronizacao-automatica@users.noreply.github.com"
+          if ! git merge --no-edit "${{ steps.alvo.outputs.tag }}"; then
+            echo "::error::Conflito ao integrar ${{ steps.alvo.outputs.tag }}. A main não foi alterada. Resolva à mão."
+            git merge --abort
+            exit 1
+          fi
+
+      - uses: ./.github/actions/preparar-node
+        if: steps.ja.outputs.pular == 'nao'
+        timeout-minutes: 15
+
+      - name: Typecheck
+        if: steps.ja.outputs.pular == 'nao'
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
+        run: pnpm typecheck
+
+      - name: Testes unitários
+        if: steps.ja.outputs.pular == 'nao'
+        run: pnpm test:unit
+
+      - name: Publicar a main e a tag
+        if: steps.ja.outputs.pular == 'nao'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tag="${{ steps.alvo.outputs.tag }}-glauco.${GITHUB_RUN_NUMBER}"
+          git tag -a "$tag" -m "Release oficial ${{ steps.alvo.outputs.tag }} com as nossas mudanças"
+          git push origin HEAD:main
+          git push origin "$tag"
+          gh workflow run publish-image.yml --ref "$tag"
+          echo "Tag publicada: $tag"

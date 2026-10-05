@@ -52,6 +52,12 @@ const DIR = join(process.cwd(), ".github/workflows");
  * acrescente, e acrescentar sem razão é visível em code review.
  */
 const ESCRITA_JUSTIFICADA: Record<string, string> = {
+  "sincronizar-upstream.yml::contents: write":
+    "faz push da main e da tag de release do fork — é a única forma de a sincronização entregar " +
+    "a versão que as VPS vão instalar",
+  "sincronizar-upstream.yml::actions: write":
+    "pede o build das imagens com `gh workflow run publish-image.yml` — um push feito pelo " +
+    "GITHUB_TOKEN não dispara outros workflows, então o build precisa ser pedido explicitamente",
   "publish-image.yml::packages: write":
     "publica a imagem do app no GHCR — é o artefato que o self-hoster instala",
   "vigia-de-colisao.yml::pull-requests: write":
