@@ -22,9 +22,6 @@ on:
   push:
     tags: ["v*"]
     branches: ["main"]
-  # Disparado pelo robô de sincronização (sincronizar-upstream.yml): um push feito
-  # pelo GITHUB_TOKEN não dispara outros workflows, então o robô pede o build aqui.
-  workflow_dispatch:
   # NÃO acrescente `release: types: [published]` aqui. Ele já esteve, e o efeito
   # foi medido na v1.3.0: `gh release create` empurra a tag E publica a release,
   # então o MESMO commit foi construído DUAS vezes, com 5 minutos de diferença.
