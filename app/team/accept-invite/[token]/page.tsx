@@ -3,12 +3,12 @@
  *
  * Behavior matrix:
  *  - Invalid/expired token         → render error
- *  - Unauthenticated user          → render CTA → /login?next=...
+ *  - Unauthenticated user          → redirect → /signup?invite=... (criar conta)
  *  - Authenticated, email mismatch → render mismatch + sign-out CTA
  *  - Authenticated, email match    → form posts to Server Action which inserts
  *                                    membership and redirects to /app/inbox
  */
-import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { verifyInviteToken } from "@/lib/auth/invite-token";
 import { authRateLimited, AUTH_LIMITS } from "@/lib/auth/rate-limit";
@@ -73,38 +73,13 @@ export default async function AcceptInvitePage({ params }: PageProps) {
     );
   }
 
+  // Sem sessão, o convidado vai direto para "Criar conta" (com o convite no
+  // link, para a conta nova já nascer amarrada a ele). Antes caía numa tela
+  // intermediária com "Fazer login" em destaque — e quem é convidado quase
+  // sempre ainda não tem conta. Quem já tem acha "Já tem conta? Entrar" lá,
+  // e esse link volta para este convite depois do login.
   if (!user) {
-    const next = encodeURIComponent(`/team/accept-invite/${token}`);
-    return (
-      <Shell idioma={idioma}>
-        <h1 className="text-xl font-semibold">{t("Você foi convidado")}</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {t("Para aceitar o convite como")} <strong>{payload.role}</strong>,{" "}
-          {t("faça login com o email")} <strong>{payload.email}</strong>.
-        </p>
-        <div className="mt-4 flex flex-wrap items-center gap-3">
-          <Link
-            href={`/login?next=${next}`}
-            className="inline-block rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
-          >
-            {t("Fazer login")}
-          </Link>
-          {/*
-            O caminho que faltava. Quem é convidado e ainda NÃO tem conta só
-            tinha "Fazer login" — então criava conta pelo caminho comum, e o
-            provisionamento, sem achar vínculo, abria uma empresa e o tornava
-            admin dela. O token viaja no link para que a conta nova já nasça
-            amarrada a este convite.
-          */}
-          <Link
-            href={`/signup?invite=${encodeURIComponent(token)}`}
-            className="text-sm underline underline-offset-4"
-          >
-            {t("Ainda não tenho conta")}
-          </Link>
-        </div>
-      </Shell>
-    );
+    redirect(`/signup?invite=${encodeURIComponent(token)}`);
   }
 
   const userEmail = (user.email ?? "").trim().toLowerCase();
