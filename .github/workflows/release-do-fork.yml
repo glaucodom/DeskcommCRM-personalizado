@@ -4,9 +4,8 @@ name: Release do fork
 # qual é a última versão (`ultima_release_estavel`, em hostgator-setup-kit/_common.sh).
 # Tag sozinha não basta: sem release, a VPS acha que não há versão nova.
 #
-# Este workflow publica a release de toda tag vX.Y.Z-glauco.N enviada por push.
-# O robô de sincronização cria a release ele mesmo (push feito pelo GITHUB_TOKEN
-# não dispara este workflow), então os dois caminhos terminam iguais.
+# Este workflow publica a release de toda tag vX.Y.Z-glauco.N enviada por push,
+# seja à mão, seja pelo robô de sincronização (que empurra com chave de deploy).
 
 on:
   push:

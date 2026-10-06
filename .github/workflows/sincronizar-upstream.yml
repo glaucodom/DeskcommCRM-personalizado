@@ -6,8 +6,14 @@ name: Sincronizar com o projeto oficial
 # tocar na main, e o GitHub avisa o dono do repositório pelo próprio sistema de
 # notificação de workflow com falha.
 #
-# Depois de publicar a main, o robô cria a tag vX.Y.Z-glauco.N e pede o build
-# das imagens: a VPS fixa uma tag, então um rollback é voltar uma tag.
+# Depois de publicar a main, o robô cria a tag vX.Y.Z-glauco.N: a VPS fixa uma
+# tag, então um rollback é voltar uma tag.
+#
+# O push usa a chave de deploy do segredo ROBO_DEPLOY_KEY, não o GITHUB_TOKEN.
+# O GITHUB_TOKEN nunca pode alterar arquivos em .github/workflows/, e toda
+# release oficial que mexe neles travava aqui (v1.74.0 mexeu no e2e.yml). Push
+# por chave dispara os workflows normalmente, então a release sai pelo
+# release-do-fork.yml e as imagens pelo publish-image.yml, como num push manual.
 
 on:
   schedule:
@@ -15,8 +21,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
-  actions: write
+  contents: read
 
 concurrency:
   group: sincronizar-upstream
@@ -27,10 +32,20 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
+      - name: Conferir a chave de publicação
+        env:
+          ROBO_DEPLOY_KEY: ${{ secrets.ROBO_DEPLOY_KEY }}
+        run: |
+          if [ -z "$ROBO_DEPLOY_KEY" ]; then
+            echo "::error::Falta o segredo ROBO_DEPLOY_KEY (chave de deploy com escrita). Sem ele o robô não consegue publicar."
+            exit 1
+          fi
+
       - name: Clonar com histórico
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ssh-key: ${{ secrets.ROBO_DEPLOY_KEY }}
 
       - name: Descobrir a última release oficial
         id: alvo
@@ -79,15 +94,11 @@ jobs:
 
       - name: Publicar a main e a tag
         if: steps.ja.outputs.pular == 'nao'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           tag="${{ steps.alvo.outputs.tag }}-glauco.${GITHUB_RUN_NUMBER}"
           git tag -a "$tag" -m "Release oficial ${{ steps.alvo.outputs.tag }} com as nossas mudanças"
           git push origin HEAD:main
+          # O push da tag dispara release-do-fork.yml (release que a VPS enxerga)
+          # e publish-image.yml (imagens).
           git push origin "$tag"
-          # A VPS só enxerga versão nova pela API de releases.
-          gh release create "$tag" --verify-tag --latest --title "$tag" \
-            --notes "Release oficial ${{ steps.alvo.outputs.tag }} com as mudanças deste fork."
-          gh workflow run publish-image.yml --ref "$tag"
           echo "Tag publicada: $tag"
