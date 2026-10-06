@@ -11,7 +11,7 @@
  *   6. Token expirado → "Convite inválido ou expirado"
  *   7. Token adulterado (HMAC quebrado) → idem
  *   8. Email não corresponde: logado com OUTRA conta → "Email não corresponde"
- *   9. Não autenticado → CTA "Fazer login", não o formulário de aceite
+ *   9. Não autenticado → vai direto para /signup?invite=… ("Entrar" volta ao convite)
  *
  * Pré-req: npx tsx scripts/seed-e2e-invite.ts (o spec roda sozinho se faltar).
  * Contra o Supabase do env (local recomendado — precisa das migrations de RLS
@@ -314,7 +314,7 @@ test.describe("ciclo de vida do convite (ponta a ponta + adversarial)", () => {
     await expect(page.getByRole("heading", { name: /não corresponde/i })).toBeVisible();
   });
 
-  test("9. não autenticado → CTA de login, não o formulário de aceite", async ({ page }) => {
+  test("9. não autenticado → criar conta, com \"Entrar\" voltando ao convite", async ({ page }) => {
     const valid = signInviteToken({
       invite_id: randomUUID(),
       email: inv.invitee_email,
@@ -323,8 +323,14 @@ test.describe("ciclo de vida do convite (ponta a ponta + adversarial)", () => {
       exp: Math.floor(Date.now() / 1000) + 3600,
     });
     await page.goto(`/team/accept-invite/${valid}`);
-    await expect(page.getByRole("heading", { name: /Você foi convidado/i })).toBeVisible();
-    await expect(page.getByRole("link", { name: /Fazer login/i })).toBeVisible();
+    // Fork: sem sessão não há mais tela intermediária — o convidado cai em
+    // "Criar conta". Quem já tem conta usa "Já tem conta? Entrar", que leva o
+    // convite como `next` e, depois do login, volta para o aceite.
+    await expect(page).toHaveURL(new RegExp(`/signup\\?invite=${encodeURIComponent(valid)}`));
+    await expect(page.getByRole("link", { name: "Entrar", exact: true })).toHaveAttribute(
+      "href",
+      `/login?next=${encodeURIComponent(`/team/accept-invite/${valid}`)}`,
+    );
   });
 
   /**
@@ -349,8 +355,8 @@ test.describe("ciclo de vida do convite (ponta a ponta + adversarial)", () => {
       exp: Math.floor(Date.now() / 1000) + 3600,
     });
 
+    // Fork: o redirect é direto (antes era um clique em "Ainda não tenho conta").
     await page.goto(`/team/accept-invite/${valid}`);
-    await page.getByRole("link", { name: /ainda não tenho conta/i }).click();
 
     // O token viaja: é ele que faz a conta nova nascer amarrada a este convite
     // em vez de ganhar uma organização própria.
