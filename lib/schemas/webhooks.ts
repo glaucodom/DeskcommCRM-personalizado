@@ -343,6 +343,7 @@ export const createWebhookSourceSchema = z.object({
 });
 export const updateWebhookSourceSchema = createWebhookSourceSchema.partial().extend({
   is_active: z.boolean().optional(),
+  authorize_ai_on_capture: z.boolean().optional(),
 });
 
 export const createAutomationRuleSchema = z

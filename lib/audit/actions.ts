@@ -240,6 +240,7 @@ export const AUDIT_ACTIONS = [
   "channel.pairing_code_requested",
   "channel.social_configured",
   "channel.social_disconnected",
+  "channel.social_desvinculado",
   "channel.ai_access_updated",
   "channel.acervo_updated",
   "channel.reconnected",
@@ -1030,6 +1031,20 @@ export const AUDIT_ACTIONS = [
   "ai.login_codex_conectado",
   // A conta da empresa foi desconectada pela própria tela de Credenciais.
   "ai.login_codex_desconectado",
+
+  // Contato pessoal (spec 21): marcar e desmarcar, no padrão de
+  // `contact.blocked` / `contact.unblocked`. Eventos NOVOS de propósito — nunca
+  // reutilizar os de bloqueio, que significam descadastro/STOP (direito do
+  // titular), não decisão operacional de esconder da operação.
+  "contact.marked_personal",
+  "contact.unmarked_personal",
+
+  // O interruptor POR EMPRESA do passo `ai_decide` das automações (#2367):
+  // gravado em `organizations.settings.automacoes.ai_decide` pela tela
+  // Configurações → Automações. Sem esta linha, desligar o freio de toda a
+  // empresa (e religá-lo) ficaria sem rastro — e é ele que decide se alguma
+  // regra consulta o modelo.
+  "settings.automation_ai_decide_updated",
 ] as const;
 
 /** Um código de auditoria. Derivado de `AUDIT_ACTIONS` — não redigite a lista. */
