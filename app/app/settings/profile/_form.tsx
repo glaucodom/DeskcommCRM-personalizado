@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import { updateProfile } from "@/app/actions/settings/updateProfile";
 import { useT } from "@/hooks/i18n/useT";
+import { useIdiomasOferecidos } from "@/lib/i18n/IdiomaProvider";
 import { IDIOMAS_VISIVEIS } from "@/lib/i18n/registro";
 import {
   profileSchema,
@@ -42,6 +43,8 @@ export function ProfileForm({
   initialTimezone,
 }: Props) {
   const t = useT();
+  // Os que esta instalação esconde (`lib/i18n/ocultos.ts`) ficam de fora.
+  const oferecidos = useIdiomasOferecidos();
   const [fullName, setFullName] = useState(initialFullName ?? "");
   const [locale, setLocale] = useState<Locale | typeof SEM_PREFERENCIA_DE_IDIOMA>(initialLocale);
   const [timezone, setTimezone] = useState(initialTimezone);
@@ -101,11 +104,13 @@ export function ProfileForm({
                     aparecer. Oferecer um idioma que não muda a tela é prometer
                     o que ela não cumpre — `en-US` saiu por isso, e um idioma
                     em construção fica fora pela mesma razão. */}
-                {IDIOMAS_VISIVEIS.map(({ codigo, nomeNativo }) => (
-                  <SelectItem key={codigo} value={codigo}>
-                    {nomeNativo}
-                  </SelectItem>
-                ))}
+                {IDIOMAS_VISIVEIS.map(({ codigo, nomeNativo }) =>
+                  oferecidos.some((i) => i.codigo === codigo) ? (
+                    <SelectItem key={codigo} value={codigo}>
+                      {nomeNativo}
+                    </SelectItem>
+                  ) : null,
+                )}
               </SelectContent>
             </Select>
           </div>

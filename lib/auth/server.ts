@@ -21,7 +21,7 @@ import {
   type ExigenciaDeMfa,
   type PapelMinimoDeMfa,
 } from "@/lib/auth/politica-mfa";
-import { normalizarIdioma } from "@/lib/i18n/idiomas";
+import { idiomaDaTela } from "@/lib/i18n/ocultos";
 import { STATUS_OPERANTE, ehOperante } from "@/lib/organizacao/operante";
 import type { AuthUser, Role, UserOrgMembership, ActiveOrg } from "./types";
 
@@ -276,7 +276,7 @@ export const loadAuthUser = cache(async (): Promise<AuthUser | null> => {
   // própria, e quem não pertence a organização nenhuma, não têm o que resolver.
   // Ler assim mesmo faria toda tela do produto tocar o cookie para descartar o
   // valor em seguida.
-  const idioma = normalizarIdioma(
+  const idioma = idiomaDaTela(
     locale ?? support?.locale ?? (await localeDaOrgAtiva(memberships)),
   );
   const timezone = (user.user_metadata?.timezone as string | undefined) ?? null;

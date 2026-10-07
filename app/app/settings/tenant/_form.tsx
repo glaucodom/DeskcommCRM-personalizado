@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import { updateTenant } from "@/app/actions/settings/updateTenant";
 import { useT } from "@/hooks/i18n/useT";
+import { useIdiomasOferecidos } from "@/lib/i18n/IdiomaProvider";
 import { IDIOMAS_VISIVEIS } from "@/lib/i18n/registro";
 import { MOEDAS_SERVIDAS, simboloDaMoeda, type MoedaServida } from "@/lib/money";
 import { paisesOferecidos, perfilDoPais } from "@/lib/legal/perfil-do-pais";
@@ -31,6 +32,8 @@ const TIMEZONES = FUSOS_OFERECIDOS.map((f) => f.codigo);
 
 export function TenantForm({ initial }: Props) {
   const t = useT();
+  // Os que esta instalação esconde (`lib/i18n/ocultos.ts`) ficam de fora.
+  const oferecidos = useIdiomasOferecidos();
   const [form, setForm] = useState<TenantInput>(initial);
   const [isPending, startTransition] = useTransition();
 
@@ -116,11 +119,13 @@ export function TenantForm({ initial }: Props) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {IDIOMAS_VISIVEIS.map(({ codigo, nomeNativo }) => (
-                  <SelectItem key={codigo} value={codigo}>
-                    {nomeNativo}
-                  </SelectItem>
-                ))}
+                {IDIOMAS_VISIVEIS.map(({ codigo, nomeNativo }) =>
+                  oferecidos.some((i) => i.codigo === codigo) ? (
+                    <SelectItem key={codigo} value={codigo}>
+                      {nomeNativo}
+                    </SelectItem>
+                  ) : null,
+                )}
               </SelectContent>
             </Select>
           </div>

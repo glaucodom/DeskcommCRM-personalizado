@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 import { traduzir } from "./dicionario";
 import { normalizarIdioma, IDIOMA_PADRAO, type Idioma } from "./idiomas";
+import { IDIOMAS_VISIVEIS, type IdiomaVisivel } from "./registro";
 
 /**
  * O idioma da interface, com contexto PRÓPRIO — não pendurado no de autenticação.
@@ -41,6 +42,29 @@ const Ctx = createContext<{ idioma: Idioma; aplicar: (i: Idioma) => void }>({
   idioma: IDIOMA_PADRAO,
   aplicar: () => {},
 });
+
+/**
+ * Os idiomas que as telas oferecem — os visíveis menos os que a instalação
+ * esconde (`lib/i18n/ocultos.ts`). Contexto próprio, montado por
+ * `IdiomasOcultos` dentro do `IdiomaProvider`: sem ele, tudo o que o registro
+ * deixa aparecer é oferecido, como no produto oficial.
+ */
+const OferecidosCtx = createContext<readonly IdiomaVisivel[]>(IDIOMAS_VISIVEIS);
+
+export function IdiomasOcultos({
+  ocultos,
+  children,
+}: {
+  ocultos: readonly string[];
+  children: React.ReactNode;
+}) {
+  const chave = ocultos.join(",");
+  const oferecidos = useMemo(() => {
+    const lista = chave.split(",");
+    return IDIOMAS_VISIVEIS.filter((i) => !lista.includes(i.codigo));
+  }, [chave]);
+  return <OferecidosCtx.Provider value={oferecidos}>{children}</OferecidosCtx.Provider>;
+}
 
 /**
  * Espelho do idioma atual fora da árvore React.
@@ -108,6 +132,11 @@ export function useIdioma(): Idioma {
  * o `useEffect` acima devolve o valor do servidor no próximo render — a tela
  * não fica mentindo que salvou.
  */
+/** Os idiomas que as telas oferecem: os visíveis menos os que a instalação esconde. */
+export function useIdiomasOferecidos(): readonly IdiomaVisivel[] {
+  return useContext(OferecidosCtx);
+}
+
 export function useAplicarIdioma(): (idioma: Idioma) => void {
   return useContext(Ctx).aplicar;
 }

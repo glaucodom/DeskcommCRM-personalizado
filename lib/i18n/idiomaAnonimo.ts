@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 
 import { normalizarIdioma, parseAcceptLanguage, type Idioma } from "@/lib/i18n/idiomas";
+import { idiomasOcultosDaInstalacao } from "@/lib/i18n/ocultos";
 
 /**
  * O idioma de quem ainda não tem sessão (ou cujo perfil não tem `locale`
@@ -20,7 +21,12 @@ import { normalizarIdioma, parseAcceptLanguage, type Idioma } from "@/lib/i18n/i
 export async function idiomaDoVisitante(
   localeBruto: string | null | undefined,
 ): Promise<Idioma> {
-  if (localeBruto) return normalizarIdioma(localeBruto);
+  // Idioma que esta instalação esconde (`lib/i18n/ocultos.ts`) cai no padrão,
+  // venha do perfil ou do navegador.
+  const ocultos = idiomasOcultosDaInstalacao();
+  const semOculto = (idioma: Idioma): Idioma =>
+    ocultos.includes(idioma) ? normalizarIdioma(null) : idioma;
+  if (localeBruto) return semOculto(normalizarIdioma(localeBruto));
   const hdrs = await headers();
-  return normalizarIdioma(parseAcceptLanguage(hdrs.get("accept-language")));
+  return semOculto(normalizarIdioma(parseAcceptLanguage(hdrs.get("accept-language"))));
 }

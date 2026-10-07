@@ -365,6 +365,10 @@ const schema = z.object({
     .default("false")
     .transform((v) => v === "true"),
 
+  // Idiomas que esta instalação esconde de quem usa (`lib/i18n/ocultos.ts`),
+  // códigos separados por vírgula. Vazio = nenhum.
+  IDIOMAS_OCULTOS: z.string().optional().default(""),
+
   // Sentry
   SENTRY_DSN: z.string().optional().default(""),
 

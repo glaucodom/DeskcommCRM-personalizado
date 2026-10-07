@@ -23,7 +23,8 @@ import {
   ImpersonateBanner,
 } from "@/components/app/ImpersonateBanner";
 import { ConexaoCaidaBanner } from "@/components/app/ConexaoCaidaBanner";
-import { IdiomaProvider } from "@/lib/i18n/IdiomaProvider";
+import { IdiomaProvider, IdiomasOcultos } from "@/lib/i18n/IdiomaProvider";
+import { idiomasOcultosDaInstalacao } from "@/lib/i18n/ocultos";
 import { listarConexoesCaidas, type ConexaoCaida } from "@/lib/channels/health";
 import { VoiceCallProvider } from "@/components/voice/VoiceCallContext";
 import { ProvedorDaOcupacaoDoRodape } from "@/lib/ui/rodape-ocupado";
@@ -263,6 +264,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     // pergunta quem está logado. Ver `lib/i18n/IdiomaProvider`: foi o
     // acoplamento com a autenticação que derrubou 32 casos.
     <IdiomaProvider locale={user.idioma}>
+    <IdiomasOcultos ocultos={idiomasOcultosDaInstalacao()}>
     <AuthProvider user={user} activeOrg={activeOrg}>
       {/*
         A COR DA ETIQUETA, uma leitura por tela.
@@ -309,6 +311,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       </div>
       </ProvedorDeCoresDasEtiquetas>
     </AuthProvider>
+    </IdiomasOcultos>
     </IdiomaProvider>
   );
 }

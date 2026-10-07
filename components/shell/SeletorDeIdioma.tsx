@@ -11,9 +11,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useT } from "@/hooks/i18n/useT";
-import { useAplicarIdioma, useIdioma } from "@/lib/i18n/IdiomaProvider";
+import { useAplicarIdioma, useIdioma, useIdiomasOferecidos } from "@/lib/i18n/IdiomaProvider";
 import { type Idioma } from "@/lib/i18n/idiomas";
-import { IDIOMAS_VISIVEIS, idiomaVisivelPorCodigo } from "@/lib/i18n/registro";
+import { idiomaVisivelPorCodigo } from "@/lib/i18n/registro";
 import { Check } from "@/lib/ui/icons";
 
 /**
@@ -40,6 +40,7 @@ export function SeletorDeIdioma() {
   const idioma = useIdioma();
   const emVigor = idiomaVisivelPorCodigo(idioma);
   const aplicar = useAplicarIdioma();
+  const oferecidos = useIdiomasOferecidos();
   const [salvando, startTransition] = useTransition();
 
   const escolher = (novo: Idioma) => {
@@ -79,6 +80,10 @@ export function SeletorDeIdioma() {
     });
   };
 
+  // Com um idioma só oferecido (a instalação esconde os outros) não há o que
+  // trocar: melhor o botão nem aparecer do que abrir uma lista de uma linha.
+  if (oferecidos.length < 2) return null;
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -95,7 +100,7 @@ export function SeletorDeIdioma() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-[180px]">
-        {IDIOMAS_VISIVEIS.map(({ codigo, nomeNativo }) => (
+        {oferecidos.map(({ codigo, nomeNativo }) => (
           <DropdownMenuItem
             key={codigo}
             onClick={() => escolher(codigo)}
