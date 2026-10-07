@@ -21,6 +21,31 @@ source "$KIT_DIR/_common.sh"
 source "$KIT_DIR/manutencao.sh"
 enter_project
 
+# ── 0--. Uma atualização por vez ────────────────────────────────────────────
+# MEDIDO nesta VPS (2026-10-06): uma atualização rodada à mão ainda estava no
+# meio (aviso de manutenção de pé, app parado de propósito) quando uma segunda
+# foi disparada. A segunda leu o aviso como "preso de uma atualização que
+# morreu", derrubou o aviso e mandou rodar de novo com --force — e a terceira
+# correu em paralelo com a primeira. O site ficou fora do ar até tudo acabar.
+#
+# A trava é a MESMA do agent.sh (.update.lock): botão da tela e terminal não
+# rodam juntos. Quando é o próprio agente que chama, ele já segura a trava e
+# avisa por DESKCOMM_TRAVA_DA_ATUALIZACAO — travar de novo aqui seria travar
+# contra ele mesmo. Fica ANTES do diagnóstico de propósito: quem é recusado não
+# pode sobrescrever o arquivo da atualização que está rodando.
+if [ -z "${DESKCOMM_TRAVA_DA_ATUALIZACAO:-}" ] && command -v flock >/dev/null 2>&1; then
+  exec 9>"$PROJECT_DIR/.update.lock"
+  if ! flock -n 9; then
+    c_red "✖ Já tem uma atualização rodando nesta VPS (pelo botão da tela ou por outro terminal)."
+    c_red "  Espere ela terminar — leva alguns minutos — e confira o site antes de rodar de novo."
+    c_red "  Não use --force agora: duas atualizações ao mesmo tempo derrubam o CRM."
+    exit 1
+  fi
+  # Avisa as rotinas do kit que esta execução já segura a trava (ver
+  # trocar_segredo_do_cron_vazado em _common.sh).
+  export DESKCOMM_TRAVA_DESTA_ATUALIZACAO=1
+fi
+
 # ── 0-. O laço do diagnóstico (#1955) ───────────────────────────────────────
 # Toda execução termina com um arquivo legível — inclusive as que MORREM antes
 # de chegar ao banco (preflight, backup, checkout), que é justamente onde não

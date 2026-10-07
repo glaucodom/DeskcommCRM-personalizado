@@ -363,6 +363,7 @@ export RODADA_DO_BANCO_ARQUIVO="${TMPDIR:-/tmp}/deskcomm-rodada-do-banco.$$"
 rm -f "$RODADA_DO_BANCO_ARQUIVO" 2>/dev/null || true
 set +e
 DESKCOMM_AGENT_REPORT=1 \
+DESKCOMM_TRAVA_DA_ATUALIZACAO=1 \
 DESKCOMM_AGENT_PREV_IMAGE="$PREV_IMAGE" \
 DESKCOMM_AGENT_REPORT_CMD="$(declare -f post report log_err); report" \
   bash "$(dirname "$0")/update.sh" "${UPDATE_ARGS[@]+"${UPDATE_ARGS[@]}"}" >"$LOG" 2>&1

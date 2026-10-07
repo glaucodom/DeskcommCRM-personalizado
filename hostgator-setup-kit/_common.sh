@@ -2312,8 +2312,13 @@ trocar_segredo_do_cron_vazado() {
   # Mesmo cadeado do agent.sh: nunca trocar com uma atualização pelo botão em
   # andamento (quem a dirige ainda fala com a senha velha), nem duas vezes ao
   # mesmo tempo (update.sh no terminal e agent.sh no cron).
+  # Quando quem chama é o próprio update.sh do terminal, ele JÁ segura este
+  # cadeado (DESKCOMM_TRAVA_DESTA_ATUALIZACAO) — tentar de novo daria "ocupado"
+  # e a troca nunca aconteceria. Pelo botão, quem segura é o agent.sh, e aí a
+  # recusa abaixo continua valendo: ele ainda fala com a senha velha.
   local tem_cadeado=""
-  if command -v flock >/dev/null 2>&1; then
+  if [ -n "${DESKCOMM_TRAVA_DESTA_ATUALIZACAO:-}" ]; then :
+  elif command -v flock >/dev/null 2>&1; then
     exec 8>"${dir}/.update.lock"
     flock -n 8 || { exec 8>&-; return 0; }
     tem_cadeado=1

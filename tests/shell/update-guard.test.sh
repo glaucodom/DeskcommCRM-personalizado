@@ -227,6 +227,9 @@ chmod 600 "$PROJ/.env"
 
 cd "$PROJ" || exit 1
 git init --quiet
+# Como no .gitignore do repositório: a trava do kit (.update.lock) é marca de
+# execução, nunca entra num commit — senão o checkout da tag seguinte tropeça nela.
+printf '.update.lock\n' >> .git/info/exclude
 git add -A
 git commit --quiet -m "v0.9.0"
 git tag v0.9.0
@@ -424,7 +427,7 @@ cp -R "$PROJ/hostgator-setup-kit" "$SRC/"
 mkdir -p "$SRC/supabase"; printf 'select 1;\n' > "$SRC/supabase/baseline.sql"
 # shellcheck disable=SC2016  # o ${APP_IMAGE} é literal DENTRO do compose
 printf 'services:\n  app:\n    image: \${APP_IMAGE:-x}\n' > "$SRC/docker-compose.prod.yml"
-printf '.env\n' > "$SRC/.gitignore"
+printf '.env\n.update.lock\n' > "$SRC/.gitignore"
 cd "$SRC" || exit 1
 git init --quiet
 git add -A; git commit --quiet -m "release antiga"; git tag v0.9.0
