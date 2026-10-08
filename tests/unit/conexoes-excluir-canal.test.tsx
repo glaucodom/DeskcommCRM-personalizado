@@ -310,6 +310,8 @@ describe("copiar detalhes de conexão no self-host HTTP", () => {
     document.execCommand = vi.fn().mockReturnValue(copied);
     render(wrap(<ConnectionsClient wahaConfigured />));
     fireEvent.click(screen.getByRole("button", { name: "Conectar novo WhatsApp" }));
+    // Fork: o diálogo pergunta o nome do número antes do QR.
+    fireEvent.click(await screen.findByRole("button", { name: "Continuar para o QR code" }));
     const details = await screen.findByText(/request-owned/);
     fireEvent.click(screen.getByText("Detalhes para suporte"));
     fireEvent.click(screen.getByRole("button", { name: "Copiar detalhes" }));
