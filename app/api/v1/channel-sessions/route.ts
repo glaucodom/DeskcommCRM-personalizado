@@ -20,6 +20,7 @@ import { ARCHIVED_AT, queryTolerantToMissingArchived } from "@/lib/channels/arch
 import { PROVIDERS_DE_MENSAGEM } from "@/lib/channels/capabilities";
 import { createChannelSchema } from "@/lib/schemas/channels";
 import { createClient } from "@/lib/supabase/server";
+import { filtrarCanaisVisiveis } from "@/lib/personalizacoes/visibilidade-por-numero";
 import { getWahaClient } from "@/lib/waha/client";
 import { traduzir } from "@/lib/i18n/dicionario";
 
@@ -62,7 +63,11 @@ export async function GET(): Promise<Response> {
   );
   if (error) return fail("internal_error", error.message, 500, { requestId });
 
-  return ok((data ?? []).map(semConfiguracaoInterna), {
+  // Personalização: com "visibilidade por número" ligada, o atendente só vê os
+  // números em que é responsável (lib/personalizacoes/visibilidade-por-numero.ts).
+  const visiveis = await filtrarCanaisVisiveis(supabase, activeOrg.orgId, activeOrg.role, data ?? []);
+
+  return ok(visiveis.map(semConfiguracaoInterna), {
     requestId,
     ...(schemaOutdated ? { meta: { schema_outdated: true } } : {}),
   });

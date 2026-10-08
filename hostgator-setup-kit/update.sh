@@ -401,6 +401,16 @@ if [ -f supabase/baseline.sql ]; then
     c_ylw "  O app pode ainda funcionar."
     orientar_banco_incompleto
   fi
+  # Personalizações do fork (supabase/personalizacoes.sql): depois do baseline,
+  # num arquivo próprio para o merge da versão oficial nunca conflitar com ele.
+  if [ -f supabase/personalizacoes.sql ]; then
+    if pg_container -i -v "$PROJECT_DIR/supabase/personalizacoes.sql:/p.sql:ro" postgres:17-alpine \
+         psql "$(url_do_schema)" -q -v ON_ERROR_STOP=1 -f /p.sql >>"$PROJECT_DIR/.deskcomm-banco.log" 2>&1; then
+      c_grn "✓ personalizações do banco aplicadas."
+    else
+      c_ylw "⚠ As personalizações do banco (supabase/personalizacoes.sql) não aplicaram — veja .deskcomm-banco.log."
+    fi
+  fi
   # ── E AS REGRAS DE ISOLAMENTO SÃO CONFERIDAS ──────────────────────────────
   #
   # ## Por que isto existe
