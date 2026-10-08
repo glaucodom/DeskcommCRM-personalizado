@@ -39,8 +39,10 @@ import type { Role, VisibilityMode } from "@/lib/auth/types";
 export type InboxTab = "unassigned" | "mine" | "all" | "closed" | "archived" | "ai";
 
 const INBOX_TABS: { value: InboxTab; label: string }[] = [
-  { value: "unassigned", label: "Fila" },
+  // Personalização: "Minhas" vem primeiro e é a aba que abre — é a que o
+  // atendente usa o dia todo (lista de quem ele atende, como no WhatsApp Web).
   { value: "mine", label: "Minhas" },
+  { value: "unassigned", label: "Fila" },
   { value: "all", label: "Todas" },
   { value: "closed", label: "Fechadas" },
   // "Arquivadas" fica ao lado de "Fechadas" porque as duas são passado — e

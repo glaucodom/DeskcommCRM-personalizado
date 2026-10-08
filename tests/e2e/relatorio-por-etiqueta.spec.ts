@@ -143,7 +143,7 @@ test.describe("Relatórios › Por etiqueta, pela tela (#1891)", () => {
     await expect(itemDaLista(page, controle), "a sem etiqueta fica fora").toHaveCount(0);
     await captura(page, "relatorio-por-etiqueta-02-inbox-todas");
 
-    // ── CONTROLE: o link sem `filter=all` (o Inbox abre na Fila). ──────────
+    // ── CONTROLE: o link com `filter=unassigned` (a Fila). ──────────
     // Espera a lista DA FILA (é ela que pede `comando=`) e filtrada chegar
     // antes de contar zero; sem isso o zero mediria a tela ainda carregando.
     const listaDaFila = page.waitForResponse(
@@ -154,7 +154,7 @@ test.describe("Relatórios › Por etiqueta, pela tela (#1891)", () => {
         r.status() === 200,
       { timeout: 30_000 },
     );
-    await page.goto(`/app/inbox?tag=${encodeURIComponent(TAG)}`);
+    await page.goto(`/app/inbox?filter=unassigned&tag=${encodeURIComponent(TAG)}`);
     // O que a Fila RECEBEU, além do que desenhou: um zero só na tela poderia
     // ser render atrasado.
     const { data: daFila } = (await (await listaDaFila).json()) as { data: Array<{ id: string }> };

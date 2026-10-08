@@ -147,7 +147,7 @@ test.describe("Inbox: as abas perguntam quem manda", () => {
     page,
   }) => {
     await loginComoAdmin(page, lerCreds());
-    await page.goto("/app/inbox");
+    await page.goto("/app/inbox?filter=unassigned");
 
     const lista = page.getByRole("main").or(page.locator("body"));
     await expect(lista.getByText(ESPERANDO).first()).toBeVisible({ timeout: 30_000 });
