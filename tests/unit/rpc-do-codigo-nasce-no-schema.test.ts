@@ -413,7 +413,8 @@ type Declaracoes = {
 const RE_DECLARACAO = /create\s+(?:or\s+replace\s+)?function\s+([A-Za-z0-9_".]+)\s*\(/gi;
 
 function varrerSchema(): Declaracoes {
-  const arquivos = [BASELINE, ...listar(`${SUPABASE}/migrations`, /\.sql$/)];
+  // Fork: `supabase/personalizacoes.sql` também é schema versionado (aplicado pelo update.sh).
+  const arquivos = [BASELINE, `${SUPABASE}/personalizacoes.sql`, ...listar(`${SUPABASE}/migrations`, /\.sql$/)];
   const d: Declaracoes = {
     nomes: new Set(),
     citada: new Set(),

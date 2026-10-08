@@ -5,8 +5,10 @@
  */
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useT } from "@/hooks/i18n/useT";
 
 export function VisibilidadePorNumeroForm({ inicial }: { inicial: boolean }) {
+  const t = useT();
   const router = useRouter();
   const [ligada, setLigada] = useState(inicial);
   const [busy, setBusy] = useState(false);
@@ -22,14 +24,14 @@ export function VisibilidadePorNumeroForm({ inicial }: { inicial: boolean }) {
         body: JSON.stringify({ ligada: proximo }),
       });
       if (!response.ok) {
-        setFeedback("Não foi possível salvar. Tente novamente.");
+        setFeedback(t("Não foi possível salvar. Tente novamente."));
         return;
       }
       setLigada(proximo);
-      setFeedback("Salvo.");
+      setFeedback(t("Salvo"));
       router.refresh();
     } catch {
-      setFeedback("Não foi possível salvar. Tente novamente.");
+      setFeedback(t("Não foi possível salvar. Tente novamente."));
     } finally {
       setBusy(false);
     }
@@ -38,12 +40,12 @@ export function VisibilidadePorNumeroForm({ inicial }: { inicial: boolean }) {
   return (
     <section className="space-y-2 rounded-lg border p-4" aria-labelledby="visibilidade-por-numero-title">
       <h2 id="visibilidade-por-numero-title" className="text-lg font-semibold">
-        Cada vendedor vê só o próprio número
+        {t("Cada vendedor vê só o próprio número")}
       </h2>
       <p className="max-w-2xl text-sm text-muted-foreground">
-        Ligado, cada atendente vê todas as conversas dos números em que está marcado acima, com ou sem
-        dono, e não vê as dos outros números. A lista de números do inbox também mostra só os dele.
-        Gerentes e administradores continuam vendo tudo. Use junto com &quot;Todos veem tudo&quot;.
+        {t(
+          "Ligado, cada atendente vê todas as conversas dos números em que está marcado acima, com ou sem dono, e não vê as dos outros números. A lista de números do inbox também mostra só os dele. Gerentes e administradores continuam vendo tudo. Use junto com \"Todos veem tudo\".",
+        )}
       </p>
       <label className="flex items-center gap-2 text-sm">
         <input
@@ -53,7 +55,7 @@ export function VisibilidadePorNumeroForm({ inicial }: { inicial: boolean }) {
           onChange={(e) => void trocar(e.target.checked)}
           data-testid="visibilidade-por-numero"
         />
-        Cada vendedor vê só os números em que é responsável
+        {t("Cada vendedor vê só os números em que é responsável")}
       </label>
       {feedback && <p className="text-sm text-muted-foreground" role="status">{feedback}</p>}
     </section>

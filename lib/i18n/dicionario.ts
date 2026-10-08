@@ -14789,6 +14789,10 @@ export const DICIONARIO: Traducoes = {
   "A conversa fica vinculada ao canal escolhido, e as próximas mensagens saem por ele.": { es: "La conversación queda vinculada al canal elegido, y los próximos mensajes salen por él." },
   "Canais disponíveis": { es: "Canales disponibles" },
   "Iniciar conversa": { es: "Iniciar conversación" },
+  // Personalização do fork: visibilidade por número.
+  "Cada vendedor vê só o próprio número": { es: "Cada vendedor ve solo su propio número" },
+  "Ligado, cada atendente vê todas as conversas dos números em que está marcado acima, com ou sem dono, e não vê as dos outros números. A lista de números do inbox também mostra só os dele. Gerentes e administradores continuam vendo tudo. Use junto com \"Todos veem tudo\".": { es: "Activado, cada agente ve todas las conversaciones de los números en los que está marcado arriba, con o sin responsable, y no ve las de los otros números. La lista de números del inbox también muestra solo los suyos. Gerentes y administradores siguen viendo todo. Úselo junto con \"Todos ven todo\"." },
+  "Cada vendedor vê só os números em que é responsável": { es: "Cada vendedor ve solo los números de los que es responsable" },
 };
 
 /**
