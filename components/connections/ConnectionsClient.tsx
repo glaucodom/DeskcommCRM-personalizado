@@ -27,6 +27,9 @@ import type { ChannelProvider } from "@/lib/channels/capabilities";
 import { usePacingKnobs } from "@/hooks/channels/usePacingKnobs";
 import { AntiBanSheet } from "./AntiBanSheet";
 import { GruposSheet } from "./GruposSheet";
+import { NomeDoNumeroDialog } from "./NomeDoNumeroDialog";
+import { RenomearNumero } from "./RenomearNumero";
+import { normalizarNomeDoNumero } from "@/lib/personalizacoes/nome-do-numero";
 import { PairingOptions } from "./PairingOptions";
 import { ChannelAcervo } from "./ChannelAcervo";
 import { ChannelAiAccess } from "./ChannelAiAccess";
@@ -266,13 +269,17 @@ export function ConnectionsClient({ wahaConfigured }: { wahaConfigured: boolean 
     void runHealthCheck(sessions);
   }, [sessions, runHealthCheck]);
 
-  const handleConnectNew = useCallback(async () => {
+  // Personalização: o número novo nasce com nome — o diálogo pergunta antes do QR.
+  const [perguntandoNome, setPerguntandoNome] = useState(false);
+  const handleConnectNew = useCallback(async (nome?: string) => {
+    setPerguntandoNome(false);
     setCreating(true);
     setConnectionDetail(null);
     try {
+      const displayName = normalizarNomeDoNumero(nome);
       const res = await apiClient.post<{ data: ChannelSession }>(
         "/api/v1/channel-sessions",
-        {},
+        displayName ? { display_name: displayName } : {},
         { idempotencyKey: createKey.current ??= randomId(), timeoutMs: 120_000 },
       );
       invalidate();
@@ -446,7 +453,7 @@ export function ConnectionsClient({ wahaConfigured }: { wahaConfigured: boolean 
               {t("Retomar todas")} ({paraRetomar.length})
             </Button>
           )}
-          <Button size="sm" disabled={creating || !wahaConfigured} onClick={handleConnectNew}>
+          <Button size="sm" disabled={creating || !wahaConfigured} onClick={() => setPerguntandoNome(true)}>
             {creating ? (
               <CircleNotch size={14} className="animate-spin" aria-hidden />
             ) : (
@@ -454,6 +461,14 @@ export function ConnectionsClient({ wahaConfigured }: { wahaConfigured: boolean 
             )}
             {t("Conectar novo WhatsApp")}
           </Button>
+          <NomeDoNumeroDialog
+            aberto={perguntandoNome}
+            titulo={t("Conectar novo WhatsApp")}
+            nomeInicial=""
+            rotuloDoBotao={t("Continuar para o QR code")}
+            onConfirmar={(nome) => void handleConnectNew(nome)}
+            onFechar={() => setPerguntandoNome(false)}
+          />
         </div>
       </div>
 
@@ -588,6 +603,9 @@ export function ConnectionsClient({ wahaConfigured }: { wahaConfigured: boolean 
                     ? `${t("Verificado")} ${new Date(c.last_health_check_at).toLocaleString(tagDoIdioma)}`
                     : t("Ainda não verificado")}
                 </p>
+                <div>
+                  <RenomearNumero channelId={c.id} nomeAtual={c.display_name} onSalvo={invalidate} />
+                </div>
                 <ChannelAiAccess channelId={c.id} />
                 {dependeDoTransporte(c) && <ChannelAcervo channelId={c.id} />}
                 <p className="text-xs text-muted-foreground">{t(!policy ? "Consulte os responsáveis em Atendimento." : policy.mode === "legacy_unconfigured" ? "Usa todos os atendentes elegíveis da organização." : policy.mode === "restricted_empty" ? "Ninguém configurado — as conversas ficarão na fila." : "Somente as pessoas selecionadas recebem este número.")}</p>

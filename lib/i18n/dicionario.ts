@@ -14793,6 +14793,12 @@ export const DICIONARIO: Traducoes = {
   "Cada vendedor vê só o próprio número": { es: "Cada vendedor ve solo su propio número" },
   "Ligado, cada atendente vê todas as conversas dos números em que está marcado acima, com ou sem dono, e não vê as dos outros números. A lista de números do inbox também mostra só os dele. Gerentes e administradores continuam vendo tudo. Use junto com \"Todos veem tudo\".": { es: "Activado, cada agente ve todas las conversaciones de los números en los que está marcado arriba, con o sin responsable, y no ve las de los otros números. La lista de números del inbox también muestra solo los suyos. Gerentes y administradores siguen viendo todo. Úselo junto con \"Todos ven todo\"." },
   "Cada vendedor vê só os números em que é responsável": { es: "Cada vendedor ve solo los números de los que es responsable" },
+  // Personalização do fork: nome do número.
+  "Um nome fácil de reconhecer, como Comercial, Financeiro ou Suporte. Ele aparece no inbox no lugar do número.": { es: "Un nombre fácil de reconocer, como Comercial, Finanzas o Soporte. Aparece en el inbox en lugar del número." },
+  "Ex.: Comercial": { es: "Ej.: Comercial" },
+  "Nome do número": { es: "Nombre del número" },
+  "Nome do número salvo.": { es: "Nombre del número guardado." },
+  "Continuar para o QR code": { es: "Continuar al código QR" },
 };
 
 /**
