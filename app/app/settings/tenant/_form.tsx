@@ -25,12 +25,20 @@ import { FUSOS_OFERECIDOS } from "@/lib/tempo/fusos";
 
 interface Props {
   initial: TenantInput;
+  /**
+   * Quem grava. Padrão: a server action do próprio tenant (Configurações ›
+   * Empresa). A gestão de tenants do admin da plataforma passa a rota dela —
+   * mesmos campos, mesma validação, outra autoridade.
+   */
+  onSave?: (dados: TenantInput) => Promise<{ ok: true } | { ok: false; error: string }>;
+  /** Chamado depois de gravar com sucesso (ex.: fechar o diálogo do admin). */
+  onSaved?: () => void;
 }
 
 // A mesma lista de toda tela de fuso — ver `lib/tempo/fusos.ts`.
 const TIMEZONES = FUSOS_OFERECIDOS.map((f) => f.codigo);
 
-export function TenantForm({ initial }: Props) {
+export function TenantForm({ initial, onSave, onSaved }: Props) {
   const t = useT();
   // Os que esta instalação esconde (`lib/i18n/ocultos.ts`) ficam de fora.
   const oferecidos = useIdiomasOferecidos();
@@ -55,9 +63,11 @@ export function TenantForm({ initial }: Props) {
       return;
     }
     startTransition(async () => {
-      const r = await updateTenant(parsed.data);
-      if (r.ok) toast.success(t("Organização atualizada."));
-      else toast.error(`${t("Erro")}: ${r.error}`);
+      const r = await (onSave ?? updateTenant)(parsed.data);
+      if (r.ok) {
+        toast.success(t("Organização atualizada."));
+        onSaved?.();
+      } else toast.error(`${t("Erro")}: ${r.error}`);
     });
   }
 
