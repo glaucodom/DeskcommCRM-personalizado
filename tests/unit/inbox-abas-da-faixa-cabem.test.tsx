@@ -127,21 +127,23 @@ describe("faixa da Inbox — quebra em vez de esconder aba (#2745)", () => {
     render(<InboxFilters value={VALUE} onChange={() => {}} />);
     // `visibleInboxTabs` é a fonte da ORDEM do trabalho; a largura não se paga
     // reordenando nem renomeando.
+    // Fork: ordem personalizada (Minhas primeiro, Automático no fim) — ver
+    // tests/unit/inbox-abre-em-minhas.test.tsx.
     expect(visibleInboxTabs("manager", "all")).toEqual([
-      "ai",
-      "unassigned",
       "mine",
+      "unassigned",
       "all",
       "closed",
       "archived",
+      "ai",
     ]);
     expect(screen.getAllByRole("tab").map((a) => a.textContent?.replace(/\s+/g, ""))).toEqual([
-      "Automático12",
-      "Fila47",
       "Minhas8",
+      "Fila47",
       "Todas130",
       "Fechadas25",
       "Arquivadas9",
+      "Automático12",
     ]);
   });
 });
