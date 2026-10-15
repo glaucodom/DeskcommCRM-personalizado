@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 
 import { loadAuthUser, resolveActiveOrg } from "@/lib/auth/server";
 import { audit } from "@/lib/audit";
+import { ipDoCliente } from "@/lib/http/ip-do-cliente";
 import { IDIOMAS, type Idioma } from "@/lib/i18n/idiomas";
 import { idiomasOcultosDaInstalacao } from "@/lib/i18n/ocultos";
 import { createClient } from "@/lib/supabase/server";
@@ -52,7 +53,7 @@ export async function trocarIdioma(
     resourceType: "user",
     resourceId: authUser.id,
     requestId: hdrs.get("x-request-id"),
-    ip: hdrs.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null,
+    ip: ipDoCliente(hdrs),
     userAgent: hdrs.get("user-agent") ?? null,
     metadata: { locale: idioma, origem: "seletor_do_topo" },
   });
