@@ -1112,6 +1112,12 @@ export function blocosDeAgendaResidentes(toolIds: readonly string[]): string[] {
  * Tools de agenda cuja EXECUÇÃO neste turno arma o `agendaStallGate` (before-send.ts) —
  * ver o wrap no loop de montagem das tools MCP, mais abaixo.
  */
+/** Personalização do fork: ferramentas cujo retorno é um compromisso gravado. */
+const FERRAMENTAS_QUE_MARCAM = new Set([
+  'crm_book_appointment',
+  'crm_find_and_book_appointment',
+  'crm_reschedule_appointment',
+]);
 const AGENDA_TOOL_NAMES = new Set([
   'crm_find_free_slots',
   'crm_book_appointment',
@@ -4313,7 +4319,10 @@ async function executarTurnoDoAgente(
                 ...mcpTool,
                 execute: (async (...args: Parameters<typeof executeOriginal>) => {
                   agendaToolCalledThisTurn = true;
-                  return executeOriginal(...args);
+                  const resultado = await executeOriginal(...args);
+                  // Personalização do fork: o compromisso gravado autoriza a confirmação.
+                  if (FERRAMENTAS_QUE_MARCAM.has(name)) evidenciasComerciais.registrarAgendamento(resultado, args[0]);
+                  return resultado;
                 }) as typeof mcpTool.execute,
               };
             } else {

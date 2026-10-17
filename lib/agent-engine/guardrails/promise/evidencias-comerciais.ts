@@ -4,7 +4,7 @@
  * Não recebe histórico, notas do contato, prompt do agente ou argumentos de tool.
  */
 export interface EvidenciaComercial {
-  origem: "catalogo" | "conhecimento";
+  origem: "catalogo" | "conhecimento" | "agenda";
   referencia: string;
   titulo: string;
   conteudo: string;
@@ -147,9 +147,56 @@ export function criarEvidenciasComerciaisDoTurno(fontesHabilitadas: readonly str
     }
   }
 
+  /**
+   * Personalização do fork: o compromisso que a AGENDA acabou de gravar neste
+   * turno (crm_book_appointment, crm_find_and_book_appointment,
+   * crm_reschedule_appointment) autoriza confirmar ESSE compromisso ao cliente.
+   * Sem isto o revisor de promessa só via a base de conhecimento e vetava até
+   * "Está agendado para segunda às 13h" — o turno marcava e o cliente ficava
+   * sem resposta. Só o retorno bem-sucedido da ferramenta entra, nunca o texto
+   * do modelo; reservado sem confirmação é dito como reservado.
+   */
+  function registrarAgendamento(resultado: unknown, pedido?: unknown) {
+    const r = objeto(resultado);
+    if (!r || r.error || r.erro || r.ok === false) return;
+    if (r.marcado !== true && r.remarcado !== true) return;
+    const c = objeto(r.compromisso);
+    if (!c) return;
+    const id = texto(c.id);
+    const quando = texto(c.quando) ?? texto(r.quando);
+    if (!id || !quando) return;
+    const reservado = r.aguarda_confirmacao === true || c.status === "pending";
+    // O retorno da marcação não traz o convidado; ele vem do pedido que a
+    // agenda ACEITOU (marcado=true), nunca de texto livre.
+    const convidado = texto(c.guest_email) ?? texto(objeto(pedido)?.guest_email);
+    const online =
+      c.location_kind === "google_meet" ||
+      c.meeting_state === "pending" ||
+      c.meeting_state === "ready";
+    const partes = [
+      `${r.remarcado === true ? "Compromisso remarcado" : "Compromisso marcado"} na agenda agora, pela ferramenta de agenda: ${texto(c.title) ?? "compromisso"}, ${quando}.`,
+      reservado
+        ? "Situação: horário RESERVADO, aguardando a equipe confirmar."
+        : "Situação: confirmado.",
+      online
+        ? "Reunião online pelo Google Meet: o link é criado automaticamente e enviado ao cliente aqui pelo WhatsApp em alguns minutos."
+        : null,
+      online && convidado
+        ? `O Google Agenda envia o convite da reunião para o e-mail ${convidado}.`
+        : null,
+    ].filter(Boolean);
+    guardar({
+      origem: "agenda",
+      referencia: id,
+      titulo: "Agendamento feito neste atendimento",
+      conteudo: partes.join(" "),
+    });
+  }
+
   return {
     registrarConhecimento,
     registrarCatalogo,
+    registrarAgendamento,
     // Relevância escolhe o CONTEXTO, nunca concede autorização. O classificador
     // recebe os trechos completos, inclusive condições/negações, e decide.
     ler: (candidata = ""): EvidenciaComercial[] => {
@@ -183,7 +230,7 @@ export function criarEvidenciasComerciaisDoTurno(fontesHabilitadas: readonly str
       // Reserva mínima para cada origem: política e produto complementam-se.
       // O restante segue a relevância global, sem duplicar ou truncar itens.
       for (let i = 0; i < 3; i++)
-        for (const origem of ["conhecimento", "catalogo"] as const) {
+        for (const origem of ["agenda", "conhecimento", "catalogo"] as const) {
           const item = ordenadas.filter(({ e }) => e.origem === origem)[i];
           if (item) adicionar(item.e);
         }

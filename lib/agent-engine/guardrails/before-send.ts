@@ -432,8 +432,15 @@ export const semanticPromiseGate: Gate = {
       pass: false,
       code: 'promise_semantic',
       reason: renderSemanticPromiseVeto(ctx.semanticPromise.suspectPhrase),
-      // detail é LOGADO: só o rótulo da camada, nunca a frase (trecho da candidata — sem PII).
-      detail: { promise_layer: 'semantic' },
+      // Personalização do fork: o detail vai para before_send_traces (banco desta
+      // instalação) com o trecho que o revisor apontou, curto, para dar para
+      // diagnosticar por que uma mensagem foi barrada. O oficial guarda só a camada.
+      detail: {
+        promise_layer: 'semantic',
+        ...(ctx.semanticPromise.suspectPhrase
+          ? { trecho: ctx.semanticPromise.suspectPhrase.slice(0, 160) }
+          : {}),
+      },
     };
   },
 };
