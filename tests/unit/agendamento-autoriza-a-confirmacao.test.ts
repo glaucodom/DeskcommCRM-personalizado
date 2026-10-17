@@ -65,3 +65,11 @@ describe("agendamento autoriza a confirmação (personalização do fork)", () =
     expect(e.ler()[0]?.conteudo).toContain("remarcado");
   });
 });
+
+describe("o link do WhatsApp e o do convite", () => {
+  it("a evidência diz que o link enviado no WhatsApp é o mesmo do convite por e-mail", () => {
+    const e = criarEvidenciasComerciaisDoTurno([]);
+    e.registrarAgendamento(marcado, { guest_email: "lead@exemplo.com" });
+    expect(e.ler()[0]?.conteudo).toContain("é o mesmo link do convite");
+  });
+});

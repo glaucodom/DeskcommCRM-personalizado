@@ -12668,7 +12668,7 @@ export const DICIONARIO: Traducoes = {
   "Uma regra de envio impediu a mensagem. Confira o aviso na Central antes de tentar novamente.": { es: "Una regla de envío bloqueó el mensaje. Revisa el aviso en la Central antes de intentarlo de nuevo." },
   "Sua reunião está marcada para": { es: "Tu reunión está programada para" },
   "Link do Google Meet:": { es: "Enlace de Google Meet:" },
-  "Esse é o link da sua reunião, o mesmo do convite enviado para o seu e-mail.": { es: "Ese es el enlace de tu reunión, el mismo de la invitación enviada a tu correo." },
+  "horário de Brasília": { es: "hora de Brasilia" },
 
 
   // ─── app/api/v1/cron/agenda-reminder (o lembrete que sai no WhatsApp) ───

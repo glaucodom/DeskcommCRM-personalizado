@@ -43,9 +43,10 @@ export function textoDoCompromisso({
   url: string | null;
   idioma: Idioma;
   /**
-   * Personalização do fork: o compromisso tem convidado com e-mail, então o Google
-   * mandou o convite com ESTE MESMO link. A frase avisa que o link solto é o da
-   * reunião — sem ela o cliente recebe uma URL sem explicação e a conversa para.
+   * Personalização do fork: formato limpo para o WhatsApp — a data numa linha e o
+   * link na linha de baixo, e o fuso de São Paulo dito como "horário de Brasília"
+   * (o nome técnico America/Sao_Paulo confundia o cliente). A explicação de que o
+   * link é o mesmo do convite por e-mail fica na fala da Clara, em mensagem separada.
    */
   comConvite?: boolean;
 }): string {
@@ -63,8 +64,11 @@ export function textoDoCompromisso({
       : url
         ? traduzir("Sua reunião está marcada para", idioma)
         : traduzir("Seu compromisso está marcado para", idioma);
+  if (url && comConvite) {
+    const fuso =
+      timeZone === "America/Sao_Paulo" ? traduzir("horário de Brasília", idioma) : timeZone;
+    return `${abertura} ${quando} (${fuso}).\n${traduzir("Link do Google Meet:", idioma)} ${url}`;
+  }
   const link = url ? ` ${traduzir("Link do Google Meet:", idioma)} ${url}` : "";
-  const explicacao =
-    url && comConvite ? ` ${traduzir("Esse é o link da sua reunião, o mesmo do convite enviado para o seu e-mail.", idioma)}` : "";
-  return `${abertura} ${quando} (${timeZone}).${link}${explicacao}`;
+  return `${abertura} ${quando} (${timeZone}).${link}`;
 }

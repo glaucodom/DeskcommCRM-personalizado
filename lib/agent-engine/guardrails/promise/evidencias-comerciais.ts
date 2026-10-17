@@ -182,7 +182,7 @@ export function criarEvidenciasComerciaisDoTurno(fontesHabilitadas: readonly str
         ? "Reunião online pelo Google Meet: o link é criado automaticamente e enviado ao cliente aqui pelo WhatsApp em alguns minutos."
         : null,
       online && convidado
-        ? `O Google Agenda envia o convite da reunião para o e-mail ${convidado}.`
+        ? `O Google Agenda envia o convite da reunião para o e-mail ${convidado}, e o link do Meet enviado aqui no WhatsApp é o mesmo link do convite.`
         : null,
     ].filter(Boolean);
     guardar({
