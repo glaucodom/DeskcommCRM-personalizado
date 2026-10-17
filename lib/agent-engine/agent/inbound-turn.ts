@@ -103,6 +103,7 @@ import {
 } from "./abertura/checkpoint";
 import { buildOpeningMessage, ritualBlocks } from "./abertura/ritual";
 import { applySaveLeadNote, buildNotesIndexBlock, getLeadNoteBody } from './lead-notes';
+import { aplicarRegistroDoLead, registrarDadosShape } from './registrar-dados-do-lead';
 import { buildCompromissosBlock } from './compromissos-do-contato';
 import { buildOrigemBlock } from './abertura/origem-do-contato';
 import { agendaNoFechamento } from './abertura/agenda-no-fechamento';
@@ -406,6 +407,15 @@ export const AGENT_TOOL_DEFS = {
           .describe('ids de notas que esta substitui/consolida (vistos no índice de memória)'),
       })
       .passthrough(),
+  },
+  registrar_dados_do_lead: {
+    description:
+      'Grava no CRM, de forma estruturada, o que a pessoa ACABOU de dizer: nome, empresa, CNPJ, e-mail, ' +
+      'segmento, como conheceu a CRTI e quem indicou. Chame logo depois de a pessoa informar cada dado, ' +
+      'junto com a próxima mensagem do turno, sem avisar a pessoa. Mande só os campos novos ou corrigidos; ' +
+      'pode chamar de novo a cada dado novo (o cadastro só cresce, não duplica empresa nem pessoa). ' +
+      'Nunca invente: só o que a pessoa disse.',
+    inputSchema: registrarDadosShape,
   },
   get_lead_note: {
     description:
@@ -3916,6 +3926,29 @@ async function executarTurnoDoAgente(
             error: {
               code: 'internal_error',
               message: 'erro interno ao salvar a nota — encerre o turno agora.',
+            },
+          };
+        }
+      },
+    }),
+    // Personalização do fork: grava nome/empresa/CNPJ/e-mail do lead no CRM (contacts,
+    // people, companies, company_people). MUTANTE; tenant/lead vêm da ROW do job (closure).
+    registrar_dados_do_lead: tool({
+      ...AGENT_TOOL_DEFS.registrar_dados_do_lead,
+      execute: async (raw) => {
+        try {
+          const res = await aplicarRegistroDoLead(pool, { tenantId, leadId }, raw);
+          if (!res.ok) {
+            return { ok: false, error: { code: 'dados_invalidos', message: res.erro ?? 'dados inválidos.' }, avisos: res.avisos };
+          }
+          return { ok: true, status: 'dados_registrados', registrado: res.registrado, avisos: res.avisos };
+        } catch (err) {
+          noteRunError(err instanceof Error ? err : new Error(String(err)));
+          return {
+            ok: false,
+            error: {
+              code: 'internal_error',
+              message: 'erro interno ao registrar os dados — siga a conversa normalmente.',
             },
           };
         }
