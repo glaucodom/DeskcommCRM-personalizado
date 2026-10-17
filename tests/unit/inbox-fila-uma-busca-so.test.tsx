@@ -189,6 +189,8 @@ afterEach(() => cleanup());
 
 describe("a lista do inbox consulta UMA vez quando o filtro efetivo muda (#2365)", () => {
   it("⭐ org SEM automático: a Fila espera o fato da org e busca uma vez só", async () => {
+    // Personalização: o inbox abre em Minhas, então a Fila é aberta pelo link.
+    window.history.replaceState(null, "", "/app/inbox?filter=unassigned");
     montar();
 
     // A pergunta org-wide sai primeiro — e é ELA que decide o filtro da Fila.
@@ -225,6 +227,8 @@ describe("a lista do inbox consulta UMA vez quando o filtro efetivo muda (#2365)
   });
 
   it("org COM automático: a Fila continua pedindo só `aguardando` — uma busca, filtro igual", async () => {
+    // Personalização: o inbox abre em Minhas, então a Fila é aberta pelo link.
+    window.history.replaceState(null, "", "/app/inbox?filter=unassigned");
     montar();
     await waitFor(() => expect(chamadas.some((c) => c.url === AUTOMATICO)).toBe(true));
 

@@ -48,10 +48,15 @@ afterEach(() => {
 const COM_ATENDENTE: InboxFiltersValue = { tab: "unassigned", search: "", onlyUnread: false, assigned_to: ATENDENTE };
 
 describe("filtro por atendente — as setas de aba", () => {
-  it("'Próxima aba' para Minhas limpa o atendente escolhido", () => {
+  // Personalização: Minhas é a primeira aba, então se chega nela da Fila pela
+  // seta "Aba anterior" (no oficial era "Próxima aba").
+  it("'Aba anterior' para Minhas limpa o atendente escolhido", () => {
+    // A seta da esquerda só aparece com a faixa rolada para a direita.
+    Object.defineProperty(HTMLElement.prototype, "scrollLeft", { configurable: true, get: () => 500, set: () => {} });
     const onChange = vi.fn();
     render(<InboxFilters value={COM_ATENDENTE} onChange={onChange} />);
-    fireEvent.click(screen.getByRole("button", { name: "Próxima aba" }));
+    fireEvent.click(screen.getByRole("button", { name: "Aba anterior" }));
+    delete (HTMLElement.prototype as { scrollLeft?: number }).scrollLeft;
     expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ tab: "mine", assigned_to: undefined }));
   });
 
