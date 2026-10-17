@@ -12,6 +12,7 @@ import { ehToolIdRemoto } from "@/lib/mcp/servidor-externo/ids";
 import { VALID_TOOL_IDS } from "@/lib/mcp/tools/catalog";
 import { TETO_TOOLS_POR_AGENTE } from "@/lib/mcp/tools/selecao-por-pacote";
 import { IDS_DE_PROVEDOR } from "@/lib/ai/pontos/provedores";
+import { LIMITE_DAS_INSTRUCOES } from "@/lib/ai/agents/limite-das-instrucoes";
 
 /**
  * Derivado de `lib/ai/pontos/provedores.ts` (a lista única desde a 0127). Como
@@ -110,7 +111,7 @@ export type FollowupConfig = z.infer<typeof followupConfigSchema>;
 
 const versionShapeSchema = z
   .object({
-    system_prompt: z.string().trim().min(10).max(20000),
+    system_prompt: z.string().trim().min(10).max(LIMITE_DAS_INSTRUCOES),
     provider: z.enum(PROVIDERS),
     model: z.string().trim().min(1).max(120),
     /**

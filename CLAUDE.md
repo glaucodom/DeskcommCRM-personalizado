@@ -1,5 +1,7 @@
 # CLAUDE.md — DeskcommCRM
 
+> **FORK PERSONALIZADO:** este repositório é `glaucodom/DeskcommCRM-personalizado`, uma versão modificada do DeskcommCRM oficial. Antes de atualizar ou mexer, leia [`PERSONALIZACOES-DO-FORK.md`](PERSONALIZACOES-DO-FORK.md): lá estão o que foi modificado e como juntar uma release oficial sem perder as mudanças.
+
 > Instruções pra futuras sessões Claude trabalhando neste repo. Leitura obrigatória antes de qualquer task de código.
 
 **Este arquivo é a doutrina — a autoridade final sobre convenção e anti-pattern.** Complementos, na ordem em que ajudam:

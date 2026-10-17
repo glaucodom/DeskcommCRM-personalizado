@@ -1200,7 +1200,7 @@
   "O nome pode ter até 120 caracteres.": "The name can have up to 120 characters.",
   "Escreva as instruções do agente (pelo menos uma frase).": "Write the agent's instructions (at least one sentence).",
   "As instruções têm": "The instructions have",
-  "caracteres, e o máximo é 20.000. Corte": "characters, and the maximum is 20,000. Cut",
+  "caracteres, e o máximo é 50.000. Corte": "characters, and the maximum is 50,000. Cut",
   "para conseguir salvar.": "to be able to save.",
   "Escolha o modelo de inteligência artificial.": "Choose the AI model.",
   "Escolha a chave de acesso da empresa de inteligência artificial.": "Choose the access key for the AI company.",
