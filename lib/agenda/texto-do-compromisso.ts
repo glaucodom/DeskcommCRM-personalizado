@@ -33,6 +33,7 @@ export function textoDoCompromisso({
   timeZone,
   url,
   idioma,
+  comConvite = false,
 }: {
   /** Ausente = primeiro envio, que é o comportamento de quem não declara nada. */
   motivo?: MotivoDaEntrega;
@@ -41,6 +42,12 @@ export function textoDoCompromisso({
   /** `null` = compromisso sem reunião online (presencial, telefone). */
   url: string | null;
   idioma: Idioma;
+  /**
+   * Personalização do fork: o compromisso tem convidado com e-mail, então o Google
+   * mandou o convite com ESTE MESMO link. A frase avisa que o link solto é o da
+   * reunião — sem ela o cliente recebe uma URL sem explicação e a conversa para.
+   */
+  comConvite?: boolean;
 }): string {
   const quando = new Intl.DateTimeFormat(tagDeIdioma(idioma), {
     dateStyle: "short",
@@ -57,5 +64,7 @@ export function textoDoCompromisso({
         ? traduzir("Sua reunião está marcada para", idioma)
         : traduzir("Seu compromisso está marcado para", idioma);
   const link = url ? ` ${traduzir("Link do Google Meet:", idioma)} ${url}` : "";
-  return `${abertura} ${quando} (${timeZone}).${link}`;
+  const explicacao =
+    url && comConvite ? ` ${traduzir("Esse é o link da sua reunião, o mesmo do convite enviado para o seu e-mail.", idioma)}` : "";
+  return `${abertura} ${quando} (${timeZone}).${link}${explicacao}`;
 }

@@ -79,7 +79,9 @@ CRONS="
 # espera ver o compromisso no celular dele em minutos, e a ida é barata (só
 # manda o que mudou). A volta é cara — varre calendário inteiro — e por isso
 # roda a cada 15.
-*/5 * * * *|60|api/v1/cron/agenda-google-push
+# Personalização do fork: a ida roda A CADA MINUTO (o oficial roda a cada 5). O convite e o
+# link do Meet de quem agendou pelo WhatsApp chegam em cerca de 1 minuto, não em até 5.
+* * * * *|60|api/v1/cron/agenda-google-push
 # O LEMBRETE. A cada 5 minutos porque a antecedência é escolhida pelo dono no
 # tipo de agendamento; uma varredura mais lenta transformaria avisar 30 minutos
 # antes em avisar entre 30 e 45 minutos antes. Barato: só olha compromisso
