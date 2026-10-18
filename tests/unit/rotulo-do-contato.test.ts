@@ -229,6 +229,11 @@ describe("a sétima cópia não nasce", () => {
       motivo: "`nomeDoCanal` — a função central do rótulo de canal",
     },
     {
+      arquivo: "lib/agent-engine/agent/registrar-dados-do-lead.ts",
+      trecho: "const atual = (contato.display_name ?? '').trim();",
+      motivo: "personalização do fork: decide se o display_name atual é nome de gente antes de gravar o que a pessoa disse; não monta rótulo de exibição",
+    },
+    {
       arquivo: "lib/lgpd/export-collector.ts",
       trecho: 'display_name: data.display_name ?? "",',
       motivo: "`organizations.display_name` do controlador no export de LGPD",
