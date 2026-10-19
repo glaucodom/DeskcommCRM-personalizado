@@ -34,6 +34,10 @@ export interface ContactSummary {
    * atendimento aparece. Opcional: conversas em cache de antes do campo existir.
    */
   force_human?: boolean | null;
+  /** Qualificação (fork). Opcionais: conversas em cache de antes dos campos existirem. */
+  empresa?: string | null;
+  cnpj?: string | null;
+  segmentos?: string[] | null;
 }
 
 /**

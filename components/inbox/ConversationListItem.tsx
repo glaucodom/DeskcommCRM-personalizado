@@ -159,6 +159,7 @@ export function ConversationListItem({
   const visibleTags = tags.slice(0, 2);
   const overflow = tags.length - visibleTags.length;
   const preview = conversation.last_message_preview?.trim() || t("Sem mensagens");
+  const empresaESegmento = [c?.empresa?.trim(), (c?.segmentos ?? []).join(", ")].filter(Boolean).join(" · ");
   const truncated = preview.length > 60 ? `${preview.slice(0, 60)}…` : preview;
   const naFila = queuePosition !== undefined;
   /**
@@ -378,6 +379,11 @@ export function ConversationListItem({
           </span>
         </div>
 
+        {empresaESegmento ? (
+          <p className="truncate text-[11px] text-text-muted" title={empresaESegmento}>
+            {empresaESegmento}
+          </p>
+        ) : null}
         <div className="mt-0.5 flex items-center justify-between gap-2">
           <p
             className={cn(

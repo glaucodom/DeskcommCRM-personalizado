@@ -26,6 +26,9 @@ interface FormShape {
   email?: string;
   phone_number?: string;
   cpf?: string;
+  empresa?: string;
+  cnpj?: string;
+  segmentosRaw?: string;
   tagsRaw?: string;
 }
 
@@ -55,7 +58,7 @@ export function NewContactDialog({ open, onOpenChange, nomeInicial, onCriado }: 
   const [serverError, setServerError] = useState<string | null>(null);
 
   const form = useForm<FormShape>({
-    defaultValues: { name: nomeInicial ?? "", email: "", phone_number: "", cpf: "", tagsRaw: "" },
+    defaultValues: { name: nomeInicial ?? "", email: "", phone_number: "", cpf: "", empresa: "", cnpj: "", segmentosRaw: "", tagsRaw: "" },
   });
 
   async function onSubmit(values: FormShape) {
@@ -69,6 +72,10 @@ export function NewContactDialog({ open, onOpenChange, nomeInicial, onCriado }: 
     if (values.email?.trim()) payload.email = values.email.trim();
     if (values.phone_number?.trim()) payload.phone_number = values.phone_number.trim();
     if (values.cpf?.trim()) payload.cpf = values.cpf.trim();
+    if (values.empresa?.trim()) payload.empresa = values.empresa.trim();
+    if (values.cnpj?.trim()) payload.cnpj = values.cnpj.trim();
+    const segmentos = (values.segmentosRaw ?? "").split(/[,;]/).map((x) => x.trim()).filter(Boolean);
+    if (segmentos.length) payload.segmentos = segmentos;
     if (tags.length) payload.tags = tags;
 
     // A MESMA régua do servidor: a tela que mostra 'Bilhete' não pode
@@ -121,6 +128,18 @@ export function NewContactDialog({ open, onOpenChange, nomeInicial, onCriado }: 
               placeholder={perfil.telefoneExemplo}
               {...form.register("phone_number")}
             />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="empresa">{t("Empresa")}</Label>
+            <Input id="empresa" {...form.register("empresa")} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="cnpj">CNPJ</Label>
+            <Input id="cnpj" inputMode="numeric" placeholder="00.000.000/0000-00" {...form.register("cnpj")} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="segmentos">{t("Segmentos (separe por vírgula)")}</Label>
+            <Input id="segmentos" {...form.register("segmentosRaw")} />
           </div>
           <div className="space-y-2">
             {/* O documento é o do PAÍS da organização — a API já valida por ele

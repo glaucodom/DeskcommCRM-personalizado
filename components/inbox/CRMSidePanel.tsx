@@ -40,6 +40,7 @@ import { cn } from "@/lib/utils";
 import { PROXIMO_PASSO_DA_MENSAGEM_NOVA } from "@/lib/atendimento/proximo-passo-padrao";
 import { rotuloDoContato } from "@/lib/contacts/rotulo-do-contato";
 import { phoneForDisplay } from "@/lib/channels/phone-variants";
+import { formatCnpj } from "@/lib/crm-b2b/normalize";
 
 interface Props {
   conversation: ConversationWithContact | null;
@@ -942,6 +943,13 @@ export function CRMSidePanel({ conversation, recolhido = false, onAlternarRecolh
           <div className="font-medium">{displayName}</div>
           {contact?.phone_number && (
             <div className="text-xs text-muted-foreground">{phoneForDisplay(contact.phone_number)}</div>
+          )}
+          {(contact?.empresa || contact?.cnpj || (contact?.segmentos ?? []).length > 0) && (
+            <div className="space-y-0.5 text-xs text-muted-foreground">
+              {contact?.empresa && <div>{contact.empresa}</div>}
+              {contact?.cnpj && <div>CNPJ {formatCnpj(contact.cnpj)}</div>}
+              {(contact?.segmentos ?? []).length > 0 && <div>{t("Segmentos")}: {(contact?.segmentos ?? []).join(", ")}</div>}
+            </div>
           )}
           {tags.length > 0 && (
             <div className="flex flex-wrap gap-1">
