@@ -35,7 +35,7 @@ import { padraoRegexDeBusca } from "@/lib/contacts/busca-regex";
 type SB = SupabaseClient;
 
 const SELECT_COLS =
-  "id, organization_id, name, display_name, email, email_normalized, phone_number, cpf_hash, birthdate, is_blocked, blocked_reason, is_personal, ai_opt_out, is_anonymized, anonymized_at, is_merged_into, merged_at, consent, tags, source, source_metadata, custom_fields, created_at, updated_at, last_activity_at, first_service_at";
+  "id, organization_id, name, display_name, email, email_normalized, phone_number, cpf_hash, birthdate, is_blocked, blocked_reason, is_personal, ai_opt_out, is_anonymized, anonymized_at, is_merged_into, merged_at, consent, tags, source, source_metadata, custom_fields, empresa, cnpj, segmentos, created_at, updated_at, last_activity_at, first_service_at";
 
 interface CursorPayload {
   sort: string | null;
@@ -483,6 +483,9 @@ export async function createContactHandler(
     source: input.source,
     source_metadata: input.source_metadata ?? {},
     custom_fields: input.custom_fields ?? {},
+    empresa: input.empresa?.trim() || null,
+    cnpj: input.cnpj || null,
+    segmentos: [...new Set(input.segmentos ?? [])],
     consent: input.consent ?? {},
   };
 
@@ -641,6 +644,10 @@ export async function patchContactHandler(
   // aqui tornaria IMPOSSÍVEL apagar um campo pela tela, porque a chave removida
   // voltaria do estado anterior a cada gravação.
   if (input.custom_fields !== undefined) patch.custom_fields = input.custom_fields;
+  // Qualificação (fork): vazio vira NULL / lista vazia.
+  if (input.empresa !== undefined) patch.empresa = input.empresa?.trim() || null;
+  if (input.cnpj !== undefined) patch.cnpj = input.cnpj || null;
+  if (input.segmentos !== undefined) patch.segmentos = [...new Set(input.segmentos)];
   if (input.consent !== undefined) {
     // MERGE por finalidade, nunca substituição.
     //

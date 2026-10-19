@@ -61,6 +61,15 @@ export const contactCreateSchema = z.object({
   source_metadata: z.record(z.string(), z.unknown()).optional(),
   consent: z.record(z.string(), z.unknown()).optional(),
   custom_fields: customFieldsSchema.optional(),
+  // Qualificação (fork): empresa, CNPJ (só os 14 números; a tela formata) e segmentos.
+  empresa: z.string().trim().max(200).nullable().optional(),
+  cnpj: z
+    .string()
+    .transform((v) => v.replace(/\D/g, ""))
+    .refine((v) => v === "" || /^\d{14}$/.test(v), "CNPJ deve ter 14 números")
+    .nullable()
+    .optional(),
+  segmentos: z.array(z.string().trim().min(1).max(80)).max(20).optional(),
 });
 export type ContactCreate = z.infer<typeof contactCreateSchema>;
 

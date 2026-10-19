@@ -33,6 +33,11 @@ export interface Contact {
   source: string;
   source_metadata: Record<string, unknown>;
   custom_fields: Record<string, unknown>;
+  /** Qualificação (personalização do fork): colunas próprias para a integração com o CRM. */
+  empresa?: string | null;
+  /** Só os 14 números. */
+  cnpj?: string | null;
+  segmentos?: string[];
   created_at: string;
   updated_at: string;
   last_activity_at: string | null;

@@ -21,6 +21,7 @@ import { contactPatchSchemaDoPais, type ContactPatch } from "@/lib/schemas/conta
 import { useUpdateContact } from "@/hooks/contacts/useUpdateContact";
 import { CustomFieldsEditor, type CustomFieldDef } from "@/components/contacts/CustomFieldsEditor";
 import type { Contact } from "@/lib/types/contacts";
+import { formatCnpj } from "@/lib/crm-b2b/normalize";
 import { phoneForDisplay } from "@/lib/channels/phone-variants";
 
 interface FormShape {
@@ -29,6 +30,9 @@ interface FormShape {
   phone_number?: string;
   /** `AAAA-MM-DD` — a MESMA forma de `contactPatchSchema` e da coluna do banco. */
   birthdate?: string;
+  empresa?: string;
+  cnpj?: string;
+  segmentosRaw?: string;
   tagsRaw?: string;
   custom_fields?: Record<string, unknown>;
 }
@@ -53,6 +57,9 @@ export function EditContactDialog({ contact, open, onOpenChange, customFieldDefs
       email: contact.email ?? "",
       phone_number: contact.phone_number ? phoneForDisplay(contact.phone_number) : "",
       birthdate: contact.birthdate ?? "",
+      empresa: contact.empresa ?? "",
+      cnpj: contact.cnpj ? formatCnpj(contact.cnpj) : "",
+      segmentosRaw: (contact.segmentos ?? []).join(", "),
       tagsRaw: contact.tags.join(", "),
       custom_fields: contact.custom_fields ?? {},
     },
@@ -67,6 +74,12 @@ export function EditContactDialog({ contact, open, onOpenChange, customFieldDefs
         email: contact.email ?? "",
         phone_number: contact.phone_number ? phoneForDisplay(contact.phone_number) : "",
         birthdate: contact.birthdate ?? "",
+        empresa: contact.empresa ?? "",
+        cnpj: contact.cnpj ? formatCnpj(contact.cnpj) : "",
+        segmentosRaw: (contact.segmentos ?? []).join(", "),
+      empresa: contact.empresa ?? "",
+      cnpj: contact.cnpj ? formatCnpj(contact.cnpj) : "",
+      segmentosRaw: (contact.segmentos ?? []).join(", "),
         tagsRaw: contact.tags.join(", "),
         custom_fields: contact.custom_fields ?? {},
       });
@@ -88,6 +101,13 @@ export function EditContactDialog({ contact, open, onOpenChange, customFieldDefs
     // exigem), então o diálogo não normaliza nada — o que se digita é o que se
     // grava, e a ficha recarregada mostra a MESMA string.
     if (values.birthdate?.trim()) payload.birthdate = values.birthdate.trim();
+    // Qualificação: sempre no payload, mesmo vazio, para apagar pela tela chegar ao banco.
+    payload.empresa = values.empresa?.trim() ?? "";
+    payload.cnpj = values.cnpj?.trim() ?? "";
+    payload.segmentos = (values.segmentosRaw ?? "")
+      .split(/[,;]/)
+      .map((x) => x.trim())
+      .filter(Boolean);
     payload.tags = tags;
     // Sempre no payload, mesmo vazio: o PATCH SUBSTITUI, e é assim que apagar um
     // campo pela tela chega ao banco.
@@ -132,6 +152,18 @@ export function EditContactDialog({ contact, open, onOpenChange, customFieldDefs
           <div className="space-y-2">
             <Label htmlFor="ec-birthdate">{t("Data de nascimento")}</Label>
             <Input id="ec-birthdate" type="date" {...form.register("birthdate")} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="ec-empresa">{t("Empresa")}</Label>
+            <Input id="ec-empresa" {...form.register("empresa")} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="ec-cnpj">CNPJ</Label>
+            <Input id="ec-cnpj" inputMode="numeric" placeholder="00.000.000/0000-00" {...form.register("cnpj")} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="ec-segmentos">{t("Segmentos (separe por vírgula)")}</Label>
+            <Input id="ec-segmentos" {...form.register("segmentosRaw")} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="ec-tags">{t("Tags")}</Label>

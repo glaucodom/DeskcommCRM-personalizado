@@ -124,16 +124,26 @@ export async function aplicarRegistroDoLead(
   if (empresa) campos.empresa_informada = empresa;
   if (cnpjNorm) campos.cnpj_informado = formatCnpj(cnpjNorm);
 
-  if (nome || email || Object.keys(campos).length > 0) {
+  // Lista de segmentos: "construção pesada, usina de asfalto" → 2 itens. Soma aos já gravados.
+  const listaDeSegmentos = segmento
+    ? [...new Set(segmento.split(/\s*[,;/]\s*|\s+e\s+/i).map((s) => s.trim()).filter((s) => s.length >= 2))]
+    : [];
+
+  if (nome || email || empresa || cnpjNorm || listaDeSegmentos.length > 0 || Object.keys(campos).length > 0) {
     await db.query(
       `update contacts
           set name = case when $3::text is not null then $3 else name end,
               display_name = case when $4::boolean then $3 else display_name end,
               email = case when $5::text is not null and email is null then $5 else email end,
               custom_fields = coalesce(custom_fields, '{}'::jsonb) || $6::jsonb,
+              empresa = coalesce($7::text, empresa),
+              cnpj = coalesce($8::text, cnpj),
+              segmentos = case
+                when cardinality($9::text[]) = 0 then segmentos
+                else (select coalesce(array_agg(distinct s), '{}') from unnest(segmentos || $9::text[]) s) end,
               updated_at = now()
         where organization_id = $1 and id = $2`,
-      [tenantId, leadId, nome, trocaDisplay, email, JSON.stringify(campos)],
+      [tenantId, leadId, nome, trocaDisplay, email, JSON.stringify(campos), empresa, cnpjNorm, listaDeSegmentos],
     );
     if (nome) registrado.push('nome');
     if (email) registrado.push('email');

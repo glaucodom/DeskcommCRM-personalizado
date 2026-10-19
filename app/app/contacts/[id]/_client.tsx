@@ -49,6 +49,7 @@ import { ConversaNoDossie } from "@/components/kanban/ConversaNoDossie";
 import { rotuloDoContato } from "@/lib/contacts/rotulo-do-contato";
 import { origemDoContato } from "@/lib/leads/origem-do-contato";
 import { phoneForDisplay } from "@/lib/channels/phone-variants";
+import { formatCnpj } from "@/lib/crm-b2b/normalize";
 import { DialButton } from "@/components/voice/DialButton";
 
 interface Props {
@@ -386,6 +387,20 @@ export function ContactDetailClient({ contactId, paineisDeModulo = [] }: Props) 
               <div>
                 <dt className="text-xs uppercase text-muted-foreground">Email</dt>
                 <dd className="mt-1">{contact.email ?? "—"}</dd>
+              </div>
+              <div>
+                <dt className="text-xs uppercase text-muted-foreground">{t("Empresa")}</dt>
+                <dd className="mt-1">{contact.empresa ?? "—"}</dd>
+              </div>
+              <div>
+                <dt className="text-xs uppercase text-muted-foreground">CNPJ</dt>
+                <dd className="mt-1">{contact.cnpj ? formatCnpj(contact.cnpj) : "—"}</dd>
+              </div>
+              <div>
+                <dt className="text-xs uppercase text-muted-foreground">{t("Segmentos")}</dt>
+                <dd className="mt-1">
+                  {contact.segmentos && contact.segmentos.length > 0 ? contact.segmentos.join(", ") : "—"}
+                </dd>
               </div>
               <div>
                 <dt className="text-xs uppercase text-muted-foreground">{t("Telefone")}</dt>
