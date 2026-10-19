@@ -77,9 +77,6 @@ export function EditContactDialog({ contact, open, onOpenChange, customFieldDefs
         empresa: contact.empresa ?? "",
         cnpj: contact.cnpj ? formatCnpj(contact.cnpj) : "",
         segmentosRaw: (contact.segmentos ?? []).join(", "),
-      empresa: contact.empresa ?? "",
-      cnpj: contact.cnpj ? formatCnpj(contact.cnpj) : "",
-      segmentosRaw: (contact.segmentos ?? []).join(", "),
         tagsRaw: contact.tags.join(", "),
         custom_fields: contact.custom_fields ?? {},
       });
