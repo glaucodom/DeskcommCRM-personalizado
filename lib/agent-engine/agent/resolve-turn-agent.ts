@@ -76,6 +76,7 @@ import {
 } from './agent-config';
 import { classifyIntent, type ClassifierContextMessage, type IntentVerdict } from './intent-classifier';
 import { corpoDaMensagem, type CorpoDaMensagemRow } from '../edge/crm/get-lead-context';
+import { INTENCAO_DO_CLIENTE, contatoEhCliente } from '@/lib/personalizacoes/cliente-para-clara-2';
 
 
 export interface TurnAgentResolution {
@@ -114,6 +115,8 @@ export interface ResolveTurnAgentDeps {
   /** Injetável para o teste não precisar de banco. */
   agenteDaCampanha?: typeof agenteDaCampanhaDaConversa;
   loadActiveRouter?: typeof loadActiveRouter;
+  /** Fork: o contato tem a etiqueta de cliente? Injetável para o teste não precisar de banco. */
+  contatoEhCliente?: typeof contatoEhCliente;
   loadPublishedAgentConfigById?: typeof loadPublishedAgentConfigById;
   loadPublishedAgentConfig?: typeof loadPublishedAgentConfig;
   classifyIntent?: typeof classifyIntent;
@@ -334,6 +337,21 @@ export async function resolveTurnAgent(
         destinationStageId: member.destinationStageId ?? null,
       };
     };
+
+    // Degrau do fork: contato com a etiqueta de cliente vai direto ao membro
+    // `cliente_crti` (Clara 2), sem classificar. Falha aberta: sem membro, sem
+    // etiqueta ou sem versão publicada, segue a régua de sempre.
+    const membroDoCliente = router.members.find((m) => m.intentName === INTENCAO_DO_CLIENTE);
+    if (membroDoCliente !== undefined && await (deps.contatoEhCliente ?? contatoEhCliente)(db, input.tenantId, input.leadId)) {
+      const config = await _loadAgentById(db, input.tenantId, membroDoCliente.agentId);
+      if (config !== null) {
+        return { config, routerId: router.id, intentName: membroDoCliente.intentName, confidence: 1, outcome: 'classified' };
+      }
+      deps.log.warn('resolve-turn-agent: agente do cliente sem versão publicada — seguindo pela régua do roteador', {
+        routerId: router.id,
+        agentId: membroDoCliente.agentId,
+      });
+    }
 
     // sticky elegível: config liga sticky E o agente ainda é membro do router
     // (membro removido ⇒ trata como sem sticky, decisão segura — ver report).
