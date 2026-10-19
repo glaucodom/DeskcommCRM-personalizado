@@ -22,6 +22,7 @@ import { useUpdateContact } from "@/hooks/contacts/useUpdateContact";
 import { CustomFieldsEditor, type CustomFieldDef } from "@/components/contacts/CustomFieldsEditor";
 import type { Contact } from "@/lib/types/contacts";
 import { formatCnpj } from "@/lib/crm-b2b/normalize";
+import { emailValido, mascaraTelefoneBr, telefoneBrParaE164, telefoneBrVazio, TELEFONE_BR_INICIAL } from "@/lib/personalizacoes/telefone-br-mascara";
 import { phoneForDisplay } from "@/lib/channels/phone-variants";
 
 interface FormShape {
@@ -55,7 +56,7 @@ export function EditContactDialog({ contact, open, onOpenChange, customFieldDefs
     defaultValues: {
       name: contact.name ?? "",
       email: contact.email ?? "",
-      phone_number: contact.phone_number ? phoneForDisplay(contact.phone_number) : "",
+      phone_number: contact.phone_number ? mascaraTelefoneBr(phoneForDisplay(contact.phone_number)) : TELEFONE_BR_INICIAL,
       birthdate: contact.birthdate ?? "",
       empresa: contact.empresa ?? "",
       cnpj: contact.cnpj ? formatCnpj(contact.cnpj) : "",
@@ -72,7 +73,7 @@ export function EditContactDialog({ contact, open, onOpenChange, customFieldDefs
       form.reset({
         name: contact.name ?? "",
         email: contact.email ?? "",
-        phone_number: contact.phone_number ? phoneForDisplay(contact.phone_number) : "",
+        phone_number: contact.phone_number ? mascaraTelefoneBr(phoneForDisplay(contact.phone_number)) : TELEFONE_BR_INICIAL,
         birthdate: contact.birthdate ?? "",
         empresa: contact.empresa ?? "",
         cnpj: contact.cnpj ? formatCnpj(contact.cnpj) : "",
@@ -91,8 +92,21 @@ export function EditContactDialog({ contact, open, onOpenChange, customFieldDefs
 
     const payload: Record<string, unknown> = {};
     if (values.name?.trim()) payload.name = values.name.trim();
-    if (values.email?.trim()) payload.email = values.email.trim();
-    if (values.phone_number?.trim()) payload.phone_number = values.phone_number.trim();
+    if (values.email?.trim()) {
+      if (!emailValido(values.email)) {
+        setServerError(t("E-mail inválido"));
+        return;
+      }
+      payload.email = values.email.trim();
+    }
+    if (!telefoneBrVazio(values.phone_number)) {
+      const e164 = telefoneBrParaE164(values.phone_number ?? "");
+      if (!e164) {
+        setServerError(t("Telefone incompleto. Informe o DDD e o número."));
+        return;
+      }
+      payload.phone_number = e164;
+    }
     // Igual aos campos de cima: só manda quando há data. O `type="date"` devolve
     // `AAAA-MM-DD` (a forma que `contactPatchSchema` e a coluna `birthdate` já
     // exigem), então o diálogo não normaliza nada — o que se digita é o que se
@@ -143,8 +157,15 @@ export function EditContactDialog({ contact, open, onOpenChange, customFieldDefs
             <Input id="ec-email" type="email" {...form.register("email")} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="ec-phone">{t("Telefone (E.164)")}</Label>
-            <Input id="ec-phone" {...form.register("phone_number")} />
+            <Label htmlFor="ec-phone">{t("Telefone (WhatsApp)")}</Label>
+            <Input
+              id="ec-phone"
+              inputMode="tel"
+              placeholder="+55 (41) 99999-8888"
+              {...form.register("phone_number", {
+                onChange: (e) => form.setValue("phone_number", mascaraTelefoneBr(e.target.value)),
+              })}
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="ec-birthdate">{t("Data de nascimento")}</Label>

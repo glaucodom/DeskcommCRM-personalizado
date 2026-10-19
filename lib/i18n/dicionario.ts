@@ -16238,6 +16238,8 @@ export const DICIONARIO: Traducoes = {
   "A sugestão tentou usar uma ação que a prévia não reconhece. Gere de novo; se repetir, revise as ferramentas ligadas no agente.": { es: "La sugerencia intentó usar una acción que la previsualización no reconoce. Genera de nuevo; si se repite, revisa las herramientas activadas en el agente." },
   "A geração da sugestão falhou, ou o contexto da conversa não pôde ser montado. Tente de novo; se repetir, o motivo ficou registrado no servidor.": { es: "La generación de la sugerencia falló, o no se pudo armar el contexto de la conversación. Inténtalo de nuevo; si se repite, el motivo quedó registrado en el servidor." },
   "Segmentos": { es: "Segmentos" },
+  "Telefone (WhatsApp)": { es: "Teléfono (WhatsApp)" },
+  "Telefone incompleto. Informe o DDD e o número.": { es: "Teléfono incompleto. Indica el código de área y el número." },
   "Segmentos (separe por vírgula)": { es: "Segmentos (separe por coma)" },
 };
 

@@ -19,6 +19,7 @@ import { Label } from "@/components/ui/label";
 import { normalizarTags } from "@/lib/contacts/tag-normalizada";
 import { contactCreateSchemaDoPais, type ContactCreate } from "@/lib/schemas/contacts";
 import type { Contact } from "@/lib/types/contacts";
+import { emailValido, mascaraTelefoneBr, telefoneBrParaE164, telefoneBrVazio, TELEFONE_BR_INICIAL } from "@/lib/personalizacoes/telefone-br-mascara";
 import { useCreateContact } from "@/hooks/contacts/useCreateContact";
 
 interface FormShape {
@@ -58,7 +59,7 @@ export function NewContactDialog({ open, onOpenChange, nomeInicial, onCriado }: 
   const [serverError, setServerError] = useState<string | null>(null);
 
   const form = useForm<FormShape>({
-    defaultValues: { name: nomeInicial ?? "", email: "", phone_number: "", cpf: "", empresa: "", cnpj: "", segmentosRaw: "", tagsRaw: "" },
+    defaultValues: { name: nomeInicial ?? "", email: "", phone_number: TELEFONE_BR_INICIAL, cpf: "", empresa: "", cnpj: "", segmentosRaw: "", tagsRaw: "" },
   });
 
   async function onSubmit(values: FormShape) {
@@ -69,8 +70,21 @@ export function NewContactDialog({ open, onOpenChange, nomeInicial, onCriado }: 
 
     const payload: Record<string, unknown> = { source: "manual" };
     if (values.name?.trim()) payload.name = values.name.trim();
-    if (values.email?.trim()) payload.email = values.email.trim();
-    if (values.phone_number?.trim()) payload.phone_number = values.phone_number.trim();
+    if (values.email?.trim()) {
+      if (!emailValido(values.email)) {
+        setServerError(t("E-mail inválido"));
+        return;
+      }
+      payload.email = values.email.trim();
+    }
+    if (!telefoneBrVazio(values.phone_number)) {
+      const e164 = telefoneBrParaE164(values.phone_number ?? "");
+      if (!e164) {
+        setServerError(t("Telefone incompleto. Informe o DDD e o número."));
+        return;
+      }
+      payload.phone_number = e164;
+    }
     if (values.cpf?.trim()) payload.cpf = values.cpf.trim();
     if (values.empresa?.trim()) payload.empresa = values.empresa.trim();
     if (values.cnpj?.trim()) payload.cnpj = values.cnpj.trim();
@@ -122,11 +136,14 @@ export function NewContactDialog({ open, onOpenChange, nomeInicial, onCriado }: 
             <Input id="email" type="email" {...form.register("email")} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="phone_number">{t("Telefone (E.164)")}</Label>
+            <Label htmlFor="phone_number">{t("Telefone (WhatsApp)")}</Label>
             <Input
               id="phone_number"
-              placeholder={perfil.telefoneExemplo}
-              {...form.register("phone_number")}
+              inputMode="tel"
+              placeholder="+55 (41) 99999-8888"
+              {...form.register("phone_number", {
+                onChange: (e) => form.setValue("phone_number", mascaraTelefoneBr(e.target.value)),
+              })}
             />
           </div>
           <div className="space-y-2">
