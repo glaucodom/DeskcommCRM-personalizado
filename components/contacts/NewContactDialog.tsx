@@ -55,11 +55,13 @@ interface Props {
 export function NewContactDialog({ open, onOpenChange, nomeInicial, onCriado }: Props) {
   const t = useT();
   const perfil = perfilDoPais(useActiveOrg()?.country);
+  // Fork: máscara +55 só para organização do Brasil; outro país segue o formato dele.
+  const brasil = perfil.telefoneExemplo.startsWith("+55");
   const create = useCreateContact();
   const [serverError, setServerError] = useState<string | null>(null);
 
   const form = useForm<FormShape>({
-    defaultValues: { name: nomeInicial ?? "", email: "", phone_number: TELEFONE_BR_INICIAL, cpf: "", empresa: "", cnpj: "", segmentosRaw: "", tagsRaw: "" },
+    defaultValues: { name: nomeInicial ?? "", email: "", phone_number: brasil ? TELEFONE_BR_INICIAL : "", cpf: "", empresa: "", cnpj: "", segmentosRaw: "", tagsRaw: "" },
   });
 
   async function onSubmit(values: FormShape) {
@@ -77,7 +79,9 @@ export function NewContactDialog({ open, onOpenChange, nomeInicial, onCriado }: 
       }
       payload.email = values.email.trim();
     }
-    if (!telefoneBrVazio(values.phone_number)) {
+    if (!brasil) {
+      if (values.phone_number?.trim()) payload.phone_number = values.phone_number.trim();
+    } else if (!telefoneBrVazio(values.phone_number)) {
       const e164 = telefoneBrParaE164(values.phone_number ?? "");
       if (!e164) {
         setServerError(t("Telefone incompleto. Informe o DDD e o número."));
@@ -136,13 +140,15 @@ export function NewContactDialog({ open, onOpenChange, nomeInicial, onCriado }: 
             <Input id="email" type="email" {...form.register("email")} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="phone_number">{t("Telefone (WhatsApp)")}</Label>
+            <Label htmlFor="phone_number">{brasil ? t("Telefone (WhatsApp)") : t("Telefone (E.164)")}</Label>
             <Input
               id="phone_number"
               inputMode="tel"
-              placeholder="+55 (41) 99999-8888"
+              placeholder={brasil ? "+55 (41) 99999-8888" : perfil.telefoneExemplo}
               {...form.register("phone_number", {
-                onChange: (e) => form.setValue("phone_number", mascaraTelefoneBr(e.target.value)),
+                onChange: (e) => {
+                  if (brasil) form.setValue("phone_number", mascaraTelefoneBr(e.target.value));
+                },
               })}
             />
           </div>

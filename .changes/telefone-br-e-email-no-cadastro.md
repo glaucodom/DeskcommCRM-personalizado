@@ -1,6 +1,6 @@
 ---
-impacto: melhoria
-secao: modificado
+impacto: capacidade_nova
+secao: alterado
 titulo: Telefone com +55 e máscara, e e-mail validado, no cadastro de contato
 ---
 

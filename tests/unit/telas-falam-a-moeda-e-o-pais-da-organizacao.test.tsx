@@ -221,7 +221,7 @@ describe("o documento e o exemplo de telefone seguem o país da organização", 
     orgAtiva.atual = { currency: "BRL", country: null };
     render(<NewContactDialog open onOpenChange={() => {}} />);
     expect(screen.getByText(/CPF \(opcional\)/)).toBeTruthy();
-    expect(screen.getByPlaceholderText("+5511999998888")).toBeTruthy();
+    expect(screen.getByPlaceholderText("+55 (41) 99999-8888")).toBeTruthy();
   });
 });
 

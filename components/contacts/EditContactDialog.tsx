@@ -38,6 +38,12 @@ interface FormShape {
   custom_fields?: Record<string, unknown>;
 }
 
+/** Fork: no Brasil o telefone abre mascarado (ou só com +55); fora dele, como veio. */
+function telefoneInicial(telefone: string | null, brasil: boolean): string {
+  if (!brasil) return telefone ? phoneForDisplay(telefone) : "";
+  return telefone ? mascaraTelefoneBr(phoneForDisplay(telefone)) : TELEFONE_BR_INICIAL;
+}
+
 interface Props {
   contact: Contact;
   open: boolean;
@@ -49,6 +55,8 @@ interface Props {
 export function EditContactDialog({ contact, open, onOpenChange, customFieldDefs = [] }: Props) {
   const t = useT();
   const perfil = perfilDoPais(useActiveOrg()?.country);
+  // Fork: máscara +55 só para organização do Brasil; outro país segue o formato dele.
+  const brasil = perfil.telefoneExemplo.startsWith("+55");
   const update = useUpdateContact(contact.id);
   const [serverError, setServerError] = useState<string | null>(null);
 
@@ -56,7 +64,7 @@ export function EditContactDialog({ contact, open, onOpenChange, customFieldDefs
     defaultValues: {
       name: contact.name ?? "",
       email: contact.email ?? "",
-      phone_number: contact.phone_number ? mascaraTelefoneBr(phoneForDisplay(contact.phone_number)) : TELEFONE_BR_INICIAL,
+      phone_number: telefoneInicial(contact.phone_number, brasil),
       birthdate: contact.birthdate ?? "",
       empresa: contact.empresa ?? "",
       cnpj: contact.cnpj ? formatCnpj(contact.cnpj) : "",
@@ -73,7 +81,7 @@ export function EditContactDialog({ contact, open, onOpenChange, customFieldDefs
       form.reset({
         name: contact.name ?? "",
         email: contact.email ?? "",
-        phone_number: contact.phone_number ? mascaraTelefoneBr(phoneForDisplay(contact.phone_number)) : TELEFONE_BR_INICIAL,
+        phone_number: telefoneInicial(contact.phone_number, brasil),
         birthdate: contact.birthdate ?? "",
         empresa: contact.empresa ?? "",
         cnpj: contact.cnpj ? formatCnpj(contact.cnpj) : "",
@@ -99,7 +107,9 @@ export function EditContactDialog({ contact, open, onOpenChange, customFieldDefs
       }
       payload.email = values.email.trim();
     }
-    if (!telefoneBrVazio(values.phone_number)) {
+    if (!brasil) {
+      if (values.phone_number?.trim()) payload.phone_number = values.phone_number.trim();
+    } else if (!telefoneBrVazio(values.phone_number)) {
       const e164 = telefoneBrParaE164(values.phone_number ?? "");
       if (!e164) {
         setServerError(t("Telefone incompleto. Informe o DDD e o número."));
@@ -157,13 +167,15 @@ export function EditContactDialog({ contact, open, onOpenChange, customFieldDefs
             <Input id="ec-email" type="email" {...form.register("email")} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="ec-phone">{t("Telefone (WhatsApp)")}</Label>
+            <Label htmlFor="ec-phone">{brasil ? t("Telefone (WhatsApp)") : t("Telefone (E.164)")}</Label>
             <Input
               id="ec-phone"
               inputMode="tel"
-              placeholder="+55 (41) 99999-8888"
+              placeholder={brasil ? "+55 (41) 99999-8888" : undefined}
               {...form.register("phone_number", {
-                onChange: (e) => form.setValue("phone_number", mascaraTelefoneBr(e.target.value)),
+                onChange: (e) => {
+                  if (brasil) form.setValue("phone_number", mascaraTelefoneBr(e.target.value));
+                },
               })}
             />
           </div>

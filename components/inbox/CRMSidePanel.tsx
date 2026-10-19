@@ -40,7 +40,7 @@ import { cn } from "@/lib/utils";
 import { PROXIMO_PASSO_DA_MENSAGEM_NOVA } from "@/lib/atendimento/proximo-passo-padrao";
 import { rotuloDoContato } from "@/lib/contacts/rotulo-do-contato";
 import { phoneForDisplay } from "@/lib/channels/phone-variants";
-import { formatCnpj } from "@/lib/crm-b2b/normalize";
+import { DadosDaEmpresaDoContato } from "./DadosDaEmpresaDoContato";
 
 interface Props {
   conversation: ConversationWithContact | null;
@@ -944,13 +944,6 @@ export function CRMSidePanel({ conversation, recolhido = false, onAlternarRecolh
           {contact?.phone_number && (
             <div className="text-xs text-muted-foreground">{phoneForDisplay(contact.phone_number)}</div>
           )}
-          {(contact?.empresa || contact?.cnpj || (contact?.segmentos ?? []).length > 0) && (
-            <div className="space-y-0.5 text-xs text-muted-foreground">
-              {contact?.empresa && <div>{contact.empresa}</div>}
-              {contact?.cnpj && <div>CNPJ {formatCnpj(contact.cnpj)}</div>}
-              {(contact?.segmentos ?? []).length > 0 && <div>{t("Segmentos")}: {(contact?.segmentos ?? []).join(", ")}</div>}
-            </div>
-          )}
           {tags.length > 0 && (
             <div className="flex flex-wrap gap-1">
               {tags.map((t) => (
@@ -996,6 +989,17 @@ export function CRMSidePanel({ conversation, recolhido = false, onAlternarRecolh
         </Card>
       </section>
 
+      {contactId && !contact?.is_anonymized && (
+        <DadosDaEmpresaDoContato
+          key={`${contactId}|${contact?.empresa ?? ""}|${contact?.cnpj ?? ""}|${(contact?.segmentos ?? []).join(",")}`}
+          contactId={contactId}
+          empresa={contact?.empresa}
+          cnpj={contact?.cnpj}
+          segmentos={contact?.segmentos}
+          readonly={readonly}
+        />
+      )}
+
       <LeadEnrichment
         data={summaryContactId === contactId && !erro && !contact?.is_anonymized ? enrichment : null}
         loading={sectionsLoading}
@@ -1010,6 +1014,7 @@ export function CRMSidePanel({ conversation, recolhido = false, onAlternarRecolh
           pipelineId={defaultPipeline.data.pipeline.id}
           stages={defaultPipeline.data.stages}
           contactId={contactId}
+          dadosDaEmpresa={{ empresa: contact?.empresa, cnpj: contact?.cnpj, segmentos: contact?.segmentos }}
           onCreated={() => {
             setLeadAtivoId(null);
             recarregar();

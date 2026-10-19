@@ -1,6 +1,6 @@
 ---
-impacto: melhoria
-secao: modificado
+impacto: capacidade_nova
+secao: alterado
 titulo: Empresa, CNPJ e segmentos no cadastro de contato e no Inbox
 ---
 

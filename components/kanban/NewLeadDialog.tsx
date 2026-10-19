@@ -38,6 +38,9 @@ import { MOEDA_PADRAO, parseReaisToCents, simboloDaMoeda } from "@/lib/money";
 import { rotuloDoContato } from "@/lib/contacts/rotulo-do-contato";
 import type { Contact } from "@/lib/types/contacts";
 import { EcoDoValor } from "./EcoDoValor";
+import { apiClient } from "@/lib/api/client";
+import { cnpjVazioOuValido, mascaraCnpj, segmentosDeTexto, SEGMENTOS_SUGERIDOS } from "@/lib/personalizacoes/dados-da-empresa";
+import { formatCnpj } from "@/lib/crm-b2b/normalize";
 import { SeletorDeContato } from "./SeletorDeContato";
 
 interface FormShape {
@@ -47,6 +50,9 @@ interface FormShape {
   valueReais: string;
   tagsRaw: string;
   expected_close_date: string;
+  empresa: string;
+  cnpj: string;
+  segmentosRaw: string;
 }
 
 interface Props {
@@ -69,6 +75,12 @@ interface Props {
    * mesmo funil + aberto, e depender de quem chama é como a regra se perde.
    */
   leads?: Lead[];
+  /**
+   * Fork: com esta prop o diálogo NÃO pede valor; pede Empresa, CNPJ e Segmento (a CRTI
+   * vende para empresa) e grava esses dados no contato. O objeto traz o que o contato já
+   * tem, para vir preenchido. Sem a prop, o diálogo é o oficial.
+   */
+  dadosDaEmpresa?: { empresa?: string | null; cnpj?: string | null; segmentos?: string[] | null };
 }
 
 function defaultStageId(stages: Stage[]): string {
@@ -84,6 +96,7 @@ export function NewLeadDialog({
   contactId,
   leads,
   onCreated,
+  dadosDaEmpresa,
 }: Props) {
   const t = useT();
   const org = useActiveOrg();
@@ -133,8 +146,23 @@ export function NewLeadDialog({
       valueReais: "",
       tagsRaw: "",
       expected_close_date: "",
+      empresa: "",
+      cnpj: "",
+      segmentosRaw: "",
     },
   });
+
+  // Fork: ao abrir, vem preenchido com o que o contato já tem.
+  const empresaDoContato = dadosDaEmpresa?.empresa ?? "";
+  const cnpjDoContato = dadosDaEmpresa?.cnpj ?? "";
+  const segmentosDoContato = (dadosDaEmpresa?.segmentos ?? []).join(", ");
+  useEffect(() => {
+    if (!open || !dadosDaEmpresa) return;
+    form.setValue("empresa", empresaDoContato);
+    form.setValue("cnpj", cnpjDoContato ? formatCnpj(cnpjDoContato) : "");
+    form.setValue("segmentosRaw", segmentosDoContato);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, empresaDoContato, cnpjDoContato, segmentosDoContato]);
 
   // Reset stage_id default if stages change while dialog mounted.
   useEffect(() => {
@@ -180,7 +208,16 @@ export function NewLeadDialog({
       .map((s) => s.trim())
       .filter(Boolean);
 
-    const reais = values.valueReais.trim();
+    if (dadosDaEmpresa && !cnpjVazioOuValido(values.cnpj)) {
+      form.setError("cnpj", { message: t("CNPJ deve ter 14 números") });
+      return;
+    }
+    if (dadosDaEmpresa && !values.title.trim() && !values.empresa.trim()) {
+      toast.error(t("Informe o título ou o nome da empresa"));
+      return;
+    }
+
+    const reais = dadosDaEmpresa ? "" : values.valueReais.trim();
     let valueCents: number | null = null;
     if (reais.length > 0) {
       valueCents = parseReaisToCents(reais);
@@ -193,7 +230,7 @@ export function NewLeadDialog({
     const payload: Record<string, unknown> = {
       pipeline_id: pipelineId,
       stage_id: values.stage_id,
-      title: values.title.trim(),
+      title: values.title.trim() || values.empresa.trim(),
       // A moeda NÃO vai daqui. O browser não sabe a moeda da organização, e
       // mandar "BRL" fazia toda instalação em peso ou dólar cadastrar lead em
       // real. Omitir é o conserto: quem decide é o servidor, que lê a
@@ -206,6 +243,20 @@ export function NewLeadDialog({
     if (values.description.trim()) payload.description = values.description.trim();
     if (valueCents !== null) payload.value_cents = valueCents;
     if (values.expected_close_date) payload.expected_close_date = values.expected_close_date;
+
+    // Fork: empresa, CNPJ e segmentos vão para o CONTATO (é onde o resto do sistema lê).
+    if (dadosDaEmpresa && idDoContato) {
+      try {
+        await apiClient.patch(`/api/v1/contacts/${idDoContato}`, {
+          empresa: values.empresa.trim(),
+          cnpj: values.cnpj.trim(),
+          segmentos: segmentosDeTexto(values.segmentosRaw),
+        });
+      } catch {
+        toast.error(t("Não foi possível salvar os dados da empresa."));
+        return;
+      }
+    }
 
     const parsed = createLeadSchema.safeParse(payload);
     if (!parsed.success) {
@@ -251,6 +302,9 @@ export function NewLeadDialog({
         valueReais: "",
         tagsRaw: "",
         expected_close_date: "",
+        empresa: "",
+        cnpj: "",
+        segmentosRaw: "",
       });
       setContato(null);
       setAviso(null);
@@ -269,6 +323,11 @@ export function NewLeadDialog({
 
   function escolherContato(escolhido: Contact | null) {
     setContato(escolhido);
+    if (dadosDaEmpresa && escolhido) {
+      form.setValue("empresa", escolhido.empresa ?? "");
+      form.setValue("cnpj", escolhido.cnpj ? formatCnpj(escolhido.cnpj) : "");
+      form.setValue("segmentosRaw", (escolhido.segmentos ?? []).join(", "));
+    }
     if (escolhido && !form.getValues("title").trim()) {
       form.setValue("title", rotuloDoContato(escolhido, t));
     }
@@ -300,7 +359,7 @@ export function NewLeadDialog({
             <Input
               id="title"
               placeholder={t("Ex: Pedido Maria — combo presente")}
-              {...form.register("title", { required: true, minLength: 2 })}
+              {...form.register("title", { required: !dadosDaEmpresa, minLength: 2 })}
             />
           </div>
 
@@ -335,6 +394,48 @@ export function NewLeadDialog({
             </Select>
           </div>
 
+          {dadosDaEmpresa ? (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="empresa">{t("Nome da empresa")}</Label>
+                <Input id="empresa" {...form.register("empresa")} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="cnpj">CNPJ</Label>
+                  <Input
+                    id="cnpj"
+                    inputMode="numeric"
+                    placeholder="00.000.000/0000-00"
+                    {...form.register("cnpj", {
+                      onChange: (e) => form.setValue("cnpj", mascaraCnpj(e.target.value)),
+                    })}
+                  />
+                  {form.formState.errors.cnpj && (
+                    <p className="text-xs text-error-fg">{form.formState.errors.cnpj.message}</p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="segmentosRaw">{t("Segmento")}</Label>
+                  <Input
+                    id="segmentosRaw"
+                    list="nl-segmentos-sugeridos"
+                    placeholder={t("Segmentos (separe por vírgula)")}
+                    {...form.register("segmentosRaw")}
+                  />
+                  <datalist id="nl-segmentos-sugeridos">
+                    {SEGMENTOS_SUGERIDOS.map((x) => (
+                      <option key={x} value={x} />
+                    ))}
+                  </datalist>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="expected_close_date">{t("Fechamento previsto")}</Label>
+                <Input id="expected_close_date" type="date" {...form.register("expected_close_date")} />
+              </div>
+            </>
+          ) : (
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
               {/* Negócio novo: o rótulo segue a moeda da organização, que é onde ele
@@ -362,6 +463,7 @@ export function NewLeadDialog({
               />
             </div>
           </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="tagsRaw">{t("Tags (separadas por vírgula)")}</Label>
