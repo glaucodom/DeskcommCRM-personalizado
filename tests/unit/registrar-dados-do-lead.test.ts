@@ -118,7 +118,7 @@ describe("registrar_dados_do_lead (personalização do fork)", () => {
     const up = chamadas.find((c) => c.sql.includes("update contacts"))!;
     expect(JSON.parse(String(up.valores[5]))).toEqual({
       segmento: "construção pesada",
-      como_conheceu: "indicação",
+      como_conheceu: "Indicação",
       indicado_por: "Pedreira Central",
     });
   });
