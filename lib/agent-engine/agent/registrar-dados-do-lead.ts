@@ -20,6 +20,7 @@
  * CNPJ: só confere 14 dígitos (a mesma régua de `normalizeCnpj`); a consulta à BrasilAPI
  * fica `pending` para o enriquecimento que o produto já tem.
  */
+import { padronizarOrigem } from '@/lib/personalizacoes/origem-do-lead';
 import { z } from 'zod';
 
 import { normalizeCnpj, formatCnpj, normalizePersonName } from '@/lib/crm-b2b/normalize';
@@ -80,7 +81,9 @@ export async function aplicarRegistroDoLead(
   const nome = limpa(d.nome, LIMITES.nome);
   const empresa = limpa(d.empresa, LIMITES.empresa);
   const segmento = limpa(d.segmento, LIMITES.segmento);
-  const comoConheceu = limpa(d.como_conheceu, LIMITES.como_conheceu);
+  const comoConhecidoBruto = limpa(d.como_conheceu, LIMITES.como_conheceu);
+  // Fork: a origem vira um nome padrão (Google, Instagram, IA, IA (ChatGPT)…).
+  const comoConheceu = comoConhecidoBruto ? padronizarOrigem(comoConhecidoBruto) : null;
   const indicadoPor = limpa(d.indicado_por, LIMITES.indicado_por);
   const emailBruto = limpa(d.email, LIMITES.email)?.toLowerCase() ?? null;
   const email = emailBruto && EMAIL.test(emailBruto) ? emailBruto : null;

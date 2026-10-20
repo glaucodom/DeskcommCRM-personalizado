@@ -13,26 +13,30 @@ import {
   SEGMENTOS_SUGERIDOS,
 } from "@/lib/personalizacoes/dados-da-empresa";
 import { formatCnpj } from "@/lib/crm-b2b/normalize";
+import { padronizarOrigem } from "@/lib/personalizacoes/origem-do-lead";
 
 interface Props {
   contactId: string;
   empresa?: string | null;
   cnpj?: string | null;
   segmentos?: string[] | null;
+  /** Campos livres do contato; a origem mora em `como_conheceu` (a Clara grava ali). */
+  customFields?: Record<string, unknown> | null;
   readonly?: boolean;
 }
 
 /** Empresa, CNPJ e segmento do contato, editáveis direto no painel do Inbox (fork). */
-export function DadosDaEmpresaDoContato({ contactId, empresa, cnpj, segmentos, readonly }: Props) {
+export function DadosDaEmpresaDoContato({ contactId, empresa, cnpj, segmentos, customFields, readonly }: Props) {
   const t = useT();
   const update = useUpdateContact(contactId);
   const inicial = {
     empresa: empresa ?? "",
     cnpj: cnpj ? formatCnpj(cnpj) : "",
     segmentos: (segmentos ?? []).join(", "),
+    origem: typeof customFields?.como_conheceu === "string" ? customFields.como_conheceu : "",
   };
   const [v, setV] = useState(inicial);
-  const mudou = v.empresa !== inicial.empresa || v.cnpj !== inicial.cnpj || v.segmentos !== inicial.segmentos;
+  const mudou = v.empresa !== inicial.empresa || v.cnpj !== inicial.cnpj || v.segmentos !== inicial.segmentos || v.origem !== inicial.origem;
 
   async function salvar() {
     if (!cnpjVazioOuValido(v.cnpj)) {
@@ -44,6 +48,8 @@ export function DadosDaEmpresaDoContato({ contactId, empresa, cnpj, segmentos, r
         empresa: v.empresa.trim(),
         cnpj: v.cnpj.trim(),
         segmentos: segmentosDeTexto(v.segmentos),
+        // `custom_fields` é gravado inteiro pela API: manda o que já existe com a origem trocada.
+        custom_fields: { ...(customFields ?? {}), como_conheceu: padronizarOrigem(v.origem) },
       });
       toast.success(t("Dados da empresa salvos"));
     } catch {
@@ -91,6 +97,23 @@ export function DadosDaEmpresaDoContato({ contactId, empresa, cnpj, segmentos, r
           <datalist id="dc-segmentos-sugeridos">
             {SEGMENTOS_SUGERIDOS.map((s) => (
               <option key={s} value={s} />
+            ))}
+          </datalist>
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor="dc-origem" className="text-xs">{t("Origem do lead")}</Label>
+          <Input
+            id="dc-origem"
+            className="h-8 text-sm"
+            list="dc-origens-sugeridas"
+            placeholder={t("Google, Instagram, IA (ChatGPT), Indicação…")}
+            value={v.origem}
+            disabled={readonly}
+            onChange={(e) => setV({ ...v, origem: e.target.value })}
+          />
+          <datalist id="dc-origens-sugeridas">
+            {["Google", "Instagram", "IA", "IA (ChatGPT)", "IA (Gemini)", "Indicação", "LinkedIn", "YouTube"].map((o) => (
+              <option key={o} value={o} />
             ))}
           </datalist>
         </div>

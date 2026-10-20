@@ -16471,6 +16471,8 @@ export const DICIONARIO: Traducoes = {
   "Telefone (WhatsApp)": { es: "Teléfono (WhatsApp)" },
   "Telefone incompleto. Informe o DDD e o número.": { es: "Teléfono incompleto. Indica el código de área y el número." },
   "Segmentos (separe por vírgula)": { es: "Segmentos (separe por coma)" },
+  "Origem do lead": { es: "Origen del lead" },
+  "Google, Instagram, IA (ChatGPT), Indicação…": { es: "Google, Instagram, IA (ChatGPT), Recomendación…" },
 };
 
 /**

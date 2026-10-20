@@ -41,6 +41,8 @@ export interface ContactSummary {
   empresa?: string | null;
   cnpj?: string | null;
   segmentos?: string[] | null;
+  /** Campos livres do contato; o painel lê daqui a origem (`como_conheceu`). */
+  custom_fields?: Record<string, unknown> | null;
 }
 
 /**

@@ -998,11 +998,12 @@ export function CRMSidePanel({ conversation, recolhido = false, onAlternarRecolh
 
       {contactId && !contact?.is_anonymized && (
         <DadosDaEmpresaDoContato
-          key={`${contactId}|${contact?.empresa ?? ""}|${contact?.cnpj ?? ""}|${(contact?.segmentos ?? []).join(",")}`}
+          key={`${contactId}|${contact?.empresa ?? ""}|${contact?.cnpj ?? ""}|${(contact?.segmentos ?? []).join(",")}|${String(contact?.custom_fields?.como_conheceu ?? "")}`}
           contactId={contactId}
           empresa={contact?.empresa}
           cnpj={contact?.cnpj}
           segmentos={contact?.segmentos}
+          customFields={contact?.custom_fields}
           readonly={readonly}
         />
       )}
