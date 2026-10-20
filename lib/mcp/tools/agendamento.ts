@@ -39,6 +39,10 @@ import { SITUACOES_DO_AGENDAMENTO } from "@/lib/agenda/tipos";
 import { contatoDoNegocio } from "@/lib/operacao/modelos-de-mensagem";
 import type { McpContext, McpToolDefinition } from "@/lib/mcp/types";
 import { resolveUserNames } from "./_users";
+import {
+  descricaoDaReuniao,
+  tituloDaReuniao,
+} from "@/lib/personalizacoes/dados-do-lead-na-agenda";
 
 /** Teto do horizonte pedido — espelha o da rota, e o excesso é erro de chamada. */
 const DIAS_PADRAO = 14;
@@ -745,6 +749,14 @@ export const crmBookAppointment: McpToolDefinition<typeof marcarShape> = {
             "equipe inclui no convite.",
         };
       }
+      // Fork: quando a IA marca sem título nem descrição, o evento nasce com a empresa, o contato
+      // e "Agendado pela Clara (IA)" — ver lib/personalizacoes/dados-do-lead-na-agenda.ts.
+      const doLead =
+        ctx.actor.type === "ai_agent" && (!input.title || !input.description)
+          ? await dadosDoLeadParaAgenda(ctx, input.contact_id)
+          : null;
+      const tituloFinal = input.title ?? (doLead ? tituloDaReuniao(tipo.nome, doLead) : undefined);
+      const descricaoFinal = input.description ?? (doLead ? descricaoDaReuniao(doLead) : undefined);
       const r = await marcarAgendamentoHandler(
         ctx.supabase,
         {
@@ -760,9 +772,9 @@ export const crmBookAppointment: McpToolDefinition<typeof marcarShape> = {
           starts_at: input.starts_at,
           contact_id: input.contact_id,
           ...(input.owner_user_id ? { owner_user_id: input.owner_user_id } : {}),
-          ...(input.title ? { title: input.title } : {}),
+          ...(tituloFinal ? { title: tituloFinal } : {}),
           ...(input.notes ? { notes: input.notes } : {}),
-          ...(input.description ? { description: input.description } : {}),
+          ...(descricaoFinal ? { description: descricaoFinal } : {}),
           ...(input.location_details !== undefined
             ? { location_details: input.location_details }
             : {}),
@@ -823,6 +835,50 @@ export const crmBookAppointment: McpToolDefinition<typeof marcarShape> = {
  * aqui divergiria da primeira na primeira mudança, e o sintoma seria o mesmo
  * horário marcar de um jeito numa ferramenta e de outro na outra.
  */
+/** Fork: o que a IA já sabe do lead na hora de marcar. Falha de leitura = evento sem enfeite, nunca sem agendamento. */
+async function dadosDoLeadParaAgenda(
+  ctx: McpContext,
+  contactId: string,
+): Promise<{
+  nome: string | null;
+  empresa: string | null;
+  telefone: string | null;
+  email: string | null;
+  segmentos: string[];
+  agente: string | null;
+} | null> {
+  try {
+    const { data: c } = await ctx.supabase
+      .from("contacts")
+      .select("name, display_name, phone_number, email, empresa, segmentos")
+      .eq("organization_id", ctx.organizationId)
+      .eq("id", contactId)
+      .maybeSingle();
+    if (!c) return null;
+    let agente: string | null = null;
+    const agentId = ctx.actor.type === "ai_agent" ? ctx.actor.agent_id : undefined;
+    if (agentId) {
+      const { data: a } = await ctx.supabase
+        .from("ai_agents")
+        .select("name")
+        .eq("organization_id", ctx.organizationId)
+        .eq("id", agentId)
+        .maybeSingle();
+      agente = a?.name ? String(a.name) : null;
+    }
+    return {
+      nome: (c.name as string | null) ?? (c.display_name as string | null) ?? null,
+      empresa: (c.empresa as string | null) ?? null,
+      telefone: (c.phone_number as string | null) ?? null,
+      email: (c.email as string | null) ?? null,
+      segmentos: Array.isArray(c.segmentos) ? (c.segmentos as string[]) : [],
+      agente,
+    };
+  } catch {
+    return null;
+  }
+}
+
 async function marcarHorario(
   ctx: McpContext,
   args: {
