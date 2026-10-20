@@ -173,6 +173,7 @@ export async function POST(req: NextRequest, ctx: Ctx): Promise<Response> {
       versionId: vid,
       runId: runRow.id,
       sampleMessage: parsed.data.sample_message,
+      ...(parsed.data.sample_history ? { sampleHistory: parsed.data.sample_history } : {}),
       sampleContact: parsed.data.sample_contact,
       channelId: version.channel_session_id,
     });

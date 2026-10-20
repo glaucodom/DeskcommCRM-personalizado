@@ -309,6 +309,17 @@ export const testRunSchema = z
         phone: z.string().trim().min(3).max(40).optional(),
       })
       .optional(),
+    // Fork: a conversa até aqui (mais antiga primeiro). Permite testar o agente turno a
+    // turno, como no WhatsApp — `sample_message` é sempre a última fala da pessoa.
+    sample_history: z
+      .array(
+        z.object({
+          direction: z.enum(["inbound", "outbound"]),
+          body: z.string().trim().min(1).max(4000),
+        }),
+      )
+      .max(80)
+      .optional(),
   })
   .strict();
 

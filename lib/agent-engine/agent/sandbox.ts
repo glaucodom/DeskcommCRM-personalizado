@@ -11,6 +11,8 @@ export async function testAgentVersion(
     versionId: string;
     runId: string;
     sampleMessage: string;
+    /** Fork: a conversa até aqui, mais antiga primeiro (teste turno a turno). */
+    sampleHistory?: Array<{ direction: "inbound" | "outbound"; body: string }>;
     sampleContact?: { name?: string; phone?: string };
     channelId: string | null;
   },
@@ -23,16 +25,18 @@ export async function testAgentVersion(
   );
   if (!agent) throw new Error("preview_version_unavailable");
   const result = newPreviewResult();
-  const context = scenarioContext(
-    [
-      {
-        direction: "inbound",
-        body: input.sampleMessage,
-        sent_at: (deps.clock?.() ?? new Date()).toISOString(),
-      },
-    ],
-    input.sampleContact,
-  );
+  const agora = deps.clock?.() ?? new Date();
+  const historico = input.sampleHistory ?? [];
+  // Cada fala do histórico ganha 1 minuto de diferença, terminando um minuto antes da última.
+  const mensagens = [
+    ...historico.map((m, i) => ({
+      direction: m.direction,
+      body: m.body,
+      sent_at: new Date(agora.getTime() - (historico.length - i + 1) * 60_000).toISOString(),
+    })),
+    { direction: "inbound" as const, body: input.sampleMessage, sent_at: agora.toISOString() },
+  ];
+  const context = scenarioContext(mensagens, input.sampleContact);
   await runAgentPreview(deps, pool, {
     kind: "sandbox",
     organizationId: input.organizationId,
