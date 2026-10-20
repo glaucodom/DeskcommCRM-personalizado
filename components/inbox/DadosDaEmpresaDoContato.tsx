@@ -112,9 +112,10 @@ export function DadosDaEmpresaDoContato({ contactId, empresa, cnpj, segmentos, c
             onChange={(e) => setV({ ...v, origem: e.target.value })}
           />
           <datalist id="dc-origens-sugeridas">
-            {["Google", "Instagram", "IA", "IA (ChatGPT)", "IA (Gemini)", "Indicação", "LinkedIn", "YouTube"].map((o) => (
+            {["Google", "Instagram", "IA", "IA (ChatGPT)", "IA (Gemini)", "LinkedIn", "YouTube"].map((o) => (
               <option key={o} value={o} />
             ))}
+            <option value="Indicação" label={t("Indicação")} />
           </datalist>
         </div>
         {!readonly && (

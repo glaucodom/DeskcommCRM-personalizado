@@ -16472,6 +16472,7 @@ export const DICIONARIO: Traducoes = {
   "Telefone incompleto. Informe o DDD e o número.": { es: "Teléfono incompleto. Indica el código de área y el número." },
   "Segmentos (separe por vírgula)": { es: "Segmentos (separe por coma)" },
   "Origem do lead": { es: "Origen del lead" },
+  "Indicação": { es: "Recomendación" },
   "Google, Instagram, IA (ChatGPT), Indicação…": { es: "Google, Instagram, IA (ChatGPT), Recomendación…" },
 };
 
