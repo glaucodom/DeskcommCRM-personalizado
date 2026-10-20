@@ -118,7 +118,10 @@ export function createMeetDeliveryHandler(deps: {
             // Sem Meet não há link, e o texto não inventa um.
             url: ehMeet ? url : null,
             idioma: normalizarIdioma(row.contact_locale ?? row.organization_locale),
-            comConvite: Boolean(row.guest_email?.trim()),
+            // Personalização do fork: o formato limpo vale para TODA reunião com Meet.
+            // Antes dependia de `guest_email`, que é o participante da EQUIPE (não o
+            // e-mail do cliente) e quase sempre vem vazio — daí o "(America/Sao_Paulo)".
+            comConvite: ehMeet,
           }),
           optedOutThisTurn: false,
           now: new Date(),
