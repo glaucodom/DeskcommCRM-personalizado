@@ -21,12 +21,15 @@ import { contactCreateSchemaDoPais, type ContactCreate } from "@/lib/schemas/con
 import type { Contact } from "@/lib/types/contacts";
 import { emailValido, mascaraTelefoneBr, telefoneBrParaE164, telefoneBrVazio, TELEFONE_BR_INICIAL } from "@/lib/personalizacoes/telefone-br-mascara";
 import { useCreateContact } from "@/hooks/contacts/useCreateContact";
+import { useTipoDeCliente } from "@/hooks/contacts/useTipoDeCliente";
+import { mascaraCpf } from "@/lib/personalizacoes/tipo-de-cliente";
 
 interface FormShape {
   name?: string;
   email?: string;
   phone_number?: string;
   cpf?: string;
+  birthdate?: string;
   empresa?: string;
   cnpj?: string;
   segmentosRaw?: string;
@@ -58,10 +61,12 @@ export function NewContactDialog({ open, onOpenChange, nomeInicial, onCriado }: 
   // Fork: máscara +55 só para organização do Brasil; outro país segue o formato dele.
   const brasil = perfil.telefoneExemplo.startsWith("+55");
   const create = useCreateContact();
+  // Fork #20: organização B2C não pede Empresa/CNPJ/Segmentos; pede CPF e nascimento.
+  const { pessoas } = useTipoDeCliente();
   const [serverError, setServerError] = useState<string | null>(null);
 
   const form = useForm<FormShape>({
-    defaultValues: { name: nomeInicial ?? "", email: "", phone_number: brasil ? TELEFONE_BR_INICIAL : "", cpf: "", empresa: "", cnpj: "", segmentosRaw: "", tagsRaw: "" },
+    defaultValues: { name: nomeInicial ?? "", email: "", phone_number: brasil ? TELEFONE_BR_INICIAL : "", cpf: "", birthdate: "", empresa: "", cnpj: "", segmentosRaw: "", tagsRaw: "" },
   });
 
   async function onSubmit(values: FormShape) {
@@ -90,10 +95,14 @@ export function NewContactDialog({ open, onOpenChange, nomeInicial, onCriado }: 
       payload.phone_number = e164;
     }
     if (values.cpf?.trim()) payload.cpf = values.cpf.trim();
-    if (values.empresa?.trim()) payload.empresa = values.empresa.trim();
-    if (values.cnpj?.trim()) payload.cnpj = values.cnpj.trim();
-    const segmentos = (values.segmentosRaw ?? "").split(/[,;]/).map((x) => x.trim()).filter(Boolean);
-    if (segmentos.length) payload.segmentos = segmentos;
+    if (pessoas) {
+      if (values.birthdate?.trim()) payload.birthdate = values.birthdate.trim();
+    } else {
+      if (values.empresa?.trim()) payload.empresa = values.empresa.trim();
+      if (values.cnpj?.trim()) payload.cnpj = values.cnpj.trim();
+      const segmentos = (values.segmentosRaw ?? "").split(/[,;]/).map((x) => x.trim()).filter(Boolean);
+      if (segmentos.length) payload.segmentos = segmentos;
+    }
     if (tags.length) payload.tags = tags;
 
     // A MESMA régua do servidor: a tela que mostra 'Bilhete' não pode
@@ -152,6 +161,8 @@ export function NewContactDialog({ open, onOpenChange, nomeInicial, onCriado }: 
               })}
             />
           </div>
+          {!pessoas && (
+            <>
           <div className="space-y-2">
             <Label htmlFor="empresa">{t("Empresa")}</Label>
             <Input id="empresa" {...form.register("empresa")} />
@@ -164,14 +175,30 @@ export function NewContactDialog({ open, onOpenChange, nomeInicial, onCriado }: 
             <Label htmlFor="segmentos">{t("Segmentos (separe por vírgula)")}</Label>
             <Input id="segmentos" {...form.register("segmentosRaw")} />
           </div>
+            </>
+          )}
           <div className="space-y-2">
             {/* O documento é o do PAÍS da organização — a API já valida por ele
                 (`contactCreateSchemaDoPais`); só a tela escrevia "CPF" em duro. */}
             <Label htmlFor="cpf">
               {perfil.documento.rotulo} ({t("opcional")})
             </Label>
-            <Input id="cpf" placeholder={perfil.documento.exemplo} {...form.register("cpf")} />
+            <Input
+              id="cpf"
+              placeholder={perfil.documento.exemplo}
+              {...form.register("cpf", {
+                onChange: (e) => {
+                  if (pessoas && brasil) form.setValue("cpf", mascaraCpf(e.target.value));
+                },
+              })}
+            />
           </div>
+          {pessoas && (
+            <div className="space-y-2">
+              <Label htmlFor="birthdate">{t("Data de nascimento")} ({t("opcional")})</Label>
+              <Input id="birthdate" type="date" {...form.register("birthdate")} />
+            </div>
+          )}
           <div className="space-y-2">
             <Label htmlFor="tagsRaw">{t("Tags (separadas por vírgula)")}</Label>
             <Input id="tagsRaw" placeholder="vip, recompra" {...form.register("tagsRaw")} />

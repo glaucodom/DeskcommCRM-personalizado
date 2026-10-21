@@ -11,6 +11,8 @@ import { Art15Form } from "./_art15";
 import { ZonaDePerigoDaOrganizacao } from "./_danger-zone";
 import { TenantForm } from "./_form";
 import { InterfaceDaEmpresaForm } from "./_interface";
+import { TipoDeClienteForm } from "./_tipo-de-cliente-form";
+import { tipoDeCliente } from "@/lib/personalizacoes/tipo-de-cliente";
 
 export const dynamic = "force-dynamic";
 
@@ -86,6 +88,12 @@ export default async function TenantSettingsPage() {
             dpo_email: row.dpo_email,
             privacy_policy_url: row.privacy_policy_url,
           }}
+        />
+      )}
+      {row && (
+        <TipoDeClienteForm
+          inicial={tipoDeCliente(row.settings as Record<string, unknown> | null)}
+          podeEditar
         />
       )}
       {row && alineas && alineasDoArt15Visiveis(row.country) && (

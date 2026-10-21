@@ -4,6 +4,8 @@ import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import { useActiveOrg } from "@/hooks/auth/AuthProvider";
 import { useT } from "@/hooks/i18n/useT";
+import { useTipoDeCliente } from "@/hooks/contacts/useTipoDeCliente";
+import { mascaraCpf } from "@/lib/personalizacoes/tipo-de-cliente";
 import { perfilDoPais } from "@/lib/legal/perfil-do-pais";
 import {
   Dialog,
@@ -31,6 +33,7 @@ interface FormShape {
   phone_number?: string;
   /** `AAAA-MM-DD` — a MESMA forma de `contactPatchSchema` e da coluna do banco. */
   birthdate?: string;
+  cpf?: string;
   empresa?: string;
   cnpj?: string;
   segmentosRaw?: string;
@@ -58,6 +61,8 @@ export function EditContactDialog({ contact, open, onOpenChange, customFieldDefs
   // Fork: máscara +55 só para organização do Brasil; outro país segue o formato dele.
   const brasil = perfil.telefoneExemplo.startsWith("+55");
   const update = useUpdateContact(contact.id);
+  // Fork #20: organização B2C não edita Empresa/CNPJ/Segmentos; edita CPF e nascimento.
+  const { pessoas } = useTipoDeCliente();
   const [serverError, setServerError] = useState<string | null>(null);
 
   const form = useForm<FormShape>({
@@ -123,12 +128,17 @@ export function EditContactDialog({ contact, open, onOpenChange, customFieldDefs
     // grava, e a ficha recarregada mostra a MESMA string.
     if (values.birthdate?.trim()) payload.birthdate = values.birthdate.trim();
     // Qualificação: sempre no payload, mesmo vazio, para apagar pela tela chegar ao banco.
-    payload.empresa = values.empresa?.trim() ?? "";
-    payload.cnpj = values.cnpj?.trim() ?? "";
-    payload.segmentos = (values.segmentosRaw ?? "")
-      .split(/[,;]/)
-      .map((x) => x.trim())
-      .filter(Boolean);
+    if (pessoas) {
+      // O CPF nunca volta preenchido (é dado sensível, cifrado): só vai quando digitado agora.
+      if (values.cpf?.trim()) payload.cpf = values.cpf.trim();
+    } else {
+      payload.empresa = values.empresa?.trim() ?? "";
+      payload.cnpj = values.cnpj?.trim() ?? "";
+      payload.segmentos = (values.segmentosRaw ?? "")
+        .split(/[,;]/)
+        .map((x) => x.trim())
+        .filter(Boolean);
+    }
     payload.tags = tags;
     // Sempre no payload, mesmo vazio: o PATCH SUBSTITUI, e é assim que apagar um
     // campo pela tela chega ao banco.
@@ -183,6 +193,23 @@ export function EditContactDialog({ contact, open, onOpenChange, customFieldDefs
             <Label htmlFor="ec-birthdate">{t("Data de nascimento")}</Label>
             <Input id="ec-birthdate" type="date" {...form.register("birthdate")} />
           </div>
+          {pessoas ? (
+            <div className="space-y-2">
+              <Label htmlFor="ec-cpf">
+                {perfil.documento.rotulo} ({t("opcional")})
+              </Label>
+              <Input
+                id="ec-cpf"
+                placeholder={contact.cpf_hash ? t("Já cadastrado. Digite só para trocar.") : perfil.documento.exemplo}
+                {...form.register("cpf", {
+                  onChange: (e) => {
+                    if (brasil) form.setValue("cpf", mascaraCpf(e.target.value));
+                  },
+                })}
+              />
+            </div>
+          ) : (
+            <>
           <div className="space-y-2">
             <Label htmlFor="ec-empresa">{t("Empresa")}</Label>
             <Input id="ec-empresa" {...form.register("empresa")} />
@@ -195,6 +222,8 @@ export function EditContactDialog({ contact, open, onOpenChange, customFieldDefs
             <Label htmlFor="ec-segmentos">{t("Segmentos (separe por vírgula)")}</Label>
             <Input id="ec-segmentos" {...form.register("segmentosRaw")} />
           </div>
+            </>
+          )}
           <div className="space-y-2">
             <Label htmlFor="ec-tags">{t("Tags")}</Label>
             <Input id="ec-tags" {...form.register("tagsRaw")} />

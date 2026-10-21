@@ -17,6 +17,7 @@ import { resolverMarcaDaOrganizacao } from "@/lib/branding/organizacao";
 import { env } from "@/lib/env";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { modulosLigados } from "@/lib/instalacao/modulos";
+import { ehPessoas } from "@/lib/personalizacoes/tipo-de-cliente";
 import { capacidadesLigadas } from "@/lib/organizacao/capacidades";
 import { ehOperante } from "@/lib/organizacao/operante";
 import {
@@ -142,7 +143,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       visibility_mode: mode ?? DEFAULT_VISIBILITY_MODE,
       // Mesma linha de `settings` já lida acima — nenhuma consulta a mais.
       cliente_pela_agenda: clientePelaAgendaLigado(orgRow?.settings),
-      modulos_ligados: modulos,
+      // Fork #20: organização B2C não vê o menu de Empresas/Pessoas (B2B), módulo ligado ou não.
+      modulos_ligados: ehPessoas(orgRow?.settings as Record<string, unknown> | null)
+        ? modulos.filter((m) => m !== "crm_b2b")
+        : modulos,
       // Mesma linha de `settings` já lida acima — nenhuma consulta a mais.
       capacidades_ligadas: capacidadesLigadas(orgRow?.settings, modulos),
     };

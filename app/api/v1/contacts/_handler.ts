@@ -19,6 +19,7 @@ import { roleAtLeast } from "@/lib/auth/types";
 import { canonicalPhoneBR, phoneLookupVariants } from "@/lib/channels/phone-variants";
 import { encontrarContatoPorTelefone } from "@/lib/channels/contato-por-telefone";
 import { camposCpfParaGravar, hashCpf } from "@/lib/contacts/cpf";
+import { semCamposDeEmpresa, tipoDeCliente } from "@/lib/personalizacoes/tipo-de-cliente";
 import type { Contact } from "@/lib/types/contacts";
 import { ensureConversation, sessaoProntaParaEnvio } from "@/lib/automation/start-conversation";
 import type {
@@ -471,11 +472,28 @@ export interface CreateContactResult {
   action: "created";
 }
 
+/**
+ * Fork #20: organização B2C (`tipo_de_cliente = "pessoas"`) não tem Empresa/CNPJ/Segmentos.
+ * O corpo é limpo desses campos (ignorados, sem erro, para integrações antigas não quebrarem)
+ * e nada que já está gravado é apagado. Falha de leitura = "empresas", o comportamento de sempre.
+ */
+async function semEmpresaSeForPessoas<T extends Record<string, unknown>>(
+  supabase: SB,
+  organizationId: string,
+  input: T,
+): Promise<T> {
+  const { data } = await supabase.from("organizations").select("settings").eq("id", organizationId).maybeSingle();
+  return tipoDeCliente(data?.settings as Record<string, unknown> | null) === "pessoas"
+    ? semCamposDeEmpresa(input)
+    : input;
+}
+
 export async function createContactHandler(
   supabase: SB,
   ctx: HandlerCtx,
-  input: ContactCreate,
+  entrada: ContactCreate,
 ): Promise<CreateContactResult> {
+  const input = await semEmpresaSeForPessoas(supabase, ctx.organization_id, entrada);
   const a = actorAuditPayload(ctx.actor);
   const insertRow: Record<string, unknown> = {
     organization_id: ctx.organization_id,
@@ -587,8 +605,9 @@ export async function patchContactHandler(
   supabase: SB,
   ctx: HandlerCtx,
   contactId: string,
-  input: ContactPatch,
+  entrada: ContactPatch,
 ): Promise<Contact> {
+  const input = await semEmpresaSeForPessoas(supabase, ctx.organization_id, entrada);
   const { data: existing, error: selErr } = await supabase
     .from("contacts")
     // ⚠️ Os campos sensíveis entram aqui para existir o **`from`** da regra L-06

@@ -351,6 +351,17 @@ const DO_SERVIDOR: RecursoOpcional[] = [
 
 const DA_EMPRESA: RecursoOpcional[] = [
   {
+    // Fork #20.
+    id: "clientes_sao_pessoas",
+    nome: "Clientes são pessoas (B2C)",
+    oQueFaz: "O cadastro do contato pede só CPF e data de nascimento (sem Empresa, CNPJ e Segmentos) e o menu de Empresas some.",
+    nivel: "organizacao",
+    padrao: "desligado",
+    quemDecide: "admin",
+    href: "/app/settings/tenant",
+    ler: peloSettings((s) => s.tipo_de_cliente === "pessoas"),
+  },
+  {
     id: "conversa_fica_com_quem_atendeu",
     nome: "A conversa fica com quem atendeu",
     oQueFaz: "Quem responde vira dono da conversa, e a IA se cala até alguém devolver.",

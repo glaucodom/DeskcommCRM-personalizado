@@ -9,6 +9,7 @@ import { fail, ok } from "@/lib/api/wrappers";
 import type { HandlerCtx } from "@/lib/api/handlers/types";
 import type { RoleCheck } from "@/lib/auth/require-role";
 import { moduloLigado } from "@/lib/instalacao/modulos";
+import { orgAtivaAtendePessoas } from "@/lib/personalizacoes/tipo-de-cliente-servidor";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 /**
@@ -19,7 +20,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
  * `/api/v1/external-db`.
  */
 export async function seModuloB2bDesligado(requestId: string): Promise<Response | null> {
-  if (await moduloLigado(createAdminClient(), "crm_b2b")) return null;
+  // Fork #20: organização B2C ("pessoas") não tem Empresas/Pessoas, mesmo com o módulo ligado.
+  if ((await moduloLigado(createAdminClient(), "crm_b2b")) && !(await orgAtivaAtendePessoas())) return null;
   return fail("not_found", "Not found.", 404, { requestId });
 }
 

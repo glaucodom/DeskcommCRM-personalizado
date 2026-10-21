@@ -109,6 +109,7 @@ export function NewTenantForm({
       plan: "standard",
       plano_id: undefined,
       owner_email: "",
+      tipo_de_cliente: "empresas",
     },
   });
 
@@ -147,6 +148,7 @@ export function NewTenantForm({
         // Ligada: o plano de cobrança (ausente = isenta) e nunca o rótulo antigo.
         ...(cobranca.ligada ? { plano_id: values.plano_id } : { plan: values.plan }),
         owner_email: values.owner_email,
+        tipo_de_cliente: values.tipo_de_cliente,
         owner_interface_settings: ownerInterface,
       });
 
@@ -167,6 +169,7 @@ export function NewTenantForm({
 
   const planValue = useWatch({ control: form.control, name: "plan" });
   const planoIdValue = useWatch({ control: form.control, name: "plano_id" });
+  const tipoDeClienteValue = useWatch({ control: form.control, name: "tipo_de_cliente" });
 
   if (created)
     return (
@@ -300,6 +303,26 @@ export function NewTenantForm({
               {errors.cnpj && (
                 <p className="text-xs text-error-fg">{t(errors.cnpj.message ?? "")}</p>
               )}
+            </div>
+
+            {/* Fork #20: para quem a empresa vende — B2B pede Empresa/CNPJ/Segmentos no contato; B2C pede CPF e nascimento */}
+            <div className="space-y-1.5">
+              <Label htmlFor="tipo_de_cliente">{t("Para quem esta empresa vende")}</Label>
+              <Select
+                value={tipoDeClienteValue ?? "empresas"}
+                onValueChange={(v) => setValue("tipo_de_cliente", v === "pessoas" ? "pessoas" : "empresas")}
+              >
+                <SelectTrigger id="tipo_de_cliente" aria-label={t("Tipo de cliente")}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="empresas">{t("Empresas (B2B)")}</SelectItem>
+                  <SelectItem value="pessoas">{t("Pessoas (B2C)")}</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                {t("Pode ser trocado depois em Configurações › Organização.")}
+              </p>
             </div>
 
             {/* plano: com a cobrança ligada, o plano de cobrança substitui o rótulo antigo (D-2) */}

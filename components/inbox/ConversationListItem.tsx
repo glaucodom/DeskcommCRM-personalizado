@@ -5,6 +5,7 @@ import { useLocaleDeData } from "@/hooks/i18n/useLocaleDeData";
 import type { Locale } from "date-fns";
 import { format, formatDistanceToNowStrict } from "date-fns";
 import { useT } from "@/hooks/i18n/useT";
+import { useTipoDeCliente } from "@/hooks/contacts/useTipoDeCliente";
 import { Check, Robot, Sparkle } from "@/lib/ui/icons";
 import { ChannelLogo } from "@/components/inbox/ChannelLogo";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -173,7 +174,8 @@ export function ConversationListItem({
   const visibleTags = tags.slice(0, 2);
   const overflow = tags.length - visibleTags.length;
   const preview = conversation.last_message_preview?.trim() || t("Sem mensagens");
-  const empresaESegmento = [c?.empresa?.trim(), (c?.segmentos ?? []).join(", ")].filter(Boolean).join(" · ");
+  const { pessoas } = useTipoDeCliente();
+  const empresaESegmento = pessoas ? "" : [c?.empresa?.trim(), (c?.segmentos ?? []).join(", ")].filter(Boolean).join(" · ");
   const truncated = preview.length > 60 ? `${preview.slice(0, 60)}…` : preview;
   const naFila = queuePosition !== undefined;
   /**

@@ -2,6 +2,7 @@
 import { useCallback, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useT } from "@/hooks/i18n/useT";
+import { useTipoDeCliente } from "@/hooks/contacts/useTipoDeCliente";
 import { useBoard } from "@/hooks/kanban/useBoard";
 
 function formatError(err: unknown, t: (texto: string) => string): string {
@@ -57,6 +58,8 @@ export function PipelinePageClient({
   funis: Array<{ id: string; name: string }>;
 }) {
   const t = useT();
+  // Fork #20: organização B2C usa o "Novo lead" padrão (com valor), sem Empresa/CNPJ/Segmento.
+  const { pessoas } = useTipoDeCliente();
   const { data, isLoading, error, pulses, realtimeStatus, seguranca } = useBoard(pipelineId);
   const router = useRouter();
   const pathname = usePathname();
@@ -246,7 +249,7 @@ export function PipelinePageClient({
           onOpenChange={setNewOpen}
           pipelineId={pipelineId}
           stages={data.stages}
-          dadosDaEmpresa={{}}
+          dadosDaEmpresa={pessoas ? undefined : {}}
           // #1751: o quadro é a lista que o diálogo confere ANTES de criar —
           // é ela que faz o aviso de negócio duplicado existir sem rede.
           leads={data.leads}

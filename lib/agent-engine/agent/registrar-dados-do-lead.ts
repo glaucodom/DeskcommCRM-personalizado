@@ -21,6 +21,9 @@
  * fica `pending` para o enriquecimento que o produto já tem.
  */
 import { padronizarOrigem } from '@/lib/personalizacoes/origem-do-lead';
+import { hashCpf, normalizeCpf } from '@/lib/contacts/cpf';
+import { isValidCpf } from '@/lib/legal/perfil-do-pais';
+import type { TipoDeCliente } from '@/lib/personalizacoes/tipo-de-cliente';
 import { z } from 'zod';
 
 import { normalizeCnpj, formatCnpj, normalizePersonName } from '@/lib/crm-b2b/normalize';
@@ -42,6 +45,44 @@ export const registrarDadosShape = z
 const LIMITES = { nome: 80, empresa: 120, email: 120, segmento: 120, como_conheceu: 120, indicado_por: 120 } as const;
 
 export type DadosDoLead = z.infer<typeof registrarDadosShape>;
+
+/**
+ * Fork #20 — organização que atende PESSOAS (B2C): a ferramenta não oferece empresa, CNPJ,
+ * segmento, como conheceu nem indicação; aceita CPF e data de nascimento (opcionais).
+ */
+export const registrarDadosPessoasShape = z
+  .object({
+    nome: z.string().optional().describe('primeiro nome ou nome da pessoa, como ela disse'),
+    email: z.string().optional().describe('e-mail da pessoa'),
+    cpf: z.string().optional().describe('CPF da pessoa, como ela digitou (só se ela informar)'),
+    data_nascimento: z.string().optional().describe('data de nascimento, ex.: "14/09/1990"'),
+  })
+  .strict();
+
+export const definicaoDaFerramentaParaPessoas = {
+  description:
+    'Grava no cadastro, de forma estruturada, o que a pessoa ACABOU de dizer: nome, e-mail, CPF e data de ' +
+    'nascimento. Chame logo depois de a pessoa informar cada dado, junto com a próxima mensagem do turno, ' +
+    'sem avisar a pessoa. Mande só os campos novos ou corrigidos; pode chamar de novo a cada dado novo. ' +
+    'CPF e nascimento são opcionais: só registre se a pessoa informar, nunca peça nem insista. ' +
+    'Este cadastro é de pessoa física: não há empresa, CNPJ nem segmento. Nunca invente: só o que a pessoa disse.',
+  inputSchema: registrarDadosPessoasShape,
+};
+
+/** "14/09/1990" ou "1990-09-14" → "1990-09-14"; data inexistente, futura ou anterior a 1900 → null. */
+export function dataDeNascimentoValida(bruto: string, hoje: Date = new Date()): string | null {
+  const t = bruto.trim();
+  let a: string | undefined, m: string | undefined, d: string | undefined;
+  let r = /^(\d{4})-(\d{2})-(\d{2})$/.exec(t);
+  if (r) [, a, m, d] = r;
+  else if ((r = /^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})$/.exec(t))) [, d, m, a] = r;
+  if (!a || !m || !d) return null;
+  const ano = Number(a), mes = Number(m), dia = Number(d);
+  const dt = new Date(Date.UTC(ano, mes - 1, dia));
+  if (dt.getUTCFullYear() !== ano || dt.getUTCMonth() !== mes - 1 || dt.getUTCDate() !== dia) return null;
+  if (ano < 1900 || dt.getTime() > hoje.getTime()) return null;
+  return `${a}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+}
 
 export interface RegistroResultado {
   ok: boolean;
@@ -66,7 +107,9 @@ export async function aplicarRegistroDoLead(
   db: Queryable,
   ids: { tenantId: string; leadId: string },
   raw: unknown,
+  tipo: TipoDeCliente = 'empresas',
 ): Promise<RegistroResultado> {
+  if (tipo === 'pessoas') return aplicarRegistroDePessoa(db, ids, raw);
   const parsed = registrarDadosShape.safeParse(raw ?? {});
   if (!parsed.success) {
     return {
@@ -249,6 +292,92 @@ export async function aplicarRegistroDoLead(
         where organization_id = $1 and id = $2`,
       [tenantId, contato.person_id, nome, normalizePersonName(nome)],
     );
+  }
+
+  return { ok: true, registrado, avisos };
+}
+
+/**
+ * Modo B2C (fork #20). Mesma disciplina do modo empresas: tenant e lead vêm da ROW do job,
+ * whitelist `.strict()`, nada do que a pessoa disse entra em log. Empresa, CNPJ, segmento e
+ * pessoa↔empresa NÃO existem aqui. O CPF é validado (dígitos verificadores) e vai CIFRADO —
+ * `cpf_encrypted` pela função `encrypt_cpf` do banco + `cpf_hash` — como o resto do produto;
+ * sem a chave de cifra o contato é salvo SEM o CPF (nunca em claro).
+ */
+async function aplicarRegistroDePessoa(
+  db: Queryable,
+  ids: { tenantId: string; leadId: string },
+  raw: unknown,
+): Promise<RegistroResultado> {
+  const parsed = registrarDadosPessoasShape.safeParse(raw ?? {});
+  if (!parsed.success) {
+    return {
+      ok: false,
+      registrado: [],
+      avisos: [],
+      erro: 'campo fora da lista. Campos aceitos: nome, email, cpf, data_nascimento.',
+    };
+  }
+  const d = parsed.data;
+  const registrado: string[] = [];
+  const avisos: string[] = [];
+  const nome = limpa(d.nome, LIMITES.nome);
+  const emailBruto = limpa(d.email, LIMITES.email)?.toLowerCase() ?? null;
+  const email = emailBruto && EMAIL.test(emailBruto) ? emailBruto : null;
+  const cpf = d.cpf && isValidCpf(d.cpf) ? normalizeCpf(d.cpf) : null;
+  const nascimento = d.data_nascimento ? dataDeNascimentoValida(d.data_nascimento) : null;
+  if (d.cpf && !cpf) avisos.push('cpf_invalido: confira com a pessoa; precisa ter 11 números válidos.');
+  if (d.data_nascimento && !nascimento) avisos.push('data_nascimento_invalida: confira com a pessoa.');
+  if (emailBruto && !email) avisos.push('email_invalido: confira com a pessoa.');
+  if (!nome && !email && !cpf && !nascimento) {
+    return { ok: false, registrado, avisos, erro: avisos[0] ?? 'nada para registrar: informe pelo menos um campo.' };
+  }
+
+  const { tenantId, leadId } = ids;
+  const { rows: cRows } = await db.query<{
+    display_name: string | null;
+    phone_number: string | null;
+  }>(`select display_name, phone_number from contacts where organization_id = $1 and id = $2`, [tenantId, leadId]);
+  const contato = cRows[0];
+  if (!contato) return { ok: false, registrado, avisos, erro: 'contato não encontrado.' };
+
+  const atual = (contato.display_name ?? '').trim();
+  const atualNaoEhNome =
+    atual === '' ||
+    atual === (contato.phone_number ?? '') ||
+    ehIdentificadorTecnico(atual) ||
+    /^\+?[\d\s()-]{8,}$/.test(atual);
+  const trocaDisplay = nome !== null && (atualNaoEhNome || primeiroToken(atual) !== primeiroToken(nome));
+
+  if (nome || email || nascimento) {
+    await db.query(
+      `update contacts
+          set name = case when $3::text is not null then $3 else name end,
+              display_name = case when $4::boolean then $3 else display_name end,
+              email = case when $5::text is not null and email is null then $5 else email end,
+              birthdate = coalesce($6::date, birthdate),
+              updated_at = now()
+        where organization_id = $1 and id = $2`,
+      [tenantId, leadId, nome, trocaDisplay, email, nascimento],
+    );
+    if (nome) registrado.push('nome');
+    if (email) registrado.push('email');
+    if (nascimento) registrado.push('data_nascimento');
+  }
+
+  if (cpf) {
+    try {
+      await db.query(
+        `update contacts
+            set cpf_encrypted = public.encrypt_cpf($3), cpf_hash = $4, updated_at = now()
+          where organization_id = $1 and id = $2`,
+        [tenantId, leadId, cpf, hashCpf(cpf)],
+      );
+      registrado.push('cpf');
+    } catch {
+      // Sem chave de cifra (ou CPF já em outro contato): o resto do cadastro fica salvo, o CPF não.
+      avisos.push('cpf_nao_gravado: não foi possível guardar o CPF agora; siga a conversa normalmente.');
+    }
   }
 
   return { ok: true, registrado, avisos };

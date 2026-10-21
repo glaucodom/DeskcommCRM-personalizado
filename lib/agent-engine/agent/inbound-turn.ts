@@ -103,7 +103,12 @@ import {
 } from "./abertura/checkpoint";
 import { buildOpeningMessage, ritualBlocks } from "./abertura/ritual";
 import { applySaveLeadNote, buildNotesIndexBlock, getLeadNoteBody } from './lead-notes';
-import { aplicarRegistroDoLead, registrarDadosShape } from './registrar-dados-do-lead';
+import {
+  aplicarRegistroDoLead,
+  definicaoDaFerramentaParaPessoas,
+  registrarDadosShape,
+} from './registrar-dados-do-lead';
+import { lerTipoDeClienteSql } from '@/lib/personalizacoes/tipo-de-cliente';
 import { buildCompromissosBlock } from './compromissos-do-contato';
 import { buildOrigemBlock } from './abertura/origem-do-contato';
 import { agendaNoFechamento } from './abertura/agenda-no-fechamento';
@@ -3095,6 +3100,9 @@ async function executarTurnoDoAgente(
    */
   const mcpToolIdsDoTurno: string[] = [];
 
+  // Fork #20: B2B ("empresas", padrão) ou B2C ("pessoas"); falha de leitura = "empresas".
+  const tipoDeClienteDaOrg = await lerTipoDeClienteSql(pool, tenantId).catch(() => 'empresas' as const);
+
   const rawTools: ToolSet = {
     get_lead_context: tool({
       ...AGENT_TOOL_DEFS.get_lead_context,
@@ -4080,9 +4088,11 @@ async function executarTurnoDoAgente(
     // people, companies, company_people). MUTANTE; tenant/lead vêm da ROW do job (closure).
     registrar_dados_do_lead: tool({
       ...AGENT_TOOL_DEFS.registrar_dados_do_lead,
+      // Fork #20: organização B2C não oferece empresa/CNPJ/segmento; aceita CPF e nascimento.
+      ...(tipoDeClienteDaOrg === 'pessoas' ? definicaoDaFerramentaParaPessoas : {}),
       execute: async (raw) => {
         try {
-          const res = await aplicarRegistroDoLead(pool, { tenantId, leadId }, raw);
+          const res = await aplicarRegistroDoLead(pool, { tenantId, leadId }, raw, tipoDeClienteDaOrg);
           if (!res.ok) {
             return { ok: false, error: { code: 'dados_invalidos', message: res.erro ?? 'dados inválidos.' }, avisos: res.avisos };
           }

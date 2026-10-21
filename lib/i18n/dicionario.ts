@@ -16474,6 +16474,18 @@ export const DICIONARIO: Traducoes = {
   "Origem do lead": { es: "Origen del lead" },
   "Indicação": { es: "Recomendación" },
   "Google, Instagram, IA (ChatGPT), Indicação…": { es: "Google, Instagram, IA (ChatGPT), Recomendación…" },
+  "Tipo de cliente": { es: "Tipo de cliente" },
+  "Clientes são pessoas (B2C)": { es: "Los clientes son personas (B2C)" },
+  "O cadastro do contato pede só CPF e data de nascimento (sem Empresa, CNPJ e Segmentos) e o menu de Empresas some.": { es: "El registro del contacto pide solo CPF y fecha de nacimiento (sin Empresa, CNPJ ni Segmentos) y el menú de Empresas desaparece." },
+  "Empresas (B2B)": { es: "Empresas (B2B)" },
+  "Pessoas (B2C)": { es: "Personas (B2C)" },
+  "Meus clientes são": { es: "Mis clientes son" },
+  "Só o administrador pode trocar.": { es: "Solo el administrador puede cambiarlo." },
+  "Cadastrado": { es: "Registrado" },
+  "Já cadastrado. Digite só para trocar.": { es: "Ya registrado. Escribe solo para cambiarlo." },
+  "Empresas (B2B): o cadastro do contato tem Empresa, CNPJ, Segmentos e como conheceu. Pessoas (B2C): o cadastro tem só CPF e data de nascimento, e o menu de Empresas some. Nada é apagado ao trocar; os dados só ficam escondidos.": { es: "Empresas (B2B): el registro del contacto tiene Empresa, CNPJ, Segmentos y cómo nos conoció. Personas (B2C): el registro tiene solo CPF y fecha de nacimiento, y el menú de Empresas desaparece. No se borra nada al cambiar; los datos solo quedan ocultos." },
+  "Para quem esta empresa vende": { es: "A quién vende esta empresa" },
+  "Pode ser trocado depois em Configurações › Organização.": { es: "Se puede cambiar después en Configuración › Organización." },
 };
 
 /**

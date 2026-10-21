@@ -306,6 +306,8 @@ export const AUDIT_ACTIONS = [
   "leads.bulk_assigned",
   "attendant.availability_changed",
   "routing.config_changed",
+  // Fork #20: B2B (empresas) ou B2C (pessoas) da organização.
+  "settings.tipo_de_cliente_changed",
   "proposals.config_changed",
   // Mudar a régua do abandono (spec 16 §5.2) muda como TODO período passa a ser
   // lido — é mutação relevante, não preferência de exibição.

@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useContact } from "@/hooks/contacts/useContact";
+import { useTipoDeCliente } from "@/hooks/contacts/useTipoDeCliente";
 import { useUnblockContact } from "@/hooks/contacts/useUnblockContact";
 import {
   useMarkPersonalContact,
@@ -80,6 +81,8 @@ export function ContactDetailClient({ contactId, paineisDeModulo = [] }: Props) 
   const localeDaData = useLocaleDeData();
   const t = useT();
   const q = useContact(contactId);
+  // Fork #20: organização B2C mostra CPF e nascimento no lugar de Empresa/CNPJ/Segmentos.
+  const { pessoas } = useTipoDeCliente();
   const { user, activeOrg } = useAuth();
   const clientesLigado = activeOrg?.cliente_pela_agenda === true;
   // As DEFINIÇÕES continuam no funil (`crm_pipelines.settings.fields[]`) — só o
@@ -398,6 +401,14 @@ export function ContactDetailClient({ contactId, paineisDeModulo = [] }: Props) 
                 <dt className="text-xs uppercase text-muted-foreground">Email</dt>
                 <dd className="mt-1">{contact.email ?? "—"}</dd>
               </div>
+              {pessoas ? (
+                <div>
+                  <dt className="text-xs uppercase text-muted-foreground">CPF</dt>
+                  {/* Dado sensível (LGPD): a ficha só diz se existe; o valor não é exibido aqui. */}
+                  <dd className="mt-1">{q.data.meta?.cpf_available ? t("Cadastrado") : "—"}</dd>
+                </div>
+              ) : (
+                <>
               <div>
                 <dt className="text-xs uppercase text-muted-foreground">{t("Empresa")}</dt>
                 <dd className="mt-1">{contact.empresa ?? "—"}</dd>
@@ -412,6 +423,8 @@ export function ContactDetailClient({ contactId, paineisDeModulo = [] }: Props) 
                   {contact.segmentos && contact.segmentos.length > 0 ? contact.segmentos.join(", ") : "—"}
                 </dd>
               </div>
+                </>
+              )}
               <div>
                 <dt className="text-xs uppercase text-muted-foreground">{t("Telefone")}</dt>
                 <dd className="mt-1">

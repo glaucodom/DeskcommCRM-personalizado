@@ -10,6 +10,8 @@ import { audit } from "@/lib/audit";
 import { createHash, randomUUID } from "node:crypto";
 import { lerPlano } from "@/lib/cobranca/dono";
 import { moduloLigado } from "@/lib/instalacao/modulos";
+import { logger } from "@/lib/logger";
+import { CHAVE_TIPO_DE_CLIENTE } from "@/lib/personalizacoes/tipo-de-cliente";
 import { querySchema, listarTenants } from "./_lista";
 
 // ---------------------------------------------------------------------------
@@ -126,7 +128,9 @@ export async function POST(req: NextRequest) {
       );
     }
   }
-  const normalizado = { ...parsed.data, owner_email: parsed.data.owner_email.trim().toLowerCase() };
+  // Fork #20: o tipo de cliente não vai para a função SQL (ela não o conhece); é gravado logo depois.
+  const { tipo_de_cliente: tipoDeClienteEscolhido, ...dadosDoTenant } = parsed.data;
+  const normalizado = { ...dadosDoTenant, owner_email: parsed.data.owner_email.trim().toLowerCase() };
   const request = cobrancaLigada ? { ...normalizado, plan: undefined } : normalizado;
   const { data: org, error } = await admin.rpc("fn_create_tenant_with_owner", {
     p_actor: adminCtx.user.id,
@@ -154,6 +158,20 @@ export async function POST(req: NextRequest) {
     }
     return fail("internal_error", "Não foi possível criar a organização", 500, { requestId });
   }
+  if (org.created && tipoDeClienteEscolhido === "pessoas") {
+    const { data: atual } = await admin.from("organizations").select("settings").eq("id", org.id).maybeSingle();
+    const { error: tipoErr } = await admin
+      .from("organizations")
+      .update({
+        settings: {
+          ...((atual?.settings as Record<string, unknown> | null) ?? {}),
+          [CHAVE_TIPO_DE_CLIENTE]: tipoDeClienteEscolhido,
+        },
+      })
+      .eq("id", org.id);
+    // A organização já existe: não derruba a criação, o administrador troca em Configurações.
+    if (tipoErr) logger.warn("tenant.tipo_de_cliente_nao_gravado", { organization_id: org.id });
+  }
   if (org.created) {
     await audit({
       action: "tenant.created_by_platform_admin",
@@ -169,6 +187,7 @@ export async function POST(req: NextRequest) {
         display_name: org.display_name,
         plan: request.plan ?? null,
         plano_id: request.plano_id ?? null,
+        tipo_de_cliente: tipoDeClienteEscolhido ?? "empresas",
         creator_role: "admin",
       },
     });

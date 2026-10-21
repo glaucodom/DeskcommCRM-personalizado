@@ -18,6 +18,7 @@ export interface CreateTenantPayload {
   plan?: "standard" | "pro" | "enterprise";
   plano_id?: string;
   owner_email: string;
+  tipo_de_cliente?: "empresas" | "pessoas";
   owner_interface_settings?: InterfaceSettings;
 }
 

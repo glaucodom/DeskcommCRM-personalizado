@@ -16,6 +16,8 @@ export const tenantCreationFields = {
   plano_id: z.string().uuid().optional(),
   owner_interface_settings: interfaceSettingsSchema.optional(),
   owner_email: z.string().trim().email(),
+  /** Fork #20: B2B ("empresas", padrão) ou B2C ("pessoas"). Ausente = "empresas". */
+  tipo_de_cliente: z.enum(["empresas", "pessoas"]).optional(),
 };
 export const createTenantSchema = z
   .object({ ...tenantCreationFields, plan: tenantCreationFields.plan.default("standard") })

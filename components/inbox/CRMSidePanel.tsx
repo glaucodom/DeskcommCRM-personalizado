@@ -42,6 +42,7 @@ import { PROXIMO_PASSO_DA_MENSAGEM_NOVA } from "@/lib/atendimento/proximo-passo-
 import { rotuloParaAEquipe } from "@/lib/contacts/rotulo-do-contato";
 import { phoneForDisplay } from "@/lib/channels/phone-variants";
 import { DadosDaEmpresaDoContato } from "./DadosDaEmpresaDoContato";
+import { useTipoDeCliente } from "@/hooks/contacts/useTipoDeCliente";
 
 interface Props {
   conversation: ConversationWithContact | null;
@@ -754,6 +755,8 @@ export function CRMSidePanel({ conversation, recolhido = false, onAlternarRecolh
 
   const [tagEditorOpen, setTagEditorOpen] = useState(false);
   const [leadDialogOpen, setLeadDialogOpen] = useState(false);
+  // Fork #20: organização B2C não mostra Empresa/CNPJ/Segmentos/como conheceu no painel.
+  const { pessoas: pessoasNoPainel } = useTipoDeCliente();
   const [leadAtivoId, setLeadAtivoId] = useState<string | null>(null);
   const defaultPipeline = useDefaultPipeline(leadDialogOpen);
 
@@ -996,7 +999,7 @@ export function CRMSidePanel({ conversation, recolhido = false, onAlternarRecolh
         </Card>
       </section>
 
-      {contactId && !contact?.is_anonymized && (
+      {contactId && !contact?.is_anonymized && !pessoasNoPainel && (
         <DadosDaEmpresaDoContato
           key={`${contactId}|${contact?.empresa ?? ""}|${contact?.cnpj ?? ""}|${(contact?.segmentos ?? []).join(",")}|${String(contact?.custom_fields?.como_conheceu ?? "")}`}
           contactId={contactId}
@@ -1026,7 +1029,7 @@ export function CRMSidePanel({ conversation, recolhido = false, onAlternarRecolh
           pipelineId={defaultPipeline.data.pipeline.id}
           stages={defaultPipeline.data.stages}
           contactId={contactId}
-          dadosDaEmpresa={{ empresa: contact?.empresa, cnpj: contact?.cnpj, segmentos: contact?.segmentos }}
+          dadosDaEmpresa={pessoasNoPainel ? undefined : { empresa: contact?.empresa, cnpj: contact?.cnpj, segmentos: contact?.segmentos }}
           onCreated={() => {
             setLeadAtivoId(null);
             recarregar();
