@@ -3,6 +3,7 @@ import { useCallback, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useT } from "@/hooks/i18n/useT";
 import { useTipoDeCliente } from "@/hooks/contacts/useTipoDeCliente";
+import { camposDoFunil, camposPorEscopo } from "@/lib/leads/campos-do-funil";
 import { useBoard } from "@/hooks/kanban/useBoard";
 
 function formatError(err: unknown, t: (texto: string) => string): string {
@@ -250,6 +251,7 @@ export function PipelinePageClient({
           pipelineId={pipelineId}
           stages={data.stages}
           dadosDaEmpresa={pessoas ? undefined : {}}
+          camposDoContato={pessoas ? camposPorEscopo(camposDoFunil(data.pipeline.settings ?? null), "contato") : undefined}
           // #1751: o quadro é a lista que o diálogo confere ANTES de criar —
           // é ela que faz o aviso de negócio duplicado existir sem rede.
           leads={data.leads}

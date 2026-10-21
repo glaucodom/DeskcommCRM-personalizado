@@ -42,6 +42,8 @@ import { PROXIMO_PASSO_DA_MENSAGEM_NOVA } from "@/lib/atendimento/proximo-passo-
 import { rotuloParaAEquipe } from "@/lib/contacts/rotulo-do-contato";
 import { phoneForDisplay } from "@/lib/channels/phone-variants";
 import { DadosDaEmpresaDoContato } from "./DadosDaEmpresaDoContato";
+import { DadosDaPessoaDoContato } from "./DadosDaPessoaDoContato";
+import { camposDoFunil, camposPorEscopo } from "@/lib/leads/campos-do-funil";
 import { useTipoDeCliente } from "@/hooks/contacts/useTipoDeCliente";
 
 interface Props {
@@ -607,6 +609,7 @@ function CamposDoFunil({
   onSalvo: () => void;
 }) {
   const t = useT();
+  const { pessoas } = useTipoDeCliente();
   const edit = useEditLead(pipelineId);
   const [customFields, setCustomFields] = useState(valores);
   // A RÉGUA do diff (issue #2132): o valor carregado quando o painel abriu.
@@ -614,6 +617,9 @@ function CamposDoFunil({
   const [camposCarregados, setCamposCarregados] = useState(valores);
 
   if (fieldDefs.length === 0) {
+    // Fork #20: em B2C os campos extras moram no bloco "Dados da pessoa"; dizer
+    // "sem campos extras" aqui contradiria o que a tela mostra logo acima.
+    if (pessoas) return null;
     return <p className="text-xs text-muted-foreground">{t("Este funil não tem campos extras.")}</p>;
   }
 
@@ -758,7 +764,9 @@ export function CRMSidePanel({ conversation, recolhido = false, onAlternarRecolh
   // Fork #20: organização B2C não mostra Empresa/CNPJ/Segmentos/como conheceu no painel.
   const { pessoas: pessoasNoPainel } = useTipoDeCliente();
   const [leadAtivoId, setLeadAtivoId] = useState<string | null>(null);
-  const defaultPipeline = useDefaultPipeline(leadDialogOpen);
+  // Fork #20: B2C precisa das definições dos campos do Contato já na abertura do painel.
+  const defaultPipeline = useDefaultPipeline(leadDialogOpen || pessoasNoPainel);
+  const camposDoContato = camposPorEscopo(camposDoFunil(defaultPipeline.data?.pipeline.settings ?? null), "contato");
 
   useEffect(() => {
     if (leadDialogOpen && defaultPipeline.isError) {
@@ -1011,16 +1019,29 @@ export function CRMSidePanel({ conversation, recolhido = false, onAlternarRecolh
         />
       )}
 
+      {contactId && !contact?.is_anonymized && pessoasNoPainel && (
+        <DadosDaPessoaDoContato
+          key={`${contactId}|${contact?.birthdate ?? ""}|${contact?.cpf_hash ?? ""}|${JSON.stringify(contact?.custom_fields ?? {})}|${camposDoContato.length}`}
+          contactId={contactId}
+          birthdate={contact?.birthdate}
+          cpfCadastrado={Boolean(contact?.cpf_hash)}
+          camposDoContato={camposDoContato}
+          customFields={contact?.custom_fields}
+          readonly={readonly}
+        />
+      )}
+
       {contactId && summaryContactId === contactId && !erro && (
         <AnuncioDoContato contactId={contactId} origem={anuncios.origem} recente={anuncios.recente} />
       )}
 
-      <LeadEnrichment
+      {/* Fork #20: "Sobre a empresa" (enriquecimento) não serve a quem vende para pessoas. */}
+      {!pessoasNoPainel && <LeadEnrichment
         data={summaryContactId === contactId && !erro && !contact?.is_anonymized ? enrichment : null}
         loading={sectionsLoading}
         error={erro || (summaryContactId === contactId && enrichmentError)}
         onRetry={recarregar}
-      />
+      />}
 
       {contactId && defaultPipeline.data && (
         <NewLeadDialog
@@ -1030,6 +1051,8 @@ export function CRMSidePanel({ conversation, recolhido = false, onAlternarRecolh
           stages={defaultPipeline.data.stages}
           contactId={contactId}
           dadosDaEmpresa={pessoasNoPainel ? undefined : { empresa: contact?.empresa, cnpj: contact?.cnpj, segmentos: contact?.segmentos }}
+          camposDoContato={camposDoContato}
+          dadosDaPessoa={{ birthdate: contact?.birthdate, cpfCadastrado: Boolean(contact?.cpf_hash), custom_fields: contact?.custom_fields }}
           onCreated={() => {
             setLeadAtivoId(null);
             recarregar();

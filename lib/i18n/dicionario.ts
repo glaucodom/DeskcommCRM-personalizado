@@ -16488,6 +16488,12 @@ export const DICIONARIO: Traducoes = {
   "Pode ser trocado depois em Configurações › Organização.": { es: "Se puede cambiar después en Configuración › Organización." },
   "Campos personalizados e etapas do funil": { es: "Campos personalizados y etapas del embudo" },
   "Crie campos extras no cadastro do contato e desenhe as colunas do funil.": { es: "Cree campos extra en el registro del contacto y diseñe las columnas del embudo." },
+  "CPF inválido": { es: "CPF inválido" },
+  "Dados da pessoa": { es: "Datos de la persona" },
+  "Dados da pessoa salvos": { es: "Datos de la persona guardados" },
+  "Salvar dados da pessoa": { es: "Guardar datos de la persona" },
+  "Não foi possível salvar os dados da pessoa.": { es: "No se pudieron guardar los datos de la persona." },
+  "Escolha ou crie o contato para informar CPF, data de nascimento e os campos personalizados.": { es: "Elija o cree el contacto para informar CPF, fecha de nacimiento y los campos personalizados." },
 };
 
 /**

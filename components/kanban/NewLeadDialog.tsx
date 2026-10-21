@@ -42,6 +42,9 @@ import { apiClient } from "@/lib/api/client";
 import { cnpjVazioOuValido, mascaraCnpj, segmentosDeTexto, SEGMENTOS_SUGERIDOS } from "@/lib/personalizacoes/dados-da-empresa";
 import { formatCnpj } from "@/lib/crm-b2b/normalize";
 import { SeletorDeContato } from "./SeletorDeContato";
+import { CustomFieldsEditor, type CustomFieldDef } from "@/components/contacts/CustomFieldsEditor";
+import { useTipoDeCliente } from "@/hooks/contacts/useTipoDeCliente";
+import { cpfVazioOuValido, mascaraCpf } from "@/lib/personalizacoes/tipo-de-cliente";
 
 interface FormShape {
   title: string;
@@ -53,6 +56,8 @@ interface FormShape {
   empresa: string;
   cnpj: string;
   segmentosRaw: string;
+  cpf: string;
+  birthdate: string;
 }
 
 interface Props {
@@ -81,6 +86,12 @@ interface Props {
    * tem, para vir preenchido. Sem a prop, o diálogo é o oficial.
    */
   dadosDaEmpresa?: { empresa?: string | null; cnpj?: string | null; segmentos?: string[] | null };
+  /**
+   * Fork #20 (B2C): campos personalizados do tipo Contato (funil padrão) e o que o
+   * contato de origem já tem. Só valem para organização que vende para pessoas.
+   */
+  camposDoContato?: CustomFieldDef[];
+  dadosDaPessoa?: { birthdate?: string | null; cpfCadastrado?: boolean; custom_fields?: Record<string, unknown> | null };
 }
 
 function defaultStageId(stages: Stage[]): string {
@@ -97,8 +108,12 @@ export function NewLeadDialog({
   leads,
   onCreated,
   dadosDaEmpresa,
+  camposDoContato = [],
+  dadosDaPessoa,
 }: Props) {
   const t = useT();
+  const { pessoas } = useTipoDeCliente();
+  const [camposDaPessoa, setCamposDaPessoa] = useState<Record<string, unknown>>({});
   const org = useActiveOrg();
   // Negócio NOVO nasce na moeda da organização (createLeadHandler).
   const moedaDoValor = org?.currency ?? MOEDA_PADRAO;
@@ -149,6 +164,8 @@ export function NewLeadDialog({
       empresa: "",
       cnpj: "",
       segmentosRaw: "",
+      cpf: "",
+      birthdate: "",
     },
   });
 
@@ -163,6 +180,23 @@ export function NewLeadDialog({
     form.setValue("segmentosRaw", segmentosDoContato);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, empresaDoContato, cnpjDoContato, segmentosDoContato]);
+
+  // Fork #20 (B2C): o que o contato (de origem ou escolhido) já tem de CPF/nascimento/campos.
+  const idDoContatoAtual = contactId ?? contato?.id ?? null;
+  const pessoaAtual = contactId
+    ? dadosDaPessoa
+    : contato
+      ? { birthdate: contato.birthdate, cpfCadastrado: Boolean(contato.cpf_hash), custom_fields: contato.custom_fields }
+      : undefined;
+  const nascimentoDoContato = pessoaAtual?.birthdate ?? "";
+  const camposDoContatoJson = JSON.stringify(pessoaAtual?.custom_fields ?? {});
+  useEffect(() => {
+    if (!open || !pessoas) return;
+    form.setValue("birthdate", nascimentoDoContato);
+    form.setValue("cpf", "");
+    setCamposDaPessoa(JSON.parse(camposDoContatoJson) as Record<string, unknown>);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, pessoas, idDoContatoAtual, nascimentoDoContato, camposDoContatoJson]);
 
   // Reset stage_id default if stages change while dialog mounted.
   useEffect(() => {
@@ -217,6 +251,11 @@ export function NewLeadDialog({
       return;
     }
 
+    if (pessoas && idDoContatoAtual && !cpfVazioOuValido(values.cpf)) {
+      form.setError("cpf", { message: t("CPF inválido") });
+      return;
+    }
+
     const reais = dadosDaEmpresa ? "" : values.valueReais.trim();
     let valueCents: number | null = null;
     if (reais.length > 0) {
@@ -255,6 +294,24 @@ export function NewLeadDialog({
       } catch {
         toast.error(t("Não foi possível salvar os dados da empresa."));
         return;
+      }
+    }
+
+    // Fork #20 (B2C): CPF, nascimento e campos do contato vão para o CONTATO.
+    if (pessoas && idDoContato) {
+      const patchDaPessoa: Record<string, unknown> = {};
+      if (values.cpf.trim()) patchDaPessoa.cpf = values.cpf.trim();
+      if (values.birthdate && values.birthdate !== nascimentoDoContato) patchDaPessoa.birthdate = values.birthdate;
+      if (camposDoContato.length > 0 && JSON.stringify(camposDaPessoa) !== camposDoContatoJson) {
+        patchDaPessoa.custom_fields = camposDaPessoa;
+      }
+      if (Object.keys(patchDaPessoa).length > 0) {
+        try {
+          await apiClient.patch(`/api/v1/contacts/${idDoContato}`, patchDaPessoa);
+        } catch {
+          toast.error(t("Não foi possível salvar os dados da pessoa."));
+          return;
+        }
       }
     }
 
@@ -305,7 +362,10 @@ export function NewLeadDialog({
         empresa: "",
         cnpj: "",
         segmentosRaw: "",
+        cpf: "",
+        birthdate: "",
       });
+      setCamposDaPessoa({});
       setContato(null);
       setAviso(null);
       onOpenChange(false);
@@ -463,6 +523,46 @@ export function NewLeadDialog({
               />
             </div>
           </div>
+          )}
+
+          {pessoas && (
+            idDoContatoAtual ? (
+              <div className="space-y-3 rounded-md border border-border p-3">
+                <h3 className="text-sm font-medium">{t("Dados da pessoa")}</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="nl-cpf">CPF</Label>
+                    <Input
+                      id="nl-cpf"
+                      inputMode="numeric"
+                      placeholder={pessoaAtual?.cpfCadastrado ? t("Já cadastrado. Digite só para trocar.") : "000.000.000-00"}
+                      {...form.register("cpf", {
+                        onChange: (e) => form.setValue("cpf", mascaraCpf(e.target.value)),
+                      })}
+                    />
+                    {form.formState.errors.cpf && (
+                      <p className="text-xs text-error-fg">{form.formState.errors.cpf.message}</p>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="nl-birthdate">{t("Data de nascimento")}</Label>
+                    <Input id="nl-birthdate" type="date" {...form.register("birthdate")} />
+                  </div>
+                </div>
+                {camposDoContato.length > 0 && (
+                  <CustomFieldsEditor
+                    fields={camposDoContato}
+                    mode="contact"
+                    value={camposDaPessoa}
+                    onChange={setCamposDaPessoa}
+                  />
+                )}
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                {t("Escolha ou crie o contato para informar CPF, data de nascimento e os campos personalizados.")}
+              </p>
+            )
           )}
 
           <div className="space-y-2">

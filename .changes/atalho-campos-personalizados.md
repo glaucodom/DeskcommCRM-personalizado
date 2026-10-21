@@ -1,5 +1,5 @@
 ---
-impacto: melhoria
+impacto: capacidade_nova
 secao: alterado
 titulo: Atalho para campos personalizados e etapas do funil em Configurações
 ---

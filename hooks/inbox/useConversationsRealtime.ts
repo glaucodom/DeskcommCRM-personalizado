@@ -43,6 +43,9 @@ export interface ContactSummary {
   segmentos?: string[] | null;
   /** Campos livres do contato; o painel lê daqui a origem (`como_conheceu`). */
   custom_fields?: Record<string, unknown> | null;
+  /** Fork #20 (B2C): nascimento e se há CPF cadastrado (o CPF em si nunca sai do servidor). */
+  birthdate?: string | null;
+  cpf_hash?: string | null;
 }
 
 /**
