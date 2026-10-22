@@ -60,6 +60,7 @@ veja primeiro se ele esbarra numa personalização desta lista. Já aconteceu co
 | 22 | **B2C no painel do Inbox e no Novo Lead**: com `tipo_de_cliente = "pessoas"`, o painel lateral mostra "Dados da pessoa" (CPF, nascimento, campos personalizados do tipo Contato) e esconde "Sobre a empresa"; o diálogo Novo Lead pede os mesmos dados do contato escolhido. Empresas não muda. | `components/inbox/DadosDaPessoaDoContato.tsx`, `CRMSidePanel.tsx`, `components/kanban/NewLeadDialog.tsx` | `tests/unit/tipo-de-cliente-painel-e-lead.test.tsx` |
 | 23 | **Funis abre direto o funil padrão de cada pessoa**: coluna `user_organizations.funil_padrao_id` (em `supabase/personalizacoes.sql`), escolhida pelo admin em Equipe (`PATCH /api/v1/team/[user_id]/funil-padrao`); `/app/kanban` sem parâmetros redireciona para o funil da pessoa, senão o `is_default` da empresa; a lista fica em `?todos=1` e há link "Todos os funis" no quadro. | `app/app/kanban/page.tsx`, `app/app/team/**`, `app/api/v1/team/[user_id]/funil-padrao/route.ts` | `tests/unit/funis-abre-o-padrao.test.ts`, `route.test.ts` ao lado da rota |
 | 24 | **Nova etiqueta em Configurações › Tags**: cadastra etiqueta (com cor opcional) direto no vocabulário (`organizations.settings.tags`) via `fn_vocabulario_de_tags_criar` (em `supabase/personalizacoes.sql`) e `POST /api/v1/tags/vocabulario/criar`; formulário em `app/app/settings/tags/_nova-etiqueta.tsx`. Manager+. | `supabase/personalizacoes.sql`, `app/api/v1/tags/vocabulario/criar/route.ts`, `app/app/settings/tags/_nova-etiqueta.tsx`, `_painel.tsx` | `tests/unit/nova-etiqueta.test.ts` |
+| 25 | **Funil do número**: `channel_sessions.funil_id` (em `supabase/personalizacoes.sql`); `destinoDoNumero` em `lib/leads/nascimento-do-lead.ts` (campanha > número > padrão, com queda para o padrão se o funil do número estiver arquivado/sem etapa); rota `GET/PATCH /api/v1/channel-sessions/[id]/funil` (admin); seletor `components/connections/FunilDoNumero.tsx` no cartão do número. Só leads novos. | `lib/leads/nascimento-do-lead.ts`, `app/api/v1/channel-sessions/[id]/funil/route.ts`, `components/connections/FunilDoNumero.tsx`, `app/app/settings/atendimento/_funil-dos-numeros.tsx`; guia de reavaliação contra o oficial em `MELHORIAS-funil-do-numero.md` | `tests/unit/funil-do-numero.test.ts`, `route.test.ts` ao lado da rota |
 
 No fork, o namespace das imagens e do repositório é `glaucodom` em vez de `melgarafael`:
 `_common.sh` (IMG_NS), compose, Dockerfiles, `install.sh` e `tests/unit/_identidade-deste-repo.ts`.
@@ -72,3 +73,11 @@ No fork, o namespace das imagens e do repositório é `glaucodom` em vez de `mel
 - O banco (`ai_agent_versions.system_prompt`) não tem limite de tamanho, então não há migração.
 - Se o oficial mexer no limite ou no `AgentForm.tsx`, mantenha o uso de `LIMITE_DAS_INSTRUCOES`
   no merge.
+
+## Reavaliar contra o oficial a cada versão nova
+
+Antes de dar o merge de uma versão oficial, para cada personalização que o oficial possa ter passado a
+cobrir (principalmente #20 tipo de cliente B2B/B2C, #23 funil padrão por pessoa, #24 nova etiqueta e #25
+funil do número): leia o `CHANGELOG.md` da versão procurando o assunto, compare com o que o fork faz e
+decida entre **adotar o oficial**, **manter o do fork** ou **manter os dois** registrando o que falta.
+O passo a passo da #25 está em `MELHORIAS-funil-do-numero.md`; use-o como modelo para as outras.

@@ -82,6 +82,7 @@ export const AUDIT_ACTIONS = [
   "member.invited",
   "team.interface_changed",
   "team.funil_padrao_changed",
+  "channel.funil_changed",
   /**
    * A EMPRESA trocou as portas que mostra (issue #1341, migration 0367). É o
    * degrau acima do `team.interface_changed`: ali a pergunta é "quem tirou o

@@ -247,6 +247,54 @@ async function destinoDaCampanha(
 }
 
 /**
+ * O destino quando o NÚMERO por onde a conversa entrou tem funil próprio
+ * (`channel_sessions.funil_id`, fork #25).
+ *
+ * Qualquer falha — coluna ausente, funil arquivado, funil sem etapa aberta —
+ * devolve `null` e o lead nasce pela regra de sempre. Errar o funil é visível e
+ * corrigível; deixar de nascer é a pessoa sumir (ver o cabeçalho do arquivo).
+ */
+async function destinoDoNumero(
+  db: SupabaseClient,
+  organizationId: string,
+  conversationId: string,
+): Promise<{ pipelineId: string; stageId: string } | null> {
+  try {
+    const { data: conversa } = await db
+      .from("conversations")
+      .select("channel_session_id")
+      .eq("organization_id", organizationId)
+      .eq("id", conversationId)
+      .maybeSingle();
+    const canalId = (conversa as { channel_session_id?: string | null } | null)?.channel_session_id;
+    if (!canalId) return null;
+
+    const { data: canal } = await db
+      .from("channel_sessions")
+      .select("funil_id")
+      .eq("organization_id", organizationId)
+      .eq("id", canalId)
+      .maybeSingle();
+    const funilId = (canal as { funil_id?: string | null } | null)?.funil_id;
+    if (!funilId) return null;
+
+    const { data: funil } = await db
+      .from("crm_pipelines")
+      .select("id")
+      .eq("organization_id", organizationId)
+      .eq("id", funilId)
+      .eq("is_archived", false)
+      .maybeSingle();
+    if (!funil) return null;
+
+    const stageId = await primeiraEtapa(db, organizationId, funilId);
+    return stageId ? { pipelineId: funilId, stageId } : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Garante que a conversa tenha um lead. Idempotente por contato: chamar de novo
  * não cria um segundo card.
  *
@@ -322,7 +370,8 @@ export async function garantirLeadDaConversa(
         origemDaCampanha.pipelineId,
         origemDaCampanha.stageId,
       )
-    : await funilDeEntrada(db, organizationId, ehCliente);
+    : (await destinoDoNumero(db, organizationId, conversationId)) ??
+      (await funilDeEntrada(db, organizationId, ehCliente));
   if ("erro" in destino) return { criado: false, motivo: destino.erro };
 
   // 4 · o card.

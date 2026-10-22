@@ -17016,6 +17016,11 @@ export const DICIONARIO: Traducoes = {
   "Essa etiqueta já existe no vocabulário.": { es: "Esa etiqueta ya existe en el vocabulario." },
   "Não foi possível criar a etiqueta agora. Tente de novo.": { es: "No se pudo crear la etiqueta ahora. Inténtalo de nuevo." },
   "Escolher cor": { es: "Elegir color" },
+  "Funil deste número": { es: "Embudo de este número" },
+  "Funil do número salvo.": { es: "Embudo del número guardado." },
+  "Quem chamar por este número vira lead neste funil.": { es: "Quien escriba a este número se convierte en lead en este embudo." },
+  "Funil de cada número": { es: "Embudo de cada número" },
+  "Escolha, para cada número conectado, o funil onde nascem os leads de quem chamar por ele. Sem escolha, vale o funil padrão da empresa. Vale para leads novos.": { es: "Elija, para cada número conectado, el embudo donde nacen los leads de quien escriba por él. Sin elección, vale el embudo predeterminado de la empresa. Vale para leads nuevos." },
 };
 
 /**

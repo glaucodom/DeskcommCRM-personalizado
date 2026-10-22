@@ -29,6 +29,7 @@ import { AntiBanSheet } from "./AntiBanSheet";
 import { GruposSheet } from "./GruposSheet";
 import { NomeDoNumeroDialog } from "./NomeDoNumeroDialog";
 import { RenomearNumero } from "./RenomearNumero";
+import { FunilDoNumero } from "./FunilDoNumero";
 import { normalizarNomeDoNumero } from "@/lib/personalizacoes/nome-do-numero";
 import { PairingOptions } from "./PairingOptions";
 import { ChannelAcervo } from "./ChannelAcervo";
@@ -613,6 +614,7 @@ export function ConnectionsClient({ wahaConfigured }: { wahaConfigured: boolean 
                 <div>
                   <RenomearNumero channelId={c.id} nomeAtual={c.display_name} onSalvo={invalidate} />
                 </div>
+                <FunilDoNumero channelId={c.id} />
                 <ChannelAiAccess channelId={c.id} />
                 {dependeDoTransporte(c) && <ChannelAcervo channelId={c.id} />}
                 <p className="text-xs text-muted-foreground">{t(!policy ? "Consulte os responsáveis em Atendimento." : policy.mode === "legacy_unconfigured" ? "Usa todos os atendentes elegíveis da organização." : policy.mode === "restricted_empty" ? "Ninguém configurado — as conversas ficarão na fila." : "Somente as pessoas selecionadas recebem este número.")}</p>

@@ -190,3 +190,12 @@ $$;
 revoke all on function public.fn_vocabulario_de_tags_criar(uuid, text, text) from public;
 revoke execute on function public.fn_vocabulario_de_tags_criar(uuid, text, text) from anon;
 grant execute on function public.fn_vocabulario_de_tags_criar(uuid, text, text) to authenticated, service_role;
+
+-- ── Funil do número ─────────────────────────────────────────────────────────
+--
+-- Cada número conectado pode ter um funil: o lead que NASCE de uma conversa
+-- desse número entra nesse funil (primeira etapa aberta). Vazio = a regra de
+-- sempre (funil padrão da empresa). Campanha que declara funil continua
+-- ganhando do número. Apagar o funil zera o vínculo (on delete set null).
+alter table public.channel_sessions
+  add column if not exists funil_id uuid references public.crm_pipelines(id) on delete set null;

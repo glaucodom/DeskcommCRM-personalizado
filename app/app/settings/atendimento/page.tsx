@@ -32,6 +32,7 @@ import { AtendimentoForm } from "./_form";
 import { VisibilidadePorNumeroForm } from "./_visibilidade-por-numero-form";
 import { visibilidadePorNumeroLigada } from "@/lib/personalizacoes/visibilidade-por-numero";
 import { TelefoneDeFichaVazia } from "./_telefoneDeFichaVazia";
+import { FunilDosNumeros } from "./_funil-dos-numeros";
 import { traduzir } from "@/lib/i18n/dicionario";
 
 export const dynamic = "force-dynamic";
@@ -86,6 +87,7 @@ export default async function AtendimentoSettingsPage() {
         initial={{ ...routing, visibility_mode: settings.visibility_mode ?? DEFAULT_VISIBILITY_MODE }}
       />
       <ChannelRoutingForm initial={channels} />
+      <FunilDosNumeros />
       <VisibilidadePorNumeroForm inicial={visibilidadePorNumeroLigada(data?.settings as Record<string, unknown> | null)} />
       <AssinaturaForm initial={assinaturaInicial} />
       <TelefoneDeFichaVazia
