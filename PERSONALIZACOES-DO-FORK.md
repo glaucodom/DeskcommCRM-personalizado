@@ -81,3 +81,11 @@ cobrir (principalmente #20 tipo de cliente B2B/B2C, #23 funil padrão por pessoa
 funil do número): leia o `CHANGELOG.md` da versão procurando o assunto, compare com o que o fork faz e
 decida entre **adotar o oficial**, **manter o do fork** ou **manter os dois** registrando o que falta.
 O passo a passo da #25 está em `MELHORIAS-funil-do-numero.md`; use-o como modelo para as outras.
+
+## Toda versão `-glauco.N` entra na página de melhorias
+
+Ao criar uma tag `vX.Y.Z-glauco.N`: (1) acrescente a seção no topo de `MELHORIAS-POR-VERSAO.md`;
+(2) se for uma personalização nova, numere-a na tabela acima e em `lib/personalizacoes/melhorias-do-fork.ts`
+(o teste `melhorias-do-fork-em-dia` cobra isso); (3) na VPS, `node ~/zap-melhorias-site/gerar.mjs`.
+Resultado: https://crtierp.com.br/zap.melhorias (nginx `zap-melhorias`, rota Traefik de prioridade 2000 em
+`crtierp.com.br`; se o contêiner sumir, recrie com o `docker run` descrito em `~/zap-melhorias-site/LEIAME.md`).

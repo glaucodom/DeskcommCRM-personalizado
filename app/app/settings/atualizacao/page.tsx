@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { loadAuthUser } from "@/lib/auth/server";
+import { MelhoriasDoFork } from "./_components/MelhoriasDoFork";
 import { UpdatePanel } from "./_components/UpdatePanel";
 
 export const metadata = { title: "Atualização do sistema" };
@@ -14,5 +15,13 @@ export const dynamic = "force-dynamic";
 export default async function Page() {
   const user = await loadAuthUser();
   if (!user?.is_platform_admin) notFound();
-  return <UpdatePanel />;
+  return (
+    <>
+      <UpdatePanel />
+      <MelhoriasDoFork
+        linkEvolucao={process.env.LINK_EVOLUCAO_DO_PROJETO}
+        linkHistorico={process.env.LINK_HISTORICO_DESTE_SISTEMA}
+      />
+    </>
+  );
 }

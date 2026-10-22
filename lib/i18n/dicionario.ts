@@ -17021,6 +17021,10 @@ export const DICIONARIO: Traducoes = {
   "Quem chamar por este número vira lead neste funil.": { es: "Quien escriba a este número se convierte en lead en este embudo." },
   "Funil de cada número": { es: "Embudo de cada número" },
   "Escolha, para cada número conectado, o funil onde nascem os leads de quem chamar por ele. Sem escolha, vale o funil padrão da empresa. Vale para leads novos.": { es: "Elija, para cada número conectado, el embudo donde nacen los leads de quien escriba por él. Sin elección, vale el embudo predeterminado de la empresa. Vale para leads nuevos." },
+  "Melhorias deste sistema (não vêm do projeto original)": { es: "Mejoras de este sistema (no vienen del proyecto original)" },
+  "Tudo abaixo foi feito por nós em cima do projeto original. Ao atualizar para uma versão nova dele, cada item é conferido para ver se continua valendo.": { es: "Todo lo de abajo lo hicimos nosotros sobre el proyecto original. Al actualizar a una versión nueva de él, se revisa cada elemento para ver si sigue vigente." },
+  "Evolução do projeto original (changelog oficial) ↗": { es: "Evolución del proyecto original (changelog oficial) ↗" },
+  "Histórico por versão do nosso sistema ↗": { es: "Historial por versión de nuestro sistema ↗" },
 };
 
 /**

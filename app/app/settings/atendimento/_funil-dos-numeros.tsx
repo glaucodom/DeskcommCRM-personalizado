@@ -16,6 +16,12 @@ interface Numero {
   phone_number: string | null;
 }
 
+function nomeDoNumero(n: Numero): string {
+  if (n.display_name) return n.display_name;
+  if (n.phone_number) return n.phone_number;
+  return n.id.slice(0, 8);
+}
+
 export function FunilDosNumeros() {
   const t = useT();
   const [numeros, setNumeros] = useState<Numero[] | null>(null);
@@ -50,7 +56,7 @@ export function FunilDosNumeros() {
       <div className="grid gap-4 sm:grid-cols-2">
         {numeros.map((n) => (
           <div key={n.id} className="space-y-2 rounded-md border p-3">
-            <p className="text-sm font-medium">{n.display_name ?? n.phone_number ?? n.id.slice(0, 8)}</p>
+            <p className="text-sm font-medium">{nomeDoNumero(n)}</p>
             {n.display_name && n.phone_number ? (
               <p className="text-xs text-muted-foreground">{n.phone_number}</p>
             ) : null}
