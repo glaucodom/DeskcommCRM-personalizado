@@ -10,6 +10,7 @@ import { TeamMembersClient } from "./_components/TeamMembersClient";
 import { TeamInvitesClient } from "./_components/TeamInvitesClient";
 import { AttendantsClient } from "./_components/AttendantsClient";
 import { fusoUtilizavel } from "@/lib/tempo/fusos";
+import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Equipe" };
@@ -46,6 +47,19 @@ export default async function TeamPage({
   const isAdmin = !!activeOrg && ROLE_RANK[activeOrg.role] >= ROLE_RANK.admin;
   const isManager = !!activeOrg && ROLE_RANK[activeOrg.role] >= ROLE_RANK.manager;
 
+  // Fork #23: os funis vivos, para o administrador escolher o funil padrão de cada pessoa.
+  let funis: Array<{ id: string; name: string }> = [];
+  if (activeOrg && isAdmin) {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from("crm_pipelines")
+      .select("id, name")
+      .eq("organization_id", activeOrg.orgId)
+      .eq("is_archived", false)
+      .order("position");
+    funis = (data ?? []) as Array<{ id: string; name: string }>;
+  }
+
   return (
     <div className="flex h-full flex-col gap-6 p-6">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -68,7 +82,7 @@ export default async function TeamPage({
           <TabsTrigger value="attendants">{t("Atendimento")}</TabsTrigger>
         </TabsList>
         <TabsContent value="members" className="mt-4 flex flex-col gap-8">
-          <TeamMembersClient currentUserId={user.id} canManage={isAdmin} />
+          <TeamMembersClient currentUserId={user.id} canManage={isAdmin} funis={funis} />
           {/*
             Convites pendentes vivem AQUI, na mesma aba de quem já entrou —
             antes só apareciam numa lista efêmera dentro do modal "Convidar

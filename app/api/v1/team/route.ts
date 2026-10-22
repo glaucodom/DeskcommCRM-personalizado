@@ -20,6 +20,7 @@ export const dynamic = "force-dynamic";
 
 interface MembershipRow {
   interface_settings?: InterfaceSettings;
+  funil_padrao_id?: string | null;
   user_id: string;
   role: string;
   invited_at: string | null;
@@ -44,7 +45,7 @@ export async function GET(_req: NextRequest): Promise<Response> {
   const supabase = await createClient();
   const { data: rows, error } = await supabase
     .from("user_organizations")
-    .select("user_id, role, interface_settings, invited_at, accepted_at, revoked_at, created_at")
+    .select("user_id, role, interface_settings, funil_padrao_id, invited_at, accepted_at, revoked_at, created_at")
     .eq("organization_id", activeOrg.orgId)
     // Revogado CONTINUA na lista, com `revoked_at` preenchido — a tela o
     // distingue. Filtrá-lo aqui fazia a revogação sumir com a pessoa, e sem a

@@ -10,6 +10,7 @@ import { useTeamMembers, type TeamMember } from "@/hooks/team/useTeamMembers";
 import { useChangeRole } from "@/hooks/team/useChangeRole";
 import { useReactivateMember } from "@/hooks/team/useReactivateMember";
 import { useRevokeMember } from "@/hooks/team/useRevokeMember";
+import { useSetFunilPadrao } from "@/hooks/team/useSetFunilPadrao";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -45,18 +46,24 @@ import { ROLES, type Role } from "@/lib/schemas/team";
 import { rotuloDoPapel } from "@/lib/auth/types";
 import { DotsThree } from "@/lib/ui/icons";
 
+/** Valor do seletor para "sem funil próprio" (o Select não aceita string vazia). */
+const SEM_FUNIL = "__padrao_da_empresa__";
+
 interface Props {
   currentUserId: string;
   canManage: boolean;
+  /** Fork #23: funis vivos da empresa, para escolher o funil padrão de cada pessoa. */
+  funis?: Array<{ id: string; name: string }>;
 }
 
-export function TeamMembersClient({ currentUserId, canManage }: Props) {
+export function TeamMembersClient({ currentUserId, canManage, funis = [] }: Props) {
   const tagDoIdioma = useTagDeIdioma();
   const t = useT();
   const { data, isLoading, isError } = useTeamMembers();
   const changeRole = useChangeRole();
   const revoke = useRevokeMember();
   const reativar = useReactivateMember();
+  const setFunilPadrao = useSetFunilPadrao();
 
   const [interfaceMember, setInterfaceMember] = useState<TeamMember | null>(null);
   const [revokeDialog, setRevokeDialog] = useState<TeamMember | null>(null);
@@ -81,6 +88,7 @@ export function TeamMembersClient({ currentUserId, canManage }: Props) {
               <TableHead>{t("Membro")}</TableHead>
               <TableHead>{t("Papel")}</TableHead>
               <TableHead>{t("Interface")}</TableHead>
+              {funis.length > 0 ? <TableHead>{t("Funil padrão")}</TableHead> : null}
               <TableHead>{t("Status")}</TableHead>
               <TableHead>{t("Última atividade")}</TableHead>
               {canManage ? <TableHead className="w-[80px]" /> : null}
@@ -145,6 +153,37 @@ export function TeamMembersClient({ currentUserId, canManage }: Props) {
                     </span>
                   )}
                 </TableCell>
+                {funis.length > 0 ? (
+                  <TableCell>
+                    {canManage ? (
+                      <Select
+                        value={funis.some((f) => f.id === m.funil_padrao_id) ? (m.funil_padrao_id as string) : SEM_FUNIL}
+                        onValueChange={(v) =>
+                          setFunilPadrao.mutate({ userId: m.user_id, pipelineId: v === SEM_FUNIL ? null : v })
+                        }
+                      >
+                        <SelectTrigger
+                          className="w-[160px]"
+                          aria-label={`${t("Funil padrão de")} ${m.full_name ?? m.email ?? m.user_id}`}
+                        >
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value={SEM_FUNIL}>{t("Padrão da empresa")}</SelectItem>
+                          {funis.map((f) => (
+                            <SelectItem key={f.id} value={f.id}>
+                              {f.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <span className="text-sm">
+                        {funis.find((f) => f.id === m.funil_padrao_id)?.name ?? t("Padrão da empresa")}
+                      </span>
+                    )}
+                  </TableCell>
+                ) : null}
                 <TableCell>
                   {/*
                     "Revogado" vem ANTES dos outros dois: quem foi revogado tem

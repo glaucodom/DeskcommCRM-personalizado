@@ -89,7 +89,7 @@ const LARGURAS = [360, 390] as const;
  */
 const SUPERFICIES = [
   { rota: "/app/inbox", nome: "inbox" },
-  { rota: "/app/kanban", nome: "funis" },
+  { rota: "/app/kanban?todos=1", nome: "funis" },
   { rota: "/app/agenda", nome: "agenda" },
   { rota: "/app/metrics", nome: "painel" },
 ] as const;
@@ -205,7 +205,7 @@ test("a barra de abas ocupa rodapé no celular e NADA no desktop", async ({ page
 
   // ── no celular: existe, encosta no fundo, e o conteúdo desconta ────────────
   await page.setViewportSize({ width: 390, height: 844 });
-  await abrir(page, "/app/kanban");
+  await abrir(page, "/app/kanban?todos=1");
 
   await expect(page.locator("nav[data-barra-inferior]")).toBeVisible();
   const noCelular = await page.evaluate(() => {
@@ -239,7 +239,7 @@ test("a barra de abas ocupa rodapé no celular e NADA no desktop", async ({ page
   // altura, encolhiam junto. Hoje a `altura` declarada é 0 e quem decide é a
   // medição, que devolve zero para elemento escondido.
   await page.setViewportSize({ width: 1440, height: 900 });
-  await abrir(page, "/app/kanban");
+  await abrir(page, "/app/kanban?todos=1");
 
   await expect(page.locator("nav[data-barra-inferior]")).toBeHidden();
   const reserva = await page.evaluate(() =>

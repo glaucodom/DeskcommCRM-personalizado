@@ -17005,6 +17005,17 @@ export const DICIONARIO: Traducoes = {
   "site com problemas": { es: "sitio con problemas" },
   "sem sinais positivos": { es: "sin señales positivas" },
   "verificação pendente": { es: "verificación pendiente" },
+  "Funil padrão": { es: "Embudo predeterminado" },
+  "Funil padrão de": { es: "Embudo predeterminado de" },
+  "Padrão da empresa": { es: "Predeterminado de la empresa" },
+  "Funil padrão atualizado.": { es: "Embudo predeterminado actualizado." },
+  "Nova etiqueta": { es: "Nueva etiqueta" },
+  "Nome da etiqueta": { es: "Nombre de la etiqueta" },
+  "Ex.: cliente vip": { es: "Ej.: cliente vip" },
+  "Etiqueta criada.": { es: "Etiqueta creada." },
+  "Essa etiqueta já existe no vocabulário.": { es: "Esa etiqueta ya existe en el vocabulario." },
+  "Não foi possível criar a etiqueta agora. Tente de novo.": { es: "No se pudo crear la etiqueta ahora. Inténtalo de nuevo." },
+  "Escolher cor": { es: "Elegir color" },
 };
 
 /**

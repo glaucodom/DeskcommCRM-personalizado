@@ -35,6 +35,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import Link from "next/link";
 import { Plus } from "@/lib/ui/icons";
 import type { LeadFilters } from "@/lib/kanban/filters";
 import { applyFilters, filtersFromParams, filtersToParams } from "@/lib/kanban/filters";
@@ -209,6 +210,14 @@ export function PipelinePageClient({
           é a mesma lógica do interruptor Lista/Calendário da tela de Tarefas.
         */}
         <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+          {/* Fork #23: o menu "Funis" abre direto o funil padrão; este é o caminho para a lista. */}
+          <Link
+            href="/app/kanban?todos=1"
+            className="text-sm text-muted-foreground underline-offset-4 hover:underline"
+            data-testid="todos-os-funis"
+          >
+            {t("Todos os funis")}
+          </Link>
           <div className="flex items-center gap-0.5 rounded-md border bg-muted p-0.5">
             <button
               type="button"

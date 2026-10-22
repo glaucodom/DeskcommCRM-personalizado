@@ -5,6 +5,8 @@ import { apiClient } from "@/lib/api/client";
 
 export interface TeamMember {
   interface_settings?: InterfaceSettings;
+  /** Fork #23: funil que "Funis" abre para esta pessoa. */
+  funil_padrao_id?: string | null;
   user_id: string;
   role: string;
   invited_at: string | null;

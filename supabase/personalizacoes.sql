@@ -115,3 +115,78 @@ update public.contacts c
   join public.companies co on co.id = cp.company_id and co.organization_id = cp.organization_id
  where cp.organization_id = c.organization_id and cp.person_id = c.person_id
    and cp.is_primary and (c.empresa is null or c.cnpj is null);
+
+-- ── Funil padrão por pessoa ─────────────────────────────────────────────────
+--
+-- O administrador escolhe, em Equipe, o funil que "Funis" no menu abre direto
+-- para cada pessoa. Vazio = cai no funil padrão da empresa (`is_default`).
+-- Apagar o funil zera a escolha (on delete set null): ninguém fica preso a um
+-- funil que não existe mais.
+alter table public.user_organizations
+  add column if not exists funil_padrao_id uuid references public.crm_pipelines(id) on delete set null;
+
+-- ── Nova etiqueta (Configurações › Tags) ────────────────────────────────────
+--
+-- O vocabulário só ganhava etiqueta quando alguém a USAVA. Esta função cadastra
+-- uma etiqueta direto no vocabulário da empresa (`organizations.settings.tags`),
+-- com cor opcional, antes de qualquer uso. Mesmo portão das outras operações do
+-- vocabulário: gerente ou mais. Nome que já existe (sem diferenciar maiúsculas)
+-- não duplica: devolve `criou = false`.
+create or replace function public.fn_vocabulario_de_tags_criar(
+  p_org uuid,
+  p_tag text,
+  p_cor text default null
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_tag text := btrim(coalesce(p_tag, ''));
+  v_cor text := nullif(btrim(coalesce(p_cor, '')), '');
+  v_existia boolean;
+begin
+  if not public.fn_role_at_least(p_org, 'manager') then
+    raise exception 'sem permissão' using errcode = '42501';
+  end if;
+  if v_tag = '' or char_length(v_tag) > 60 then
+    raise exception 'tag_invalida' using errcode = '22023';
+  end if;
+  if v_cor is not null and v_cor !~* '^#[0-9a-f]{6}$' then
+    raise exception 'cor_invalida' using errcode = '22023';
+  end if;
+
+  select exists (
+    select 1
+      from public.organizations o
+      cross join lateral jsonb_array_elements(
+        case when jsonb_typeof(o.settings -> 'tags') = 'array' then o.settings -> 'tags' else '[]'::jsonb end
+        || case when jsonb_typeof(o.settings -> 'canonical_conversation_tags') = 'array'
+                then o.settings -> 'canonical_conversation_tags' else '[]'::jsonb end
+      ) as e(valor)
+     where o.id = p_org
+       and lower(btrim(coalesce(e.valor ->> 'tag', e.valor #>> '{}'))) = lower(v_tag)
+  ) into v_existia;
+
+  if v_existia then
+    return jsonb_build_object('criou', false, 'tag', v_tag);
+  end if;
+
+  update public.organizations o
+     set settings = jsonb_set(
+           coalesce(o.settings, '{}'::jsonb),
+           '{tags}',
+           case when jsonb_typeof(o.settings -> 'tags') = 'array' then o.settings -> 'tags' else '[]'::jsonb end
+             || jsonb_build_array(jsonb_strip_nulls(jsonb_build_object('tag', v_tag, 'cor', v_cor))),
+           true
+         )
+   where o.id = p_org;
+
+  return jsonb_build_object('criou', true, 'tag', v_tag);
+end;
+$$;
+
+revoke all on function public.fn_vocabulario_de_tags_criar(uuid, text, text) from public;
+revoke execute on function public.fn_vocabulario_de_tags_criar(uuid, text, text) from anon;
+grant execute on function public.fn_vocabulario_de_tags_criar(uuid, text, text) to authenticated, service_role;

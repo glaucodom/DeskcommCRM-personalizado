@@ -30,7 +30,11 @@ export const metadata: Metadata = { title: "Funis" };
  * atalho de platform admin, que as rotas não concedem por padrão): mostrar um
  * botão que o servidor recusaria seria prometer o que não se cumpre.
  */
-export default async function KanbanPickerPage() {
+export default async function KanbanPickerPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const user = await requireAuth();
   const activeOrg = await resolveActiveOrg(user);
   if (!activeOrg) redirect("/app");
@@ -63,6 +67,24 @@ export default async function KanbanPickerPage() {
   const podeImportar = ROLE_RANK[activeOrg.role] >= ROLE_RANK.agent;
   const idioma = user.idioma;
   const t = (texto: string) => traduzir(texto, idioma);
+
+  // Fork #23: "Funis" no menu abre direto o funil padrão da pessoa (ou da empresa); a lista
+  // (onde se cria, renomeia e escolhe outro) fica em `?todos=1`. Qualquer outro
+  // parâmetro (ex.: `?lead=` dos links de Conversões) mantém a lista de sempre.
+  const params = await searchParams;
+  if (Object.keys(params).length === 0) {
+    // 1º o funil que o administrador marcou para ESTA pessoa (Equipe); 2º o
+    // padrão da empresa. A leitura é tolerante: sem a coluna, cai no 2º.
+    const { data: minha } = await supabase
+      .from("user_organizations")
+      .select("funil_padrao_id")
+      .eq("organization_id", activeOrg.orgId)
+      .eq("user_id", user.id)
+      .maybeSingle();
+    const idDaPessoa = (minha as { funil_padrao_id?: string | null } | null)?.funil_padrao_id;
+    const destino = funis.find((f) => f.id === idDaPessoa) ?? funis.find((f) => f.is_default);
+    if (destino) redirect(`/app/pipelines/${destino.id}`);
+  }
 
   return (
     <div className="flex h-full flex-col gap-4 p-6">

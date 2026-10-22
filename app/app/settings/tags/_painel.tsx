@@ -49,6 +49,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ChipDeEtiqueta } from "@/components/tags/ChipDeEtiqueta";
+import { NovaEtiqueta } from "./_nova-etiqueta";
 import { invalidarCoresDasEtiquetas } from "@/components/tags/CoresDasEtiquetas";
 import { cn } from "@/lib/utils";
 import { PALETA_DE_ETIQUETAS, NOME_DO_TOM, normalizarCorDeEtiqueta } from "@/lib/tags/cor-da-etiqueta";
@@ -245,16 +246,20 @@ export function PainelDeTags({ tags, idioma }: { tags: LinhaDeVocabulario[]; idi
 
   if (tags.length === 0) {
     return (
-      <Card className="p-6 text-sm text-muted-foreground">
-        {t(
-          "Nenhuma etiqueta nesta organização ainda. Elas aparecem aqui conforme os agentes, o Inbox e o funil usarem.",
-        )}
-      </Card>
+      <div className="flex flex-col gap-4">
+        <NovaEtiqueta idioma={idioma} />
+        <Card className="p-6 text-sm text-muted-foreground">
+          {t(
+            "Nenhuma etiqueta nesta organização ainda. Elas aparecem aqui conforme os agentes, o Inbox e o funil usarem.",
+          )}
+        </Card>
+      </div>
     );
   }
 
   return (
     <div className="flex flex-col gap-4">
+      <NovaEtiqueta idioma={idioma} />
       <Card className="overflow-hidden">
         <table className="w-full text-sm">
           <caption className="sr-only">{t("Etiquetas da organização e onde são usadas")}</caption>
