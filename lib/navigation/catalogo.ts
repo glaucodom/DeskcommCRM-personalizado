@@ -946,6 +946,18 @@ export const NAV_CATALOG = [
     minRole: "manager",
   },
   {
+    // Fork #21: a mesma tela de "Etapas do funil" (grupo CRM), com porta também em
+    // Configurações › Sua empresa. O registro indexa por href, então a entrada tem
+    // endereço próprio, e a página só redireciona para a tela de verdade.
+    href: "/app/settings/funil",
+    label: "Funil",
+    description: "Etapas do funil e campos personalizados do cadastro do contato.",
+    icon: "Funnel",
+    group: "organizacao",
+    section: "Sua empresa",
+    minRole: "manager",
+  },
+  {
     // A área única dos recursos opcionais (pedido do mantenedor, doc 73/80):
     // tudo o que a empresa pode ligar, com o estado e o caminho até a tela onde
     // se liga. Só leitura — quem liga continua sendo a tela do assunto.

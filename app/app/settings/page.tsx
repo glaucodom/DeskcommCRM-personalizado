@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { NavHub } from "@/components/shell/NavHub";
 import { requireAuth, resolveActiveOrg } from "@/lib/auth/server";
 import { traduzir } from "@/lib/i18n/dicionario";
@@ -31,25 +30,7 @@ export default async function SettingsHubPage() {
   const activeOrg = await resolveActiveOrg(user);
   const idioma = user.idioma;
 
-  // Fork #21: atalho para os campos personalizados do contato, que moram em
-  // "Etapas do funil" (grupo CRM) e ninguém achava pelo hub de Configurações.
-  const podeVerEtapas = ["admin", "manager"].includes(activeOrg?.role ?? "");
-
   return (
-    <>
-      {podeVerEtapas && (
-        <div className="mx-auto max-w-6xl px-4 pt-6">
-          <Link
-            href="/app/settings/tenant/pipelines"
-            className="inline-flex flex-col gap-0.5 rounded-lg border border-border bg-surface px-4 py-3 text-sm hover:bg-surface-hover"
-          >
-            <span className="font-medium">{traduzir("Campos personalizados e etapas do funil", idioma)}</span>
-            <span className="text-fg-muted">
-              {traduzir("Crie campos extras no cadastro do contato e desenhe as colunas do funil.", idioma)}
-            </span>
-          </Link>
-        </div>
-      )}
     <NavHub
       group="organizacao"
       isPlatformAdmin={user.is_platform_admin && !user.support}
@@ -61,6 +42,5 @@ export default async function SettingsHubPage() {
       subtitle={traduzir("Sua conta, os dados da empresa e quem tem acesso ao quê.", idioma)}
       locale={idioma}
     />
-    </>
   );
 }
