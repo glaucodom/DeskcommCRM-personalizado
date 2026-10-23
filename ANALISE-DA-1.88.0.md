@@ -1,8 +1,7 @@
 # Análise da versão oficial 1.88.0 contra as nossas 31 personalizações
 
-Feita em 2026-10-23, com o fork em `v1.87.0-glauco.8` (zap rodando a glauco.7). **Nada foi juntado ainda**:
-este arquivo é o plano. O merge de teste (`git merge --no-commit v1.88.0` num worktree descartável) foi
-descartado depois de medir os conflitos.
+Feita em 2026-10-23, com o fork em `v1.87.0-glauco.8`. **Juntada em `v1.88.0-glauco.1`** seguindo o plano abaixo
+(resultado na seção F). Antes do merge definitivo, um merge de teste num worktree descartável mediu os conflitos.
 
 A 1.88.0 é grande: 792 arquivos, +67 mil linhas, 17 migrations novas. O merge dá **7 conflitos de texto**,
 todos resolvidos mantendo os dois lados (tabela A). Além deles há sobreposições que o git não vê, porque
@@ -69,3 +68,16 @@ Toda versão oficial nova ganha um `ANALISE-DA-X.Y.Z.md` como este **antes** do 
 sobreposições por assunto (usar a lista de personalizações como índice e o CHANGELOG oficial como fonte),
 decisão por linha (adotar / manter / os dois) e o que medir depois. É o que impede a nossa melhoria de
 brigar com a do projeto original sem ninguém perceber.
+
+## F. Resultado do merge (v1.88.0-glauco.1)
+
+- 7 conflitos resolvidos como na tabela A. Ajustes além do texto: removido o import duplicado de
+  `CustomFieldsEditor` no `NewLeadDialog.tsx` e o `PAIS_PADRAO` que ficou sem uso nos dois diálogos de contato.
+- `dicionario.ts`: as duas partes mantidas, nossas entradas no fim; nenhuma chave duplicada.
+- Conferido no código: B10 (`nomeProprioOpcional` no criar e no editar do `_handler.ts`), B3 (a 0748 só ADICIONA
+  `fn_vocabulario_de_tags_pagina`; `fn_vocabulario_de_tags_criar` continua nossa), B2 (a trava `.update.lock` e
+  `DESKCOMM_TRAVA_*` seguem no `update.sh` e no `agent.sh`).
+- Conferência de tipos dos arquivos tocados limpa; `pnpm test:unit`: 2.646 arquivos, 27.925 testes, nenhuma falha, sem
+  precisar mexer em teste oficial.
+- Ficam para MEDIR no zap depois de instalar: B4 (visibilidade por número), B1 (cadastro com e sem +55), B7 (importar
+  histórico em modo prévia), "Nova etiqueta", tela de Atualização com a prova de MFA.
