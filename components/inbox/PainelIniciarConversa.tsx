@@ -35,6 +35,7 @@
  * o nono dígito, quem veio com `+` passa direto. A mesma função lê o CSV de
  * contatos e o webhook de captação.
  */
+import { nomeProprio } from "@/lib/personalizacoes/nome-proprio";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
@@ -146,7 +147,7 @@ function CorpoDoPainel({
   const alvo: AlvoDeConversa | null = alvoContato
     ? { contact_id: alvoContato.id }
     : telefone
-      ? { phone_number: telefone, ...(nome.trim() ? { name: nome.trim() } : {}) }
+      ? { phone_number: telefone, ...(nome.trim() ? { name: nomeProprio(nome) } : {}) }
       : null;
 
   return (
@@ -226,6 +227,7 @@ function CorpoDoPainel({
               autoComplete="off"
               placeholder={t("Como o contato aparece no CRM")}
               onChange={(evento) => setNome(evento.target.value)}
+              onBlur={() => setNome((n) => nomeProprio(n))}
             />
           </div>
         )}

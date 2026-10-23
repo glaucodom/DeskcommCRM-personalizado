@@ -5,6 +5,9 @@ acrescente uma seção NO TOPO** (mais nova primeiro) no formato abaixo e rode `
 na VPS. Linha de item: `- #número **Título**: o que muda para quem usa`. Use `#-` quando não for um item da
 lista de personalizações (ex.: junção com o oficial). Nada aqui é do projeto original.
 
+## v1.87.0-glauco.5 · 2026-10-23
+- #26 **Nome com letras maiúsculas certas**: ao cadastrar ou editar contato (Contatos, Iniciar conversa, agente de IA), o nome é gravado como "Glauco Satler Neiva" ou "Maria da Silva Oliveira" (de, da, do, das, dos, e ficam minúsculos).
+
 ## v1.87.0-glauco.4 · 2026-10-22
 Tudo o que é nosso fica visível dentro do sistema.
 - #- **Lista de melhorias na tela de Atualização**: clicar na versão no rodapé do menu mostra o que este sistema tem a mais que o projeto original.

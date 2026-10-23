@@ -39,6 +39,7 @@ import {
   recusasDePadrao,
 } from "@/lib/leads/padrao-do-campo";
 import { testaComPrazo } from "@/lib/leads/padrao-do-campo-no-servidor";
+import { nomeProprioOpcional } from "@/lib/personalizacoes/nome-proprio";
 
 type SB = SupabaseClient;
 
@@ -525,8 +526,8 @@ export async function createContactHandler(
   const insertRow: Record<string, unknown> = {
     organization_id: ctx.organization_id,
     created_by_user_id: ctx.actor.type === "user" ? ctx.actor.id : null,
-    name: input.name ?? null,
-    display_name: input.display_name ?? null,
+    name: nomeProprioOpcional(input.name) ?? null,
+    display_name: nomeProprioOpcional(input.display_name) ?? null,
     email: input.email ?? null,
     phone_number: input.phone_number ? canonicalPhoneBR(input.phone_number) : null,
     birthdate: input.birthdate ?? null,
@@ -699,8 +700,8 @@ export async function patchContactHandler(
   }
 
   const patch: Record<string, unknown> = {};
-  if (input.name !== undefined) patch.name = input.name;
-  if (input.display_name !== undefined) patch.display_name = input.display_name;
+  if (input.name !== undefined) patch.name = nomeProprioOpcional(input.name);
+  if (input.display_name !== undefined) patch.display_name = nomeProprioOpcional(input.display_name);
   // `email_normalized` NÃO entra no patch — é `GENERATED ALWAYS AS
   // (lower(trim(email))) STORED` (baseline.sql:1349), e o Postgres RECUSA
   // qualquer atribuição a coluna gerada (SQLSTATE 428C9), abortando o UPDATE

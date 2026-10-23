@@ -12,6 +12,7 @@ export interface MelhoriaDoFork {
 }
 
 export const MELHORIAS_DO_FORK: readonly MelhoriaDoFork[] = [
+  { n: 26, titulo: "Nome de pessoa sempre com a primeira letra maiúscula (Maria da Silva Oliveira)", desde: "1.87.0-glauco.5" },
   { n: 25, titulo: "Funil do número: quem chama por um número vira lead no funil escolhido para ele", desde: "1.87.0-glauco.3" },
   { n: 24, titulo: "Nova etiqueta (nome e cor) em Configurações › Tags", desde: "1.87.0-glauco.2" },
   { n: 23, titulo: "Funil padrão por pessoa, definido em Equipe; link “Todos os funis”", desde: "1.87.0-glauco.2" },

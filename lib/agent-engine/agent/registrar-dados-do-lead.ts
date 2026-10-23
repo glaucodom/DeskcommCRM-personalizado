@@ -20,6 +20,7 @@
  * CNPJ: só confere 14 dígitos (a mesma régua de `normalizeCnpj`); a consulta à BrasilAPI
  * fica `pending` para o enriquecimento que o produto já tem.
  */
+import { nomeProprio } from '@/lib/personalizacoes/nome-proprio';
 import { padronizarOrigem } from '@/lib/personalizacoes/origem-do-lead';
 import { hashCpf, normalizeCpf } from '@/lib/contacts/cpf';
 import { isValidCpf } from '@/lib/legal/perfil-do-pais';
@@ -121,7 +122,8 @@ export async function aplicarRegistroDoLead(
     };
   }
   const d = parsed.data;
-  const nome = limpa(d.nome, LIMITES.nome);
+  const nomeBruto = limpa(d.nome, LIMITES.nome);
+  const nome = nomeBruto ? nomeProprio(nomeBruto) : null;
   const empresa = limpa(d.empresa, LIMITES.empresa);
   const segmento = limpa(d.segmento, LIMITES.segmento);
   const comoConhecidoBruto = limpa(d.como_conheceu, LIMITES.como_conheceu);

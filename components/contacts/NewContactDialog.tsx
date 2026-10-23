@@ -1,4 +1,5 @@
 "use client";
+import { nomeProprio } from "@/lib/personalizacoes/nome-proprio";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -76,7 +77,7 @@ export function NewContactDialog({ open, onOpenChange, nomeInicial, onCriado }: 
     const tags = normalizarTags((values.tagsRaw ?? "").split(","));
 
     const payload: Record<string, unknown> = { source: "manual" };
-    if (values.name?.trim()) payload.name = values.name.trim();
+    if (values.name?.trim()) payload.name = nomeProprio(values.name);
     if (values.email?.trim()) {
       if (!emailValido(values.email)) {
         setServerError(t("E-mail inválido"));
@@ -142,7 +143,7 @@ export function NewContactDialog({ open, onOpenChange, nomeInicial, onCriado }: 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="name">{t("Nome")}</Label>
-            <Input id="name" {...form.register("name")} />
+            <Input id="name" {...form.register("name", { onBlur: (e) => form.setValue("name", nomeProprio(e.target.value)) })} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="email">{t("Email")}</Label>
