@@ -42,6 +42,7 @@ import { cn } from "@/lib/utils";
 import { PROXIMO_PASSO_DA_MENSAGEM_NOVA } from "@/lib/atendimento/proximo-passo-padrao";
 import { rotuloParaAEquipe } from "@/lib/contacts/rotulo-do-contato";
 import { phoneForDisplay } from "@/lib/channels/phone-variants";
+import { NomeEditavelDoContato } from "./NomeEditavelDoContato";
 import { DadosDaEmpresaDoContato } from "./DadosDaEmpresaDoContato";
 import { DadosDaPessoaDoContato } from "./DadosDaPessoaDoContato";
 import { camposDoFunil, camposPorEscopo } from "@/lib/leads/campos-do-funil";
@@ -963,7 +964,11 @@ export function CRMSidePanel({ conversation, recolhido = false, onAlternarRecolh
           {t("Contato")}
         </h3>
         <Card className="mt-2 space-y-2 p-3 text-sm">
-          <div className="font-medium">{displayName}</div>
+          {contactId ? (
+            <NomeEditavelDoContato contactId={contactId} rotulo={displayName} nomeSalvo={(contact?.name ?? "").trim()} />
+          ) : (
+            <div className="font-medium">{displayName}</div>
+          )}
           {contact?.phone_number && (
             <div className="text-xs text-muted-foreground">{phoneForDisplay(contact.phone_number)}</div>
           )}
