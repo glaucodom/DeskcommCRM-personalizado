@@ -5,6 +5,9 @@ acrescente uma seção NO TOPO** (mais nova primeiro) no formato abaixo e rode `
 na VPS. Linha de item: `- #número **Título**: o que muda para quem usa`. Use `#-` quando não for um item da
 lista de personalizações (ex.: junção com o oficial). Nada aqui é do projeto original.
 
+## v1.87.0-glauco.7 · 2026-10-23
+- #30 **Importar histórico: barra de progresso atualiza sempre**: a janela não congela mais quando a aba fica em segundo plano.
+
 ## v1.87.0-glauco.6 · 2026-10-23
 - #30 **Importar histórico para o CRM**: em Conexões, no número com "Guardar o histórico" ligado, o botão mostra a prévia, pede confirmação e importa em segundo plano as conversas e mensagens que o WhatsApp já entregou. Não aciona IA nem automação; conversas novas entram fechadas; grupos ficam de fora; pode repetir sem duplicar.
 
