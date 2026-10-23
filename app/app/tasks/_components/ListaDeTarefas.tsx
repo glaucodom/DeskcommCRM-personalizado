@@ -17,7 +17,7 @@ import {
   type PrioridadeDaTarefa,
   type Tarefa,
 } from "@/lib/tarefas/tipos";
-import { Check, Kanban, PencilSimple, Trash, UserCircle } from "@/lib/ui/icons";
+import { CalendarDots, Check, Kanban, PencilSimple, Trash, UserCircle } from "@/lib/ui/icons";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -150,7 +150,23 @@ function Linha({
           >
             {rotuloDaPrioridade[tarefa.priority]}
           </span>
-          <span className={cn("text-muted-foreground", atrasada && "font-semibold text-destructive")}>
+          {/*
+            O prazo mora num balão, como a etiqueta de prioridade ao lado: a cor conta a
+            situação (atrasada no vermelho do tema, no prazo neutra, sem prazo tracejada).
+            `data-prazo` é o gancho do teste e de qualquer ajuste de estilo.
+          */}
+          <span
+            data-prazo={!tarefa.due_date ? "sem_prazo" : atrasada ? "atrasada" : "no_prazo"}
+            className={cn(
+              "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-medium tabular-nums",
+              !tarefa.due_date
+                ? "border-dashed border-border text-muted-foreground"
+                : atrasada
+                  ? "border-destructive/30 bg-destructive/10 text-destructive"
+                  : "border-border bg-muted/50 text-foreground/80",
+            )}
+          >
+            <CalendarDots size={12} aria-hidden />
             {tarefa.due_date
               ? new Date(tarefa.due_date).toLocaleString(tag, {
                   day: "2-digit",
