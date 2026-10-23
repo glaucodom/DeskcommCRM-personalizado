@@ -97,3 +97,61 @@ describe("prazo da tarefa em balão", () => {
     expect(balao.getAttribute("data-prazo")).toBe("no_prazo");
   });
 });
+
+/**
+ * Organização da linha: o balão do prazo fica NO TOPO, o título em negrito vem
+ * logo abaixo, e a data e a hora ficam separadas por um traço vertical fino —
+ * "23/10, 09:00" com as duas coladas parecia um número só.
+ */
+describe("organização da linha da tarefa", () => {
+  function montar(t: Tarefa) {
+    const { container } = render(
+      <ListaDeTarefas
+        tarefas={[t]}
+        podeEditar={false}
+        aoAlternarConcluida={vi.fn(async () => ({}))}
+        aoEditar={vi.fn()}
+        aoApagar={vi.fn(async () => ({}))}
+        mostrarNegocio={false}
+      />,
+    );
+    const balao = container.querySelector<HTMLElement>("[data-prazo]")!;
+    const titulo = [...container.querySelectorAll("p")].find((p) =>
+      p.textContent?.includes("Ligar para minha rainha"),
+    )!;
+    return { container, balao, titulo };
+  }
+
+  const COM_PRAZO = () => tarefa({ due_date: new Date(Date.now() + 3 * UM_DIA).toISOString() });
+
+  it("data e hora em pedaços separados, com um divisor entre eles", () => {
+    const { balao } = montar(COM_PRAZO());
+    expect(balao.querySelector("[data-prazo-data]")?.textContent).toMatch(/^\d{2}\/\d{2}$/);
+    expect(balao.querySelector("[data-prazo-hora]")?.textContent).toMatch(/^\d{2}:\d{2}$/);
+    const divisor = balao.querySelector("[data-prazo-divisor]");
+    expect(divisor).not.toBeNull();
+    expect(divisor!.getAttribute("aria-hidden")).toBe("true");
+  });
+
+  it("o balão do prazo vem ANTES do título", () => {
+    const { balao, titulo } = montar(COM_PRAZO());
+    expect(balao.compareDocumentPosition(titulo) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it("o título é negrito", () => {
+    const { titulo } = montar(COM_PRAZO());
+    expect(titulo.className).toContain("font-bold");
+  });
+
+  it("a prioridade fica ABAIXO do título", () => {
+    const { container, titulo } = montar(COM_PRAZO());
+    const prioridade = [...container.querySelectorAll("span")].find((s) => s.textContent === "Média")!;
+    expect(titulo.compareDocumentPosition(prioridade) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it("sem prazo continua como um balão só, sem divisor", () => {
+    const { balao } = montar(tarefa({ due_date: null }));
+    expect(balao.querySelector("[data-prazo-divisor]")).toBeNull();
+    expect(balao.textContent).toContain("Sem prazo");
+  });
+});
