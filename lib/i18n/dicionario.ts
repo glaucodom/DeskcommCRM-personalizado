@@ -17688,7 +17688,6 @@ export const DICIONARIO: Traducoes = {
   "Atualizando os contatos…": { es: "Actualizando los contactos…" },
   "A lista de segmentos desta empresa, para escolher no contato e no Novo lead.": { es: "La lista de segmentos de esta empresa, para elegir en el contacto y en el Nuevo lead." },
   "Selecione o segmento": { es: "Seleccione el segmento" },
-  "Nenhum": { es: "Ninguno" },
 };
 
 /**
