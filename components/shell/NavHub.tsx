@@ -88,7 +88,7 @@ export function NavHub({
   const secoes = hubSections(group, isPlatformAdmin, role, interfaceSettings, modulosLigados, capacidadesLigadas);
 
   return (
-    <div className="flex h-full flex-col gap-8 p-6">
+    <div className="mx-auto flex h-full w-full max-w-6xl flex-col gap-8 p-4 sm:p-6">
       <header>
         <h1 className="text-2xl font-semibold tracking-tight">{traduzir(title, locale)}</h1>
         {subtitle && <p className="text-sm text-muted-foreground">{traduzir(subtitle, locale)}</p>}

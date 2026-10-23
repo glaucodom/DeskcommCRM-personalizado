@@ -423,7 +423,7 @@ export function ProposalEditorClient({ id, podeEditar, podeRevisar = false }: { 
   const editavel = podeEditar && proposta.status === "rascunho";
 
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-4 p-6">
+    <div className="mx-auto w-full max-w-6xl space-y-4 p-6">
       <header>
         <input
           className="text-2xl font-semibold w-full border rounded-md px-2 py-1"
