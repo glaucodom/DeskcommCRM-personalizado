@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useT } from "@/hooks/i18n/useT";
 import { apiClient } from "@/lib/api/client";
+import { ImportarHistorico } from "./ImportarHistorico";
 
 interface Acervo {
   guardar_historico: boolean;
@@ -77,6 +78,7 @@ export function ChannelAcervo({ channelId }: { channelId: string }) {
           {t("Não foi possível guardar esta opção.")}
         </p>
       )}
+      {ligado && <ImportarHistorico channelId={channelId} />}
     </div>
   );
 }

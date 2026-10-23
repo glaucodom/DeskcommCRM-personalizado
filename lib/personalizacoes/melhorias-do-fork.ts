@@ -12,6 +12,7 @@ export interface MelhoriaDoFork {
 }
 
 export const MELHORIAS_DO_FORK: readonly MelhoriaDoFork[] = [
+  { n: 30, titulo: "Botão “Importar histórico para o CRM” nos números com acervo ligado", desde: "1.87.0-glauco.6" },
   { n: 29, titulo: "Telefone com máscara (+55 (41) 99999-8888) em todas as telas", desde: "1.87.0-glauco.5" },
   { n: 28, titulo: "Lápis para editar o nome do contato direto no painel do Inbox", desde: "1.87.0-glauco.5" },
   { n: 27, titulo: "Contato sem nome recebe o nome salvo na agenda do celular", desde: "1.87.0-glauco.5" },

@@ -5,6 +5,9 @@ acrescente uma seção NO TOPO** (mais nova primeiro) no formato abaixo e rode `
 na VPS. Linha de item: `- #número **Título**: o que muda para quem usa`. Use `#-` quando não for um item da
 lista de personalizações (ex.: junção com o oficial). Nada aqui é do projeto original.
 
+## v1.87.0-glauco.6 · 2026-10-23
+- #30 **Importar histórico para o CRM**: em Conexões, no número com "Guardar o histórico" ligado, o botão mostra a prévia, pede confirmação e importa em segundo plano as conversas e mensagens que o WhatsApp já entregou. Não aciona IA nem automação; conversas novas entram fechadas; grupos ficam de fora; pode repetir sem duplicar.
+
 ## v1.87.0-glauco.5 · 2026-10-23
 - #26 **Nome com letras maiúsculas certas**: ao cadastrar ou editar contato (Contatos, Iniciar conversa, agente de IA), o nome é gravado como "Glauco Satler Neiva" ou "Maria da Silva Oliveira" (de, da, do, das, dos, e ficam minúsculos).
 - #29 **Telefone com máscara em todas as telas**: +55 (41) 99999-8888 nos contatos, no Inbox e nos negócios.

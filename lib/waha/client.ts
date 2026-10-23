@@ -599,6 +599,47 @@ export class WahaClient {
   }
 
   /**
+   * Fork #30 — conversas que o servidor do canal guardou do número (`chats/overview`),
+   * paginadas. Só leitura. Devolve o `id` de cada chat no formato que `mensagensDoChat`
+   * aceita (`...@c.us` ou `...@lid`; grupo termina em `@g.us`).
+   */
+  async chatsDoHistorico(session: string, limite = 200, offset = 0): Promise<Array<{ id: string; name: string | null; timestamp: number | null }>> {
+    const res = await this.fetchComTeto(
+      `${this.baseUrl}/api/${encodeURIComponent(session)}/chats/overview?limit=${limite}&offset=${offset}`,
+      { headers: { "X-Api-Key": this.apiKey } },
+      30_000,
+    );
+    if (!res.ok) throw new Error(`waha_chats_${res.status}`);
+    const bruto = (await res.json().catch(() => null)) as unknown;
+    if (!Array.isArray(bruto)) return [];
+    const out: Array<{ id: string; name: string | null; timestamp: number | null }> = [];
+    for (const item of bruto) {
+      if (!item || typeof item !== "object") continue;
+      const o = item as Record<string, unknown>;
+      if (typeof o.id !== "string") continue;
+      const last = o.lastMessage && typeof o.lastMessage === "object" ? (o.lastMessage as Record<string, unknown>) : null;
+      out.push({
+        id: o.id,
+        name: typeof o.name === "string" ? o.name : null,
+        timestamp: last && typeof last.timestamp === "number" ? last.timestamp : null,
+      });
+    }
+    return out;
+  }
+
+  /** Fork #30 — uma página das mensagens guardadas de um chat, SEM baixar mídia. */
+  async mensagensDoChat(session: string, chatId: string, limite = 100, offset = 0): Promise<unknown[]> {
+    const res = await this.fetchComTeto(
+      `${this.baseUrl}/api/${encodeURIComponent(session)}/chats/${encodeURIComponent(chatId)}/messages?limit=${limite}&offset=${offset}&downloadMedia=false`,
+      { headers: { "X-Api-Key": this.apiKey } },
+      30_000,
+    );
+    if (!res.ok) throw new Error(`waha_chat_messages_${res.status}`);
+    const bruto = (await res.json().catch(() => null)) as unknown;
+    return Array.isArray(bruto) ? bruto : [];
+  }
+
+  /**
    * Liga ou desliga o recebimento de grupos NESTA sessão. Só devolve `true` quando o GET
    * seguinte confirma a troca: o WAHA já respondeu 200 para operação que não aconteceu
    * (medido na issue melgarafael/DeskcommCRM#1428).

@@ -112,6 +112,8 @@ export function MessageBubble({
   // poda anulou os DOIS campos — a partir daí `hasMedia` é false e esta mensagem
   // de mídia perde o render. O aviso é o do issue #1534.
   const mediaExpirada = (message.metadata as Record<string, unknown> | null)?.media_status === "expired";
+  // Fork #30: mídia de histórico importado não tem arquivo (já expirou no WhatsApp).
+  const midiaDoHistorico = (message.metadata as Record<string, unknown> | null)?.media_status === "historico_indisponivel";
   // O texto do aviso carrega os DIAS que a organização configurou — a 0557
   // guarda `media_retention_days` (já com o piso de 30) junto do marcador,
   // porque a bolha não tem acesso à configuração da organização e "por política"
@@ -413,9 +415,9 @@ export function MessageBubble({
               </div>
             )}
 
-            {!hasMedia && mediaExpirada && (
+            {!hasMedia && (mediaExpirada || midiaDoHistorico) && (
               <div className={cn(message.body && "mb-1")}>
-                <MediaUnavailable kind={avisoDeExpiracao} />
+                <MediaUnavailable kind={midiaDoHistorico ? t("Arquivo do histórico não disponível (expirou no WhatsApp)") : avisoDeExpiracao} />
               </div>
             )}
 
