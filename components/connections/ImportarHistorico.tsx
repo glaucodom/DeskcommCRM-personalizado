@@ -54,7 +54,10 @@ export function ImportarHistorico({ channelId }: { channelId: string }) {
     queryKey: chave,
     queryFn: () => apiClient.get<{ data: { estado: Estado | null } }>(`/api/v1/channel-sessions/${channelId}/importar-historico`),
     enabled: podeImportar,
-    refetchOnWindowFocus: false,
+    // A importação anda com a aba em segundo plano e a janela pode ficar aberta por minutos:
+    // sem estas duas linhas a barra congelava no último valor lido.
+    refetchOnWindowFocus: true,
+    refetchIntervalInBackground: true,
     refetchInterval: (q) => {
       const fase = q.state.data?.data.estado?.fase;
       return fase === "analisando" || fase === "importando" ? 2000 : false;
@@ -83,6 +86,7 @@ export function ImportarHistorico({ channelId }: { channelId: string }) {
           size="sm"
           disabled={pedir.isPending || ocupado}
           onClick={() => {
+            void query.refetch();
             setAberto(true);
             if (!ocupado) pedir.mutate("analisar");
           }}
