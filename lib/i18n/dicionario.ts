@@ -17687,6 +17687,7 @@ export const DICIONARIO: Traducoes = {
   "Tirar este segmento da lista? Os contatos que já o têm continuam com ele.": { es: "¿Quitar este segmento de la lista? Los contactos que ya lo tienen lo conservan." },
   "Atualizando os contatos…": { es: "Actualizando los contactos…" },
   "A lista de segmentos desta empresa, para escolher no contato e no Novo lead.": { es: "La lista de segmentos de esta empresa, para elegir en el contacto y en el Nuevo lead." },
+  "Ver menos": { es: "Ver menos" },
 };
 
 /**
