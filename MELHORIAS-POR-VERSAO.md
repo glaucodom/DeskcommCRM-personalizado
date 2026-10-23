@@ -5,6 +5,9 @@ acrescente uma seção NO TOPO** (mais nova primeiro) no formato abaixo e rode `
 na VPS. Linha de item: `- #número **Título**: o que muda para quem usa`. Use `#-` quando não for um item da
 lista de personalizações (ex.: junção com o oficial). Nada aqui é do projeto original.
 
+## v1.88.0-glauco.2 · 2026-10-23
+- #32 **Segmentos cadastrados por empresa**: em CRM › Segmentos (só B2B) cada empresa cadastra a própria lista; o Inbox, o Novo contato, o Editar contato e o Novo lead escolhem dela. Renomear atualiza também os contatos; tirar da lista não apaga o segmento dos contatos que já o têm.
+
 ## v1.88.0-glauco.1 · 2026-10-23
 - #- **Junção com o oficial 1.88.0**: todas as nossas melhorias mantidas. Ganhos do oficial: voltar para a versão anterior em um clique (e sozinho se o app cair), verificação em duas etapas com "confiar neste dispositivo", encaminhar mensagem, últimas compras do contato, contatos em cartões no celular, telefone brasileiro aceito pela API e muitas correções.
 

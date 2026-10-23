@@ -1,4 +1,5 @@
 "use client";
+import { SeletorDeSegmentos } from "@/components/contacts/SeletorDeSegmentos";
 import { nomeProprio } from "@/lib/personalizacoes/nome-proprio";
 import { useEffect, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
@@ -281,8 +282,8 @@ export function EditContactDialog({
             <Input id="ec-cnpj" inputMode="numeric" placeholder="00.000.000/0000-00" {...form.register("cnpj")} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="ec-segmentos">{t("Segmentos (separe por vírgula)")}</Label>
-            <Input id="ec-segmentos" {...form.register("segmentosRaw")} />
+            <Label htmlFor="ec-segmentos">{t("Segmentos")}</Label>
+            <SeletorDeSegmentos id="ec-segmentos" value={form.watch("segmentosRaw") ?? ""} onChange={(v) => form.setValue("segmentosRaw", v, { shouldDirty: true })} />
           </div>
             </>
           )}

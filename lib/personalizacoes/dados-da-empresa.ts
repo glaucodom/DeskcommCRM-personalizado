@@ -5,16 +5,6 @@ import { normalizeCnpj } from "@/lib/crm-b2b/normalize";
  * pessoa física. Empresa, CNPJ e segmentos são preenchidos pelo atendente direto no
  * painel do Inbox e no "Novo Lead" (que não pede mais valor).
  */
-export const SEGMENTOS_SUGERIDOS = [
-  "Construção pesada",
-  "Construção predial",
-  "Pedreira / mineração",
-  "Concreteira",
-  "Usina de asfalto",
-  "Pré-moldados",
-  "Locadora de máquinas",
-] as const;
-
 /** "12345678000199" -> "12.345.678/0001-99", enquanto digita. */
 export function mascaraCnpj(entrada: string): string {
   const d = entrada.replace(/\D/g, "").slice(0, 14);

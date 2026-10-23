@@ -1,5 +1,6 @@
 "use client";
 
+import { SeletorDeSegmentos } from "@/components/contacts/SeletorDeSegmentos";
 import { useActiveOrg } from "@/hooks/auth/AuthProvider";
 import { useT } from "@/hooks/i18n/useT";
 import { useEffect, useMemo, useState } from "react";
@@ -40,7 +41,7 @@ import { rotuloDoContato } from "@/lib/contacts/rotulo-do-contato";
 import type { Contact } from "@/lib/types/contacts";
 import { EcoDoValor } from "./EcoDoValor";
 import { apiClient } from "@/lib/api/client";
-import { cnpjVazioOuValido, mascaraCnpj, segmentosDeTexto, SEGMENTOS_SUGERIDOS } from "@/lib/personalizacoes/dados-da-empresa";
+import { cnpjVazioOuValido, mascaraCnpj, segmentosDeTexto } from "@/lib/personalizacoes/dados-da-empresa";
 import { formatCnpj } from "@/lib/crm-b2b/normalize";
 import { SeletorDeContato } from "./SeletorDeContato";
 import { CustomFieldsEditor, type CustomFieldDef } from "@/components/contacts/CustomFieldsEditor";
@@ -546,17 +547,11 @@ export function NewLeadDialog({
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="segmentosRaw">{t("Segmento")}</Label>
-                  <Input
+                  <SeletorDeSegmentos
                     id="segmentosRaw"
-                    list="nl-segmentos-sugeridos"
-                    placeholder={t("Segmentos (separe por vírgula)")}
-                    {...form.register("segmentosRaw")}
+                    value={form.watch("segmentosRaw") ?? ""}
+                    onChange={(v) => form.setValue("segmentosRaw", v, { shouldDirty: true })}
                   />
-                  <datalist id="nl-segmentos-sugeridos">
-                    {SEGMENTOS_SUGERIDOS.map((x) => (
-                      <option key={x} value={x} />
-                    ))}
-                  </datalist>
                 </div>
               </div>
               <div className="space-y-2">

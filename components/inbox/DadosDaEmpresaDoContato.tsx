@@ -1,4 +1,5 @@
 "use client";
+import { SeletorDeSegmentos } from "@/components/contacts/SeletorDeSegmentos";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -10,7 +11,6 @@ import {
   cnpjVazioOuValido,
   mascaraCnpj,
   segmentosDeTexto,
-  SEGMENTOS_SUGERIDOS,
 } from "@/lib/personalizacoes/dados-da-empresa";
 import { formatCnpj } from "@/lib/crm-b2b/normalize";
 import { padronizarOrigem } from "@/lib/personalizacoes/origem-do-lead";
@@ -85,20 +85,12 @@ export function DadosDaEmpresaDoContato({ contactId, empresa, cnpj, segmentos, c
         </div>
         <div className="space-y-1">
           <Label htmlFor="dc-segmentos" className="text-xs">{t("Segmento")}</Label>
-          <Input
+          <SeletorDeSegmentos
             id="dc-segmentos"
-            className="h-8 text-sm"
-            list="dc-segmentos-sugeridos"
-            placeholder={t("Segmentos (separe por vírgula)")}
             value={v.segmentos}
             disabled={readonly}
-            onChange={(e) => setV({ ...v, segmentos: e.target.value })}
+            onChange={(segmentos) => setV({ ...v, segmentos })}
           />
-          <datalist id="dc-segmentos-sugeridos">
-            {SEGMENTOS_SUGERIDOS.map((s) => (
-              <option key={s} value={s} />
-            ))}
-          </datalist>
         </div>
         <div className="space-y-1">
           <Label htmlFor="dc-origem" className="text-xs">{t("Origem do lead")}</Label>

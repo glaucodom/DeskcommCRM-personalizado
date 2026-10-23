@@ -329,3 +329,78 @@ $$;
 revoke all on function public.fn_importar_historico_lote(uuid, uuid, jsonb) from public;
 revoke execute on function public.fn_importar_historico_lote(uuid, uuid, jsonb) from anon, authenticated;
 grant execute on function public.fn_importar_historico_lote(uuid, uuid, jsonb) to service_role;
+
+-- ── Segmentos cadastrados por empresa (#32) ─────────────────────────────────
+--
+-- Cada empresa (B2B) tem a PRÓPRIA lista de segmentos, em
+-- `organizations.settings.segmentos_cadastrados` (array de textos). Nasce vazia:
+-- nenhuma lista vem no código, porque a mesma versão roda em várias empresas.
+-- Renomear muda a lista e os contatos que já usam o nome, na mesma transação.
+-- Apagar da lista NÃO mexe nos contatos (a rota só tira a opção).
+create or replace function public.fn_segmentos_salvar(p_org uuid, p_lista jsonb)
+returns void
+language sql
+security definer
+set search_path = public
+as $$
+  update public.organizations o
+     set settings = jsonb_set(coalesce(o.settings, '{}'::jsonb), '{segmentos_cadastrados}',
+                              case when jsonb_typeof(p_lista) = 'array' then p_lista else '[]'::jsonb end, true)
+   where o.id = p_org;
+$$;
+
+create or replace function public.fn_segmentos_renomear(p_org uuid, p_de text, p_para text)
+returns integer
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_contatos integer;
+begin
+  update public.organizations o
+     set settings = jsonb_set(
+           coalesce(o.settings, '{}'::jsonb), '{segmentos_cadastrados}',
+           coalesce((
+             select jsonb_agg(to_jsonb(x.nome) order by x.pos)
+               from (select distinct on (n) n as nome, min(pos) over (partition by n) as pos
+                       from (select case when e.valor = p_de then p_para else e.valor end as n, e.pos
+                               from jsonb_array_elements_text(
+                                      case when jsonb_typeof(o.settings -> 'segmentos_cadastrados') = 'array'
+                                           then o.settings -> 'segmentos_cadastrados' else '[]'::jsonb end
+                                    ) with ordinality as e(valor, pos)) t) x
+           ), '[]'::jsonb), true)
+   where o.id = p_org;
+
+  update public.contacts c
+     set segmentos = (
+           select array_agg(distinct case when s = p_de then p_para else s end)
+             from unnest(c.segmentos) as s)
+   where c.organization_id = p_org and p_de = any(c.segmentos) and c.is_anonymized is not true;
+  get diagnostics v_contatos = row_count;
+  return v_contatos;
+end;
+$$;
+
+create or replace function public.fn_segmentos_uso(p_org uuid)
+returns table (nome text, usos bigint)
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select s as nome, count(*) as usos
+    from public.contacts c, unnest(c.segmentos) as s
+   where c.organization_id = p_org and c.is_merged_into is null and c.is_anonymized is not true
+   group by s;
+$$;
+
+revoke all on function public.fn_segmentos_salvar(uuid, jsonb) from public;
+revoke all on function public.fn_segmentos_renomear(uuid, text, text) from public;
+revoke all on function public.fn_segmentos_uso(uuid) from public;
+revoke execute on function public.fn_segmentos_salvar(uuid, jsonb) from anon, authenticated;
+revoke execute on function public.fn_segmentos_renomear(uuid, text, text) from anon, authenticated;
+revoke execute on function public.fn_segmentos_uso(uuid) from anon, authenticated;
+grant execute on function public.fn_segmentos_salvar(uuid, jsonb) to service_role;
+grant execute on function public.fn_segmentos_renomear(uuid, text, text) to service_role;
+grant execute on function public.fn_segmentos_uso(uuid) to service_role;

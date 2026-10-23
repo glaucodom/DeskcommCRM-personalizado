@@ -374,6 +374,18 @@ export const NAV_CATALOG = [
     // Inbox e o funil, que continuam no menu.
   },
   {
+    // Fork #32: os segmentos DESTA empresa (só B2B). Some junto com Empresas/Pessoas para empresa B2C
+    // ou com o módulo CRM B2B desligado.
+    href: "/app/segmentos",
+    label: "Segmentos",
+    description: "A lista de segmentos desta empresa, para escolher no contato e no Novo lead.",
+    icon: "ClipboardText",
+    group: "crm",
+    section: "Preparar a venda",
+    minRole: "manager",
+    modulo: "crm_b2b",
+  },
+  {
     href: "/app/imports",
     label: "Importações",
     description: "Lotes CSV/XLSX de empresas, pessoas e telefones.",

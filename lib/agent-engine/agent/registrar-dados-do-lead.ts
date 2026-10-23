@@ -20,6 +20,7 @@
  * CNPJ: só confere 14 dígitos (a mesma régua de `normalizeCnpj`); a consulta à BrasilAPI
  * fica `pending` para o enriquecimento que o produto já tem.
  */
+import { segmentoDaLista, segmentosDasConfiguracoes } from '@/lib/personalizacoes/segmentos';
 import { nomeProprio } from '@/lib/personalizacoes/nome-proprio';
 import { padronizarOrigem } from '@/lib/personalizacoes/origem-do-lead';
 import { hashCpf, normalizeCpf } from '@/lib/contacts/cpf';
@@ -173,9 +174,25 @@ export async function aplicarRegistroDoLead(
   if (cnpjNorm) campos.cnpj_informado = formatCnpj(cnpjNorm);
 
   // Lista de segmentos: "construção pesada, usina de asfalto" → 2 itens. Soma aos já gravados.
-  const listaDeSegmentos = segmento
+  const citados = segmento
     ? [...new Set(segmento.split(/\s*[,;/]\s*|\s+e\s+/i).map((s) => s.trim()).filter((s) => s.length >= 2))]
     : [];
+  // Fork #32: se a empresa cadastrou segmentos (CRM › Segmentos), só entram em `segmentos` os que existem na
+  // lista (casados sem acento nem caixa, com o nome cadastrado). O resto fica só no texto livre
+  // `custom_fields.segmento`, sem sujar a lista. Empresa sem lista cadastrada: comportamento de sempre.
+  let listaDeSegmentos = citados;
+  if (citados.length > 0) {
+    const { rows: oRows } = await db.query<{ settings: unknown }>(
+      `select settings from organizations where id = $1`,
+      [tenantId],
+    );
+    const cadastrados = segmentosDasConfiguracoes(oRows[0]?.settings);
+    if (cadastrados.length > 0) {
+      listaDeSegmentos = [
+        ...new Set(citados.map((c) => segmentoDaLista(cadastrados, c)).filter((c): c is string => c !== null)),
+      ];
+    }
+  }
 
   if (nome || email || empresa || cnpjNorm || listaDeSegmentos.length > 0 || Object.keys(campos).length > 0) {
     await db.query(

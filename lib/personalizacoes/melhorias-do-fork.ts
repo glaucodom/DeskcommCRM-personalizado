@@ -12,6 +12,7 @@ export interface MelhoriaDoFork {
 }
 
 export const MELHORIAS_DO_FORK: readonly MelhoriaDoFork[] = [
+  { n: 32, titulo: "Segmentos cadastrados por empresa em CRM › Segmentos (só B2B)", desde: "1.88.0-glauco.2" },
   { n: 31, titulo: "Versão no rodapé do menu aparece só para administradores", desde: "1.87.0-glauco.8" },
   { n: 30, titulo: "Botão “Importar histórico para o CRM” nos números com acervo ligado", desde: "1.87.0-glauco.6" },
   { n: 29, titulo: "Telefone com máscara (+55 (41) 99999-8888) em todas as telas", desde: "1.87.0-glauco.5" },

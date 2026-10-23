@@ -17675,6 +17675,18 @@ export const DICIONARIO: Traducoes = {
   "A importação parou por um erro. Pode tentar de novo; o que já entrou não duplica.": { es: "La importación se detuvo por un error. Puede reintentar; lo que ya entró no se duplica." },
   "Importar agora": { es: "Importar ahora" },
   "Arquivo do histórico não disponível (expirou no WhatsApp)": { es: "Archivo del historial no disponible (expiró en WhatsApp)" },
+  "Carregando segmentos…": { es: "Cargando segmentos…" },
+  "Nenhum segmento cadastrado.": { es: "Ningún segmento registrado." },
+  "Cadastrar em CRM › Segmentos": { es: "Registrar en CRM › Segmentos" },
+  "Não foi possível salvar. Confira se o nome já existe.": { es: "No se pudo guardar. Compruebe si el nombre ya existe." },
+  "Os segmentos desta empresa. Eles aparecem para escolher no contato, no Inbox e no Novo lead.": { es: "Los segmentos de esta empresa. Aparecen para elegir en el contacto, en el Inbox y en el Nuevo lead." },
+  "Novo segmento": { es: "Nuevo segmento" },
+  "Não foi possível ler os segmentos.": { es: "No se pudieron leer los segmentos." },
+  "Nenhum segmento cadastrado ainda.": { es: "Aún no hay segmentos registrados." },
+  "Nome do segmento": { es: "Nombre del segmento" },
+  "Tirar este segmento da lista? Os contatos que já o têm continuam com ele.": { es: "¿Quitar este segmento de la lista? Los contactos que ya lo tienen lo conservan." },
+  "Atualizando os contatos…": { es: "Actualizando los contactos…" },
+  "A lista de segmentos desta empresa, para escolher no contato e no Novo lead.": { es: "La lista de segmentos de esta empresa, para elegir en el contacto y en el Nuevo lead." },
 };
 
 /**
