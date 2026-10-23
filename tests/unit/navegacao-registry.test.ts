@@ -189,6 +189,7 @@ describe("hubSections", () => {
       "/app/calls",
       "/app/comandas",
       "/app/products",
+      "/app/segmentos",
       "/app/imports",
       "/app/settings/tenant/pipelines",
       "/app/proposals",
@@ -196,7 +197,7 @@ describe("hubSections", () => {
   });
 
   it("empresas, pessoas e importação só existem com o módulo crm_b2b ligado (doc 68)", () => {
-    const B2B = ["/app/companies", "/app/people", "/app/imports"];
+    const B2B = ["/app/companies", "/app/people", "/app/segmentos", "/app/imports"];
     const hrefs = (modulos: readonly ModuloOpcional[]) =>
       hubSections("crm", true, null, undefined, modulos).flatMap((s) => s.items.map((i) => i.href));
     expect(hrefs([]).filter((h) => B2B.includes(h))).toEqual([]);

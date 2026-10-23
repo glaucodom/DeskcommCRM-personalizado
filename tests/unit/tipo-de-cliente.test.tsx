@@ -94,7 +94,7 @@ describe("NewContactDialog", () => {
     desenhar();
     expect(screen.getByLabelText("Empresa")).toBeTruthy();
     expect(screen.getByLabelText("CNPJ")).toBeTruthy();
-    expect(screen.getByLabelText(/Segmentos/)).toBeTruthy();
+    expect(screen.getByRole("group", { name: /Segmentos/ })).toBeTruthy();
     expect(screen.queryByLabelText(/Data de nascimento/)).toBeNull();
   });
 
@@ -103,7 +103,7 @@ describe("NewContactDialog", () => {
     desenhar();
     expect(screen.queryByLabelText("Empresa")).toBeNull();
     expect(screen.queryByLabelText("CNPJ")).toBeNull();
-    expect(screen.queryByLabelText(/Segmentos/)).toBeNull();
+    expect(screen.queryByRole("group", { name: /Segmentos/ })).toBeNull();
     expect(screen.getByLabelText(/CPF/)).toBeTruthy();
     expect(screen.getByLabelText(/Data de nascimento/)).toBeTruthy();
   });

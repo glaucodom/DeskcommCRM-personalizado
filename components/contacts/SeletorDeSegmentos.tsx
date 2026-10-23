@@ -38,17 +38,17 @@ export function SeletorDeSegmentos({
     onChange(novos.join(", "));
   }
 
-  if (isLoading) return <p className="text-xs text-muted-foreground">{t("Carregando segmentos…")}</p>;
+  if (isLoading) return <p className="text-xs text-muted-foreground" id={id} role="group" aria-label={t("Segmentos")}>{t("Carregando segmentos…")}</p>;
   if (opcoes.length === 0) {
     return (
-      <p className="text-xs text-muted-foreground" id={id}>
+      <p className="text-xs text-muted-foreground" id={id} role="group" aria-label={t("Segmentos")}>
         {t("Nenhum segmento cadastrado.")}{" "}
         <Link href="/app/segmentos" className="underline">{t("Cadastrar em CRM › Segmentos")}</Link>
       </p>
     );
   }
   return (
-    <div className="flex flex-wrap gap-1.5" id={id} role="group">
+    <div className="flex flex-wrap gap-1.5" id={id} role="group" aria-label={t("Segmentos")}>
       {opcoes.map((nome) => {
         const ativo = chavesMarcadas.has(chaveDoSegmento(nome));
         return (

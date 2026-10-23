@@ -116,7 +116,7 @@ describe("módulo ligado acende a porta mesmo no preset simplificada", () => {
 describe("ondeOModuloAparece: a tela pode dizer o que ligar vai mudar", () => {
   it("módulo com porta devolve o caminho E o grupo do menu", () => {
     const onde = ondeOModuloAparece("crm_b2b");
-    expect(onde.map((p) => p.href)).toEqual(["/app/companies", "/app/people", "/app/imports"]);
+    expect(onde.map((p) => p.href)).toEqual(["/app/companies", "/app/people", "/app/segmentos", "/app/imports"]);
     expect(onde.every((p) => p.grupo === "CRM")).toBe(true);
     expect(onde[0]!.label).toBe("Empresas");
   });
