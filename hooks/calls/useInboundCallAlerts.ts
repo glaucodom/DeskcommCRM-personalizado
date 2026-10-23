@@ -4,7 +4,7 @@ import { useCallback } from "react";
 
 import { useActiveOrg, usePermission } from "@/hooks/auth/AuthProvider";
 import { useRealtimeChannel } from "@/hooks/realtime/useRealtimeChannel";
-import { phoneForDisplay } from "@/lib/channels/phone-variants";
+import { telefoneNaTela } from "@/lib/personalizacoes/telefone-br-mascara";
 import { rotuloDoContato, SEM_NOME } from "@/lib/contacts/rotulo-do-contato";
 import { entregarAviso } from "@/lib/notifications/deliver";
 import { canalLigado } from "@/lib/notifications/prefs";
@@ -47,7 +47,7 @@ async function callerName(contactId: string | null, fromNumber: string): Promise
     .maybeSingle();
   const row = data as { display_name?: string | null; name?: string | null } | null;
   const rotulo = rotuloDoContato({ display_name: row?.display_name, name: row?.name, phone_number: fromNumber });
-  if (rotulo === SEM_NOME || rotulo === phoneForDisplay(fromNumber)) return null;
+  if (rotulo === SEM_NOME || rotulo === telefoneNaTela(fromNumber)) return null;
   return rotulo;
 }
 

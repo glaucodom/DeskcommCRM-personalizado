@@ -1,5 +1,6 @@
 "use client";
 
+import { telefoneNaTela } from "@/lib/personalizacoes/telefone-br-mascara";
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -159,7 +160,7 @@ function DadosDoContato({ contato }: { contato: Contact }) {
         <dd className="min-w-0 tabular-nums">
           {contato.phone_number ? (
             <span className="inline-flex flex-wrap items-center gap-x-2">
-              {contato.phone_number}
+              {telefoneNaTela(contato.phone_number)}
               {digitos && (
                 <a
                   href={`https://wa.me/${digitos}`}

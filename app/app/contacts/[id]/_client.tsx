@@ -51,7 +51,7 @@ import { RoteirosDoContato } from "@/components/contacts/RoteirosDoContato";
 import { ConversaNoDossie } from "@/components/kanban/ConversaNoDossie";
 import { rotuloParaAEquipe } from "@/lib/contacts/rotulo-do-contato";
 import { ORIGEM_AGENDA_DO_CELULAR, origemDoContato } from "@/lib/leads/origem-do-contato";
-import { phoneForDisplay } from "@/lib/channels/phone-variants";
+import { telefoneNaTela } from "@/lib/personalizacoes/telefone-br-mascara";
 import { formatCnpj } from "@/lib/crm-b2b/normalize";
 import { DialButton } from "@/components/voice/DialButton";
 
@@ -201,7 +201,7 @@ export function ContactDetailClient({ contactId, paineisDeModulo = [] }: Props) 
           <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
             {contact.email && <span>{contact.email}</span>}
             {contact.email && contact.phone_number && <span>•</span>}
-            {contact.phone_number && <span>{phoneForDisplay(contact.phone_number)}</span>}
+            {contact.phone_number && <span>{telefoneNaTela(contact.phone_number)}</span>}
           </div>
           <div className="mt-2 flex flex-wrap gap-1">
             {contact.tags.map((t) => (
@@ -435,7 +435,7 @@ export function ContactDetailClient({ contactId, paineisDeModulo = [] }: Props) 
               <div>
                 <dt className="text-xs uppercase text-muted-foreground">{t("Telefone")}</dt>
                 <dd className="mt-1">
-                  {contact.phone_number ? phoneForDisplay(contact.phone_number) : "—"}
+                  {contact.phone_number ? telefoneNaTela(contact.phone_number) : "—"}
                 </dd>
               </div>
               {/*

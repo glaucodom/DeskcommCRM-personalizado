@@ -5,6 +5,8 @@
  * que é o que a API exige. Mora aqui, fora dos diálogos, para o merge com o oficial
  * conflitar o mínimo.
  */
+import { phoneForDisplay } from "@/lib/channels/phone-variants";
+
 export const TELEFONE_BR_INICIAL = "+55 ";
 
 /** Aceita digitação, colagem e valor já gravado ("+5541999998888", "41 99999-8888"). */
@@ -37,4 +39,14 @@ export function telefoneBrParaE164(valor: string): string | null {
 const EMAIL_RX = /^[^\s@]+@[^\s@.]+(\.[^\s@.]+)+$/;
 export function emailValido(valor: string): boolean {
   return EMAIL_RX.test(valor.trim());
+}
+
+/**
+ * Exibição (fork #29): "+55 (41) 99999-8888", ou "+55 (41) 3333-4444" no fixo. Número de outro país,
+ * ou que não é de gente, volta como `phoneForDisplay` devolve. Só tela: o que se grava continua E.164.
+ */
+export function telefoneNaTela(raw: string | null | undefined): string {
+  const base = phoneForDisplay(raw);
+  const m = /^\+55(\d{2})(\d{4,5})(\d{4})$/.exec(base.replace(/[\s()-]/g, ""));
+  return m ? `+55 (${m[1]}) ${m[2]}-${m[3]}` : base;
 }

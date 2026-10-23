@@ -54,7 +54,7 @@ import {
   rotuloDoTipoDeCanal,
 } from "@/lib/channels/conversa-nova";
 import { lerEstadoDoCanal, nomeDoCanal, rotuloDoEstadoDoCanal } from "@/lib/channels/estado";
-import { phoneForDisplay } from "@/lib/channels/phone-variants";
+import { telefoneNaTela } from "@/lib/personalizacoes/telefone-br-mascara";
 
 /** O que o POST precisa para abrir (ou reabrir) a conversa do contato. */
 export interface AlvoDeConversa {
@@ -100,7 +100,7 @@ function OpcaoDeCanal({
 }) {
   const t = useT();
   const nome = nomeDoCanal(canal, t);
-  const numero = phoneForDisplay(canal.phone_number);
+  const numero = telefoneNaTela(canal.phone_number);
   const tipo = rotuloDoTipoDeCanal(canal.provider);
   const estado = lerEstadoDoCanal(canal.status);
 

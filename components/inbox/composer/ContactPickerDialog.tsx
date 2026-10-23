@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useContactList } from "@/hooks/contacts/useContactList";
 import { parseDialablePhone, phoneToWhatsappId } from "@/lib/messaging/contact-card";
-import { phoneForDisplay } from "@/lib/channels/phone-variants";
+import { telefoneNaTela } from "@/lib/personalizacoes/telefone-br-mascara";
 import { rotuloDoContato } from "@/lib/contacts/rotulo-do-contato";
 import { MagnifyingGlass, UserCircle } from "@/lib/ui/icons";
 import { cn } from "@/lib/utils";
@@ -170,7 +170,7 @@ export function ContactPickerDialog({
                     <span className="min-w-0 flex-1">
                       <span className="block truncate font-medium">{displayName(c)}</span>
                       {c.phone_number && (
-                        <span className="block truncate text-xs text-muted-foreground">{phoneForDisplay(c.phone_number)}</span>
+                        <span className="block truncate text-xs text-muted-foreground">{telefoneNaTela(c.phone_number)}</span>
                       )}
                     </span>
                   </button>

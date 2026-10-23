@@ -44,7 +44,7 @@ import { ReservarServicoNaConversa } from "@/components/agenda/ReservarServicoNa
 import { motivoDoContato } from "@/lib/inbox/motivo-do-envio-bloqueado";
 import type { ConversationWithContact } from "@/hooks/inbox/useConversationsRealtime";
 import { rotuloParaAEquipe } from "@/lib/contacts/rotulo-do-contato";
-import { phoneForDisplay } from "@/lib/channels/phone-variants";
+import { telefoneNaTela } from "@/lib/personalizacoes/telefone-br-mascara";
 import { rotuloDoCanalDaConversa } from "@/lib/channels/estado";
 
 interface Props {
@@ -118,7 +118,7 @@ export function ConversationHeader({
    * canais (#2383). `null` quando não há canal, e aí o badge não existe.
    */
   const rotuloCanal = rotuloDoCanalDaConversa(conversation.channel_sessions, t);
-  const phone = c?.phone_number ? phoneForDisplay(c.phone_number) : null;
+  const phone = c?.phone_number ? telefoneNaTela(c.phone_number) : null;
   const status = conversation.status;
   const isMineAssigned = conversation.assigned_to_user_id === user.id;
   const isOpen = status === "open" || conversation.assigned_to_user_id == null;

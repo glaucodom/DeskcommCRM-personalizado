@@ -54,7 +54,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { phoneForDisplay } from "@/lib/channels/phone-variants";
+import { telefoneNaTela } from "@/lib/personalizacoes/telefone-br-mascara";
 import { rotuloDoContato } from "@/lib/contacts/rotulo-do-contato";
 import {
   useContactDuplicates,
@@ -148,7 +148,7 @@ function GrupoDeDuplicados({
               <span className="block truncate font-medium">{rotuloDoContato(c, t)}</span>
               <span className="block truncate text-muted-foreground">{c.email ?? "—"}</span>
               <span className="block truncate text-muted-foreground">
-                {c.phone_number ? phoneForDisplay(c.phone_number) : "—"}
+                {c.phone_number ? telefoneNaTela(c.phone_number) : "—"}
               </span>
               {c.id === principal ? (
                 <span className="mt-1 block text-xs font-medium text-primary">

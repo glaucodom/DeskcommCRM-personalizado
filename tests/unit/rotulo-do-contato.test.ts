@@ -49,13 +49,13 @@ describe("rotuloDoContato", () => {
     // escreve; `display_name` é o nome do perfil do WhatsApp, gravado pela
     // ingestão, e nenhuma tela o edita. Esta asserção esperava o contrário, e o
     // nome digitado pelo operador nunca aparecia (issue #906).
-    expect(rotuloDoContato({ display_name: "🌸 Kaio", name: "Kaio Gomes", phone_number: "+5531988887777" })).toBe(
+    expect(rotuloDoContato({ display_name: "🌸 Kaio", name: "Kaio Gomes", phone_number: "+55 (31) 98888-7777" })).toBe(
       "Kaio Gomes",
     );
   });
 
   it("sem nome escolhido, usa o que o canal informou", () => {
-    expect(rotuloDoContato({ display_name: "🌸 Kaio", name: null, phone_number: "+5531988887777" })).toBe("🌸 Kaio");
+    expect(rotuloDoContato({ display_name: "🌸 Kaio", name: null, phone_number: "+55 (31) 98888-7777" })).toBe("🌸 Kaio");
   });
 
   it("pula o display_name TÉCNICO e usa o que vier depois", () => {
@@ -63,19 +63,19 @@ describe("rotuloDoContato", () => {
     // Sem esta regra, consertar o título do lead para ler do cadastro faria
     // `Contato 543134@lid` aparecer no card do kanban.
     expect(
-      rotuloDoContato({ display_name: "Contato 543134@lid", name: null, phone_number: "+5531988887777" }),
-    ).toBe("+5531988887777");
+      rotuloDoContato({ display_name: "Contato 543134@lid", name: null, phone_number: "+55 (31) 98888-7777" }),
+    ).toBe("+55 (31) 98888-7777");
   });
 
   it("o TELEFONE vale mais que 'Sem nome' — e duas telas o ignoravam", () => {
-    expect(rotuloDoContato({ display_name: null, name: null, phone_number: "+5531988887777" })).toBe(
-      "+5531988887777",
+    expect(rotuloDoContato({ display_name: null, name: null, phone_number: "+55 (31) 98888-7777" })).toBe(
+      "+55 (31) 98888-7777",
     );
   });
 
   it("celular BR sem o nono aparece COM o 9", () => {
     expect(rotuloDoContato({ display_name: null, name: null, phone_number: "+553284793302" })).toBe(
-      "+5532984793302",
+      "+55 (32) 98479-3302",
     );
   });
 
@@ -109,7 +109,7 @@ describe("nomeDoContato — o nome de gente, sem telefone nem literal", () => {
   });
 
   it("sem nome de gente devolve null, nunca o telefone", () => {
-    expect(nomeDoContato({ display_name: null, name: " ", phone_number: "+5531988887777" })).toBeNull();
+    expect(nomeDoContato({ display_name: null, name: " ", phone_number: "+55 (31) 98888-7777" })).toBeNull();
     expect(nomeDoContato(null)).toBeNull();
   });
 });

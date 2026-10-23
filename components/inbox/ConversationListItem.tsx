@@ -21,7 +21,7 @@ import {
 import { cn } from "@/lib/utils";
 import type { ConversationWithContact } from "@/hooks/inbox/useConversationsRealtime";
 import { rotuloParaAEquipe } from "@/lib/contacts/rotulo-do-contato";
-import { phoneForDisplay } from "@/lib/channels/phone-variants";
+import { telefoneNaTela } from "@/lib/personalizacoes/telefone-br-mascara";
 import { rotuloDoCanalDaConversa } from "@/lib/channels/estado";
 
 interface Props {
@@ -169,7 +169,7 @@ export function ConversationListItem({
   const t = useT();
   const c = conversation.contacts ?? null;
   const displayName = rotuloParaAEquipe(c, t);
-  const phoneFallback = c?.phone_number ? phoneForDisplay(c.phone_number) : "??";
+  const phoneFallback = c?.phone_number ? telefoneNaTela(c.phone_number) : "??";
   const tags = c?.tags ?? [];
   const visibleTags = tags.slice(0, 2);
   const overflow = tags.length - visibleTags.length;

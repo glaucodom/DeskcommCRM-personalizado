@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { NewContactDialog } from "@/components/contacts/NewContactDialog";
 import { useContactList } from "@/hooks/contacts/useContactList";
-import { phoneForDisplay } from "@/lib/channels/phone-variants";
+import { telefoneNaTela } from "@/lib/personalizacoes/telefone-br-mascara";
 import { rotuloDoContato } from "@/lib/contacts/rotulo-do-contato";
 import { X } from "@/lib/ui/icons";
 import type { Contact } from "@/lib/types/contacts";
@@ -62,7 +62,7 @@ export function SeletorDeContato({ escolhido, onEscolher }: Props) {
             <p className="truncate text-sm">{rotuloDoContato(escolhido, t)}</p>
             {escolhido.phone_number && (
               <p className="truncate text-xs text-muted-foreground">
-                {phoneForDisplay(escolhido.phone_number)}
+                {telefoneNaTela(escolhido.phone_number)}
               </p>
             )}
           </div>
@@ -101,7 +101,7 @@ export function SeletorDeContato({ escolhido, onEscolher }: Props) {
                 <span className="text-sm">{rotuloDoContato(c, t)}</span>
                 {c.phone_number && (
                   <span className="text-xs text-muted-foreground">
-                    {phoneForDisplay(c.phone_number)}
+                    {telefoneNaTela(c.phone_number)}
                   </span>
                 )}
               </button>

@@ -4,7 +4,7 @@ import { useT } from "@/hooks/i18n/useT";
 import Link from "next/link";
 import type { AdminConversationDetailResponse } from "@/hooks/useAdminConversation";
 import { Buildings, Phone, ArrowRight } from "@/lib/ui/icons";
-import { phoneForDisplay } from "@/lib/channels/phone-variants";
+import { telefoneNaTela } from "@/lib/personalizacoes/telefone-br-mascara";
 
 interface Props {
   data: AdminConversationDetailResponse;
@@ -41,7 +41,7 @@ export function AdminSidePanel({ data }: Props) {
             {contact.phone_number && (
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Phone size={12} weight="duotone" aria-hidden />
-                {phoneForDisplay(contact.phone_number)}
+                {telefoneNaTela(contact.phone_number)}
               </div>
             )}
             {contact.email && (

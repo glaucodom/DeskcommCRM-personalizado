@@ -5,7 +5,7 @@ import { useVoiceCall } from "@/components/voice/VoiceCallContext";
 import { usePecaDoRodape, type PecaDoRodape } from "@/lib/ui/rodape-ocupado";
 import { useContact } from "@/hooks/contacts/useContact";
 import { rotuloDoContato } from "@/lib/contacts/rotulo-do-contato";
-import { phoneForDisplay } from "@/lib/channels/phone-variants";
+import { telefoneNaTela } from "@/lib/personalizacoes/telefone-br-mascara";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { CircleNotch, Microphone, MicrophoneSlash, PhoneX, Warning } from "@/lib/ui/icons";
@@ -62,7 +62,7 @@ export function ActiveCallPanel() {
   const ancora = usePecaDoRodape(PAINEL_DE_CHAMADA);
 
   const contact = call?.contact_id ? contactQuery.data?.data : undefined;
-  const nome = contact ? rotuloDoContato(contact) : phoneForDisplay(call?.peer_phone ?? "");
+  const nome = contact ? rotuloDoContato(contact) : telefoneNaTela(call?.peer_phone ?? "");
   const inicial = (nome || "?").trim().charAt(0).toUpperCase();
 
   const conectada = call?.status === "connected" && !!call.answered_at;

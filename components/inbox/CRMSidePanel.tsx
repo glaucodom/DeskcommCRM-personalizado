@@ -41,7 +41,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { cn } from "@/lib/utils";
 import { PROXIMO_PASSO_DA_MENSAGEM_NOVA } from "@/lib/atendimento/proximo-passo-padrao";
 import { rotuloParaAEquipe } from "@/lib/contacts/rotulo-do-contato";
-import { phoneForDisplay } from "@/lib/channels/phone-variants";
+import { telefoneNaTela } from "@/lib/personalizacoes/telefone-br-mascara";
 import { NomeEditavelDoContato } from "./NomeEditavelDoContato";
 import { DadosDaEmpresaDoContato } from "./DadosDaEmpresaDoContato";
 import { DadosDaPessoaDoContato } from "./DadosDaPessoaDoContato";
@@ -970,7 +970,7 @@ export function CRMSidePanel({ conversation, recolhido = false, onAlternarRecolh
             <div className="font-medium">{displayName}</div>
           )}
           {contact?.phone_number && (
-            <div className="text-xs text-muted-foreground">{phoneForDisplay(contact.phone_number)}</div>
+            <div className="text-xs text-muted-foreground">{telefoneNaTela(contact.phone_number)}</div>
           )}
           {tags.length > 0 && (
             <div className="flex flex-wrap gap-1">

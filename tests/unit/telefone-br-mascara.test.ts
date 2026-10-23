@@ -47,3 +47,13 @@ describe("cerca do merge com o oficial", () => {
     expect(readFileSync("components/contacts/NewContactDialog.tsx", "utf8")).toContain("empresa");
   });
 });
+
+describe("fork #29 — telefoneNaTela", () => {
+  it("celular, fixo, sem o nono e número de fora", async () => {
+    const { telefoneNaTela } = await import("@/lib/personalizacoes/telefone-br-mascara");
+    expect(telefoneNaTela("+5541999998888")).toBe("+55 (41) 99999-8888");
+    expect(telefoneNaTela("+554133334444")).toBe("+55 (41) 3333-4444");
+    expect(telefoneNaTela("+14155550123")).toBe("+14155550123");
+    expect(telefoneNaTela(null)).toBe("");
+  });
+});

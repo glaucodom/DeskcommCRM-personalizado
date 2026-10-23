@@ -25,7 +25,7 @@
  * 16 mediu em 30% dos turnos — vocabulário de máquina chegando ao cliente.
  */
 
-import { phoneForDisplay } from "@/lib/channels/phone-variants";
+import { telefoneNaTela } from "@/lib/personalizacoes/telefone-br-mascara";
 
 /** O que qualquer tela precisa saber para chamar alguém pelo nome. */
 export interface ContatoNomeavel {
@@ -128,7 +128,7 @@ export function rotuloDoContato(
   if (nome) return nome;
 
   const tel = (c.phone_number ?? "").trim();
-  if (tel !== "") return phoneForDisplay(tel);
+  if (tel !== "") return telefoneNaTela(tel);
 
   return t(SEM_NOME);
 }

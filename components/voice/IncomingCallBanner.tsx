@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useVoiceCall } from "@/components/voice/VoiceCallContext";
 import { useContact } from "@/hooks/contacts/useContact";
 import { rotuloDoContato } from "@/lib/contacts/rotulo-do-contato";
-import { phoneForDisplay } from "@/lib/channels/phone-variants";
+import { telefoneNaTela } from "@/lib/personalizacoes/telefone-br-mascara";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Phone, PhoneX } from "@/lib/ui/icons";
@@ -21,7 +21,7 @@ export function IncomingCallBanner() {
   const t = useT();
 
   const contact = call?.contact_id ? contactQuery.data?.data : undefined;
-  const nome = contact ? rotuloDoContato(contact) : phoneForDisplay(call?.peer_phone ?? "");
+  const nome = contact ? rotuloDoContato(contact) : telefoneNaTela(call?.peer_phone ?? "");
   const inicial = (nome || "?").trim().charAt(0).toUpperCase();
 
   // Toque sintetizado via Web Audio (sem arquivo de asset): dois beeps curtos

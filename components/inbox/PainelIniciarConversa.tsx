@@ -67,7 +67,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { apiClient } from "@/lib/api/client";
 import { ApiError } from "@/lib/api/types";
 import { showApiError } from "@/components/feedback/ApiErrorToast";
-import { normalizePhoneBR, phoneForDisplay, samePhone } from "@/lib/channels/phone-variants";
+import { normalizePhoneBR, samePhone } from "@/lib/channels/phone-variants";
+import { telefoneNaTela } from "@/lib/personalizacoes/telefone-br-mascara";
 import { rotuloDoContato } from "@/lib/contacts/rotulo-do-contato";
 import { ChatCircle, UserCircle, Users } from "@/lib/ui/icons";
 import { useAuth, usePermission } from "@/hooks/auth/AuthProvider";
@@ -183,7 +184,7 @@ function CorpoDoPainel({
             <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2 text-sm">
               <UserCircle size={16} weight="regular" aria-hidden className="shrink-0" />
               <span className="min-w-0 flex-1 truncate">
-                {t("Novo contato")}: {phoneForDisplay(telefone)}
+                {t("Novo contato")}: {telefoneNaTela(telefone)}
               </span>
             </div>
           ) : null}
@@ -204,7 +205,7 @@ function CorpoDoPainel({
                   <span className="min-w-0 flex-1 truncate">{rotuloDoContato(c, t)}</span>
                   {c.phone_number && (
                     <span className="shrink-0 text-xs text-muted-foreground">
-                      {phoneForDisplay(c.phone_number)}
+                      {telefoneNaTela(c.phone_number)}
                     </span>
                   )}
                 </button>

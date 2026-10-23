@@ -39,7 +39,7 @@ import { useDeleteContact, mensagemDeBloqueioPorVinculo } from "@/hooks/contacts
 import type { ContactOrderBy } from "@/lib/schemas/contacts";
 import type { Contact } from "@/lib/types/contacts";
 import { rotuloParaAEquipe } from "@/lib/contacts/rotulo-do-contato";
-import { phoneForDisplay } from "@/lib/channels/phone-variants";
+import { telefoneNaTela } from "@/lib/personalizacoes/telefone-br-mascara";
 import { useConversaNovaComEscolhaDeCanal } from "@/components/channels/SeletorDeCanalParaConversa";
 import { EditContactDialog } from "@/components/contacts/EditContactDialog";
 
@@ -294,7 +294,7 @@ export function ContactsTable({
               {c.email ?? "—"}
             </TableCell>
             <TableCell className="text-muted-foreground">
-              {c.phone_number ? phoneForDisplay(c.phone_number) : "—"}
+              {c.phone_number ? telefoneNaTela(c.phone_number) : "—"}
             </TableCell>
             <TableCell>
               <div className="flex flex-wrap gap-1">

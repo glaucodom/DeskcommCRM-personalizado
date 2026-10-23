@@ -12,6 +12,7 @@ export interface MelhoriaDoFork {
 }
 
 export const MELHORIAS_DO_FORK: readonly MelhoriaDoFork[] = [
+  { n: 29, titulo: "Telefone com máscara (+55 (41) 99999-8888) em todas as telas", desde: "1.87.0-glauco.5" },
   { n: 28, titulo: "Lápis para editar o nome do contato direto no painel do Inbox", desde: "1.87.0-glauco.5" },
   { n: 27, titulo: "Contato sem nome recebe o nome salvo na agenda do celular", desde: "1.87.0-glauco.5" },
   { n: 26, titulo: "Nome de pessoa sempre com a primeira letra maiúscula (Maria da Silva Oliveira)", desde: "1.87.0-glauco.5" },

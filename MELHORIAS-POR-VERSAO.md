@@ -7,6 +7,7 @@ lista de personalizações (ex.: junção com o oficial). Nada aqui é do projet
 
 ## v1.87.0-glauco.5 · 2026-10-23
 - #26 **Nome com letras maiúsculas certas**: ao cadastrar ou editar contato (Contatos, Iniciar conversa, agente de IA), o nome é gravado como "Glauco Satler Neiva" ou "Maria da Silva Oliveira" (de, da, do, das, dos, e ficam minúsculos).
+- #29 **Telefone com máscara em todas as telas**: +55 (41) 99999-8888 nos contatos, no Inbox e nos negócios.
 - #28 **Lápis para editar o nome no Inbox**: no painel da direita da conversa, clique no lápis ao lado do nome, digite e Enter; salva na hora, sem sair da tela.
 - #27 **Nome da agenda do celular vira o nome do contato**: contato que chega sem nome recebe o nome que você salvou no celular (se parecer nome de gente), já com as maiúsculas certas. Pode editar; nome digitado nunca é trocado.
 
