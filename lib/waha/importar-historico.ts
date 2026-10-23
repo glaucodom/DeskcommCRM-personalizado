@@ -39,7 +39,7 @@ export interface EstadoDaImportacao {
   mensagens_importadas: number;
   ja_existiam: number;
   grupos_ignorados: number;
-  sem_telefone: number;
+  sem_numero_achado: number;
   midias_indisponiveis: number;
   contatos_novos: number;
   conversas_novas: number;
@@ -53,7 +53,7 @@ const ESTADO_ZERO: Omit<EstadoDaImportacao, "fase" | "atualizado_em"> = {
   mensagens_importadas: 0,
   ja_existiam: 0,
   grupos_ignorados: 0,
-  sem_telefone: 0,
+  sem_numero_achado: 0,
   midias_indisponiveis: 0,
   contatos_novos: 0,
   conversas_novas: 0,
@@ -268,7 +268,7 @@ async function executar(db: SupabaseClient, canal: Canal, pedido: Pedido, inicia
     const telefone = telefoneDoChat(chat.id, brutas);
     const mapeadas = brutas.map((b) => mapearMensagemDoAcervo(b)).filter((m): m is MensagemParaImportar => m !== null);
     if (!telefone) {
-      est.sem_telefone += 1;
+      est.sem_numero_achado += 1;
     } else if (mapeadas.length > 0) {
       const gravadas = await caudasJaGravadas(db, canal, telefone);
       const vistas = new Set<string>();

@@ -28,7 +28,7 @@ interface Estado {
   mensagens_importadas: number;
   ja_existiam: number;
   grupos_ignorados: number;
-  sem_telefone: number;
+  sem_numero_achado: number;
   midias_indisponiveis: number;
   contatos_novos: number;
   conversas_novas: number;
@@ -117,12 +117,12 @@ export function ImportarHistorico({ channelId }: { channelId: string }) {
                   <>
                     <p>
                       {t("Vão entrar")} <strong>{numero(estado.mensagens_novas)}</strong> {t("mensagens novas de")}{" "}
-                      <strong>{numero(estado.conversas_total - estado.sem_telefone)}</strong> {t("conversas.")}
+                      <strong>{numero(estado.conversas_total - estado.sem_numero_achado)}</strong> {t("conversas.")}
                     </p>
                     <ul className="list-disc pl-5 text-xs text-muted-foreground">
                       <li>{numero(estado.ja_existiam)} {t("mensagens já estão no CRM e serão puladas.")}</li>
                       <li>{numero(estado.grupos_ignorados)} {t("grupos ficam de fora.")}</li>
-                      {estado.sem_telefone > 0 && <li>{numero(estado.sem_telefone)} {t("conversas sem telefone identificado serão puladas.")}</li>}
+                      {estado.sem_numero_achado > 0 && <li>{numero(estado.sem_numero_achado)} {t("conversas sem telefone identificado serão puladas.")}</li>}
                       <li>{numero(estado.midias_indisponiveis)} {t("mídias antigas entram sem o arquivo (indisponível).")}</li>
                     </ul>
                     <p className="text-xs">
