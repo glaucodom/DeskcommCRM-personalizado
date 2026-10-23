@@ -2,7 +2,9 @@
 import Link from "next/link";
 
 import { ArrowCircleUp } from "@/lib/ui/icons";
+import { useAuth } from "@/hooks/auth/AuthProvider";
 import { useT } from "@/hooks/i18n/useT";
+import { roleAtLeast } from "@/lib/auth/types";
 import { useSystemVersion } from "@/hooks/system/useSystemVersion";
 import { cn } from "@/lib/utils";
 
@@ -23,7 +25,10 @@ export function VersionFooter({
 }) {
   const t = useT();
   const { data } = useSystemVersion();
+  const { user, activeOrg } = useAuth();
   if (!data?.current_version) return null;
+  // Fork #31: a versão só aparece para administradores; os outros não precisam vê-la.
+  if (!data.is_owner && !user.is_platform_admin && !roleAtLeast(activeOrg?.role, "admin")) return null;
 
   const label = data.current_version.replace(/^v/i, "");
   // Só acende quando existe versão nova de verdade. `off_release` sozinho não

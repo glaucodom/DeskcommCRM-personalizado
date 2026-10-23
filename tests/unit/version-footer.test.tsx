@@ -11,6 +11,10 @@ import { VersionFooter } from "@/components/shell/VersionFooter";
  */
 
 const dados = { current: null as null | Record<string, unknown> };
+const papel = { atual: "admin" as string, plataforma: false };
+vi.mock("@/hooks/auth/AuthProvider", () => ({
+  useAuth: () => ({ user: { is_platform_admin: papel.plataforma }, activeOrg: { role: papel.atual } }),
+}));
 
 vi.mock("@/hooks/i18n/useT", () => ({ useT: () => (chave: string) => chave }));
 vi.mock("@/hooks/system/useSystemVersion", () => ({
@@ -20,6 +24,8 @@ vi.mock("@/hooks/system/useSystemVersion", () => ({
 afterEach(() => {
   cleanup();
   dados.current = null;
+  papel.atual = "admin";
+  papel.plataforma = false;
 });
 
 describe("VersionFooter", () => {
@@ -65,6 +71,13 @@ describe("VersionFooter", () => {
 
     expect(screen.queryByRole("link")).toBeNull();
     expect(screen.getByText("versão 1.73.0")).toBeInTheDocument();
+  });
+
+  it("fork #31: quem não é dono nem administrador não vê a versão", () => {
+    dados.current = { current_version: "v1.73.0", latest_version: "v1.74.0", update_available: true, is_owner: false };
+    papel.atual = "agent";
+    const { container } = render(<VersionFooter collapsed={false} />);
+    expect(container).toBeEmptyDOMElement();
   });
 
   it("sem versão instalada conhecida: não renderiza nada", () => {
