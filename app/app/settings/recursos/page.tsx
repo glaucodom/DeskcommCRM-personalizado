@@ -120,7 +120,11 @@ export default async function RecursosOpcionaisPage() {
                 ajustar={
                   estado === "ligado" && porta && (dono || ROLE_RANK[activeOrg.role] >= ROLE_RANK[porta.minRole ?? "viewer"])
                     ? porta.href
-                    : null
+                    : // Fork: para o administrador da plataforma o módulo desligado leva direto à tela onde se liga
+                      // (antes: selo sem botão, e ninguém sabia onde ir).
+                      dono && estado === "desligado" && r.href
+                      ? r.href
+                      : null
                 }
                 idioma={idioma}
               />

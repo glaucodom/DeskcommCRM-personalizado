@@ -6,14 +6,51 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useT } from "@/hooks/i18n/useT";
 import { recarregarTipoDeCliente } from "@/hooks/contacts/useTipoDeCliente";
+import { updateModuloDaInstalacao } from "@/app/actions/settings/updateModuloDaInstalacao";
 import type { TipoDeCliente } from "@/lib/personalizacoes/tipo-de-cliente";
 
-export function TipoDeClienteForm({ inicial, podeEditar }: { inicial: TipoDeCliente; podeEditar: boolean }) {
+/**
+ * O módulo "Empresas, Pessoas e Segmentos" (`crm_b2b`) é da INSTALAÇÃO e vem desligado.
+ * `podeLigar` = administrador da plataforma (é quem o action `updateModuloDaInstalacao` aceita).
+ */
+export interface EstadoDoModuloB2b {
+  ligado: boolean;
+  podeLigar: boolean;
+}
+
+export function TipoDeClienteForm({
+  inicial,
+  podeEditar,
+  modulo,
+}: {
+  inicial: TipoDeCliente;
+  podeEditar: boolean;
+  modulo?: EstadoDoModuloB2b;
+}) {
   const t = useT();
   const router = useRouter();
   const [tipo, setTipo] = useState<TipoDeCliente>(inicial);
   const [busy, setBusy] = useState(false);
   const [feedback, setFeedback] = useState("");
+  const [ligando, setLigando] = useState(false);
+  const [erroDoModulo, setErroDoModulo] = useState("");
+
+  async function ligarModulo() {
+    setLigando(true);
+    setErroDoModulo("");
+    try {
+      const r = await updateModuloDaInstalacao({ modulo: "crm_b2b", ligado: true });
+      if (!r.ok) {
+        setErroDoModulo(t("Não foi possível ligar agora. Confira a sua permissão de administrador da plataforma."));
+        return;
+      }
+      router.refresh();
+    } catch {
+      setErroDoModulo(t("Não foi possível ligar agora. Confira a sua permissão de administrador da plataforma."));
+    } finally {
+      setLigando(false);
+    }
+  }
 
   async function trocar(proximo: TipoDeCliente) {
     setBusy(true);
@@ -66,6 +103,40 @@ export function TipoDeClienteForm({ inicial, podeEditar }: { inicial: TipoDeClie
         <p className="text-sm text-muted-foreground">{t("Só o administrador pode trocar.")}</p>
       )}
       {feedback && <p className="text-sm text-muted-foreground" role="status">{feedback}</p>}
+      {modulo && tipo === "empresas" && (
+        <div className="space-y-2 rounded-md border bg-muted/30 p-3" data-testid="modulo-b2b">
+          {modulo.ligado ? (
+            <p className="text-sm">{t("Empresas, Pessoas e Segmentos estão ligados nesta instalação.")}</p>
+          ) : (
+            <>
+              <p className="text-sm">
+                {t(
+                  "Empresas, Pessoas e Segmentos estão desligados nesta instalação. Enquanto estiverem, essas telas não abrem.",
+                )}
+              </p>
+              {modulo.podeLigar ? (
+                <button
+                  type="button"
+                  disabled={ligando}
+                  onClick={() => void ligarModulo()}
+                  className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground disabled:opacity-60"
+                >
+                  {t("Ligar agora")}
+                </button>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  {t("Peça a quem administra o servidor para ligar.")}
+                </p>
+              )}
+            </>
+          )}
+          {erroDoModulo && (
+            <p className="text-sm text-destructive" role="alert">
+              {erroDoModulo}
+            </p>
+          )}
+        </div>
+      )}
     </section>
   );
 }

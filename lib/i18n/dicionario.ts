@@ -17687,6 +17687,11 @@ export const DICIONARIO: Traducoes = {
   "Tirar este segmento da lista? Os contatos que já o têm continuam com ele.": { es: "¿Quitar este segmento de la lista? Los contactos que ya lo tienen lo conservan." },
   "Atualizando os contatos…": { es: "Actualizando los contactos…" },
   "A lista de segmentos desta empresa, para escolher no contato e no Novo lead.": { es: "La lista de segmentos de esta empresa, para elegir en el contacto y en el Nuevo lead." },
+  "Empresas, Pessoas e Segmentos estão ligados nesta instalação.": { es: "Empresas, Personas y Segmentos están activados en esta instalación." },
+  "Empresas, Pessoas e Segmentos estão desligados nesta instalação. Enquanto estiverem, essas telas não abrem.": { es: "Empresas, Personas y Segmentos están desactivados en esta instalación. Mientras lo estén, esas pantallas no se abren." },
+  "Não foi possível ligar agora. Confira a sua permissão de administrador da plataforma.": { es: "No se pudo activar ahora. Revise su permiso de administrador de la plataforma." },
+  "Peça a quem administra o servidor para ligar.": { es: "Pida a quien administra el servidor que lo active." },
+  "Ligar agora": { es: "Activar ahora" },
 };
 
 /**

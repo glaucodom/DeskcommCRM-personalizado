@@ -6,6 +6,8 @@ import { normalizarIdioma } from "@/lib/i18n/idiomas";
 import { traduzir } from "@/lib/i18n/dicionario";
 import { alineasDoArt15Visiveis, art15DoControlador } from "@/lib/legal/art15";
 import { moedaServidaOu } from "@/lib/money";
+import { moduloLigado } from "@/lib/instalacao/modulos";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { Art15Form } from "./_art15";
 import { ZonaDePerigoDaOrganizacao } from "./_danger-zone";
@@ -45,6 +47,12 @@ export default async function TenantSettingsPage() {
   }
 
   const supabase = await createClient();
+  // Fork: o módulo Empresas/Pessoas/Segmentos é da instalação e vem desligado; o cartão de
+  // Tipo de cliente diz em que pé ele está e, para o administrador da plataforma, liga com um clique.
+  const moduloB2b = {
+    ligado: await moduloLigado(createAdminClient(), "crm_b2b"),
+    podeLigar: user.is_platform_admin && !user.support,
+  };
   const { data } = await supabase
     .from("organizations")
     .select(
@@ -105,6 +113,7 @@ export default async function TenantSettingsPage() {
         <TipoDeClienteForm
           inicial={tipoDeCliente(row.settings as Record<string, unknown> | null)}
           podeEditar
+          modulo={moduloB2b}
         />
       )}
       {row && alineas && alineasDoArt15Visiveis(row.country) && (
