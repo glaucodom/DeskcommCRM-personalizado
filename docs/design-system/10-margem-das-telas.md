@@ -46,5 +46,6 @@ Se começar em `288`, a tela tem padding próprio; se o wrapper for mais estreit
 | Hubs (`NavHub`: CRM, IA, Análise) | padronizada |
 | Tarefas | padronizada |
 | Propostas (lista e detalhe) | padronizada |
+| Segmentos (`/app/segmentos`) | padronizada em 23/10/2026 (era `max-w-2xl` centralizado + `p-4`) |
 
 As demais telas entram nesta tabela conforme o Glauco for pedindo o ajuste, uma por vez ou em grupo.

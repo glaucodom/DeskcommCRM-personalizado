@@ -19,6 +19,7 @@ const TELAS: Array<[arquivo: string, wrapper: RegExp]> = [
   ["app/app/tasks/_components/TarefasClient.tsx", /<div className="(flex w-full flex-col gap-6)">/],
   ["app/app/proposals/_client.tsx", /<div className="(w-full space-y-4)">/],
   ["app/app/proposals/[id]/_client.tsx", /<div className="(w-full space-y-4)">/],
+  ["app/app/segmentos/_client.tsx", /<div className="(w-full space-y-4)">/],
 ];
 
 describe("margem das telas igual à do Funil", () => {
