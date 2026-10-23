@@ -22,14 +22,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
-import { Tag, Receipt, Users, ArrowRight, CaretDoubleLeft, CaretDoubleRight } from "@/lib/ui/icons";
+import { Receipt, Users, ArrowRight, CaretDoubleLeft, CaretDoubleRight } from "@/lib/ui/icons";
 import { apiClient } from "@/lib/api/client";
 import { toast } from "sonner";
 import type { ConversationWithContact } from "@/hooks/inbox/useConversationsRealtime";
 import { activityLabel, actorLabel, actorShape } from "@/lib/leads/activity-vocabulary";
 import { soChavesAlteradas } from "@/lib/leads/custom-fields-so-diff";
 import { ConversationTagsEditor } from "./ConversationTagsEditor";
-import { ContactTagsEditor } from "./ContactTagsEditor";
 import { TarefasDaDemanda } from "./TarefasDaDemanda";
 import { useDefaultPipeline } from "@/hooks/pipelines/useDefaultPipeline";
 import { LoseLeadDialog } from "@/components/kanban/LoseLeadDialog";
@@ -764,7 +763,6 @@ export function CRMSidePanel({ conversation, recolhido = false, onAlternarRecolh
   const idsDeNegocioVistos = useRef<Set<string>>(new Set());
   const procurarNovoNegocio = useRef(false);
 
-  const [tagEditorOpen, setTagEditorOpen] = useState(false);
   const [leadDialogOpen, setLeadDialogOpen] = useState(false);
   // Fork #20: organização B2C não mostra Empresa/CNPJ/Segmentos/como conheceu no painel.
   const { pessoas: pessoasNoPainel } = useTipoDeCliente();
@@ -973,7 +971,9 @@ export function CRMSidePanel({ conversation, recolhido = false, onAlternarRecolh
           {contact?.phone_number && (
             <div className="text-xs text-muted-foreground">{telefoneNaTela(contact.phone_number)}</div>
           )}
-          {tags.length > 0 && (
+          {/* Fork: a lista de etiquetas é UMA só (seção "Etiquetas", mais abaixo). Aqui ficam só no modo
+              leitura, em que essa seção não é desenhada. */}
+          {readonly && tags.length > 0 && (
             <div className="flex flex-wrap gap-1">
               {tags.map((t) => (
                 <ChipDeEtiqueta key={t} tag={t} className="h-4 px-1.5 text-[10px]" />
@@ -982,16 +982,6 @@ export function CRMSidePanel({ conversation, recolhido = false, onAlternarRecolh
           )}
           <div className="flex flex-wrap gap-2 pt-1">
             {contactId&&conversation?<Link className="underline" href={`/app/agenda?contato=${contactId}&conversa=${conversation.id}`}>{t("Marcar compromisso")}</Link>:null}
-            <Button
-              size="sm"
-              variant="outline"
-              className="h-7 px-2 text-xs"
-              disabled={readonly || !contactId}
-              aria-pressed={tagEditorOpen}
-              onClick={() => setTagEditorOpen((v) => !v)}
-            >
-              <Tag size={12} className="mr-1" weight="regular" aria-hidden /> {t("Tags do contato")}
-            </Button>
             <Button
               size="sm"
               variant="outline"
@@ -1011,10 +1001,6 @@ export function CRMSidePanel({ conversation, recolhido = false, onAlternarRecolh
               </Button>
             )}
           </div>
-          {tagEditorOpen && contactId && (
-            // Contexto de PESSOA: a etiqueta vai para `contacts.tags` (#2979).
-            <ContactTagsEditor entityId={contactId} orgId={conversation.organization_id} tags={tags} />
-          )}
         </Card>
       </section>
 
@@ -1081,6 +1067,8 @@ export function CRMSidePanel({ conversation, recolhido = false, onAlternarRecolh
         conversationId={conversation.id}
         orgId={conversation.organization_id}
         tags={conversation.tags ?? []}
+        contactId={contactId}
+        contactTags={tags}
       />}
 
       <Separator />

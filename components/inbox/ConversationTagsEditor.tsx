@@ -18,20 +18,37 @@ import {
 } from "@/hooks/inbox/useConversationTags";
 import { useDefinirCorDaEtiqueta } from "@/hooks/tags/useDefinirCorDaEtiqueta";
 import { sugestoesDeEtiqueta } from "@/lib/contacts/etiquetas";
+import { useUpdateContact } from "@/hooks/contacts/useUpdateContact";
+import { normalizarTags } from "@/lib/contacts/tag-normalizada";
 
 interface Props {
   conversationId: string;
   orgId: string;
+  /** As etiquetas da CONVERSA, como o servidor as devolveu. */
   tags: string[];
+  /**
+   * Fork — uma lista só para conversa e contato. Com `contactId`, o editor mostra a UNIÃO de
+   * `contactTags` e `tags` e grava a lista inteira nas DUAS caixas (`conversations.tags` e
+   * `contacts.tags`): as regras que leem a etiqueta do contato (`cliente` → Clara 2, contato
+   * interno) continuam vendo o que o operador marcou. Sem `contactId`, é o editor de sempre.
+   */
+  contactId?: string | null;
+  contactTags?: string[];
 }
 
 /** G3-05: aplica/remove tags de atendimento na conversa, com sugestão canônica. */
-export function ConversationTagsEditor({ conversationId, orgId, tags }: Props) {
+export function ConversationTagsEditor({ conversationId, orgId, tags: tagsDaConversa, contactId, contactTags }: Props) {
   const t = useT();
+  const unificada = !!contactId;
+  // A união, sem repetir (a mesma régua de normalização dos dois lados); a ordem é a da 1ª aparição.
+  const tags = unificada ? normalizarTags([...(contactTags ?? []), ...tagsDaConversa]) : tagsDaConversa;
+  const daPessoa = useUpdateContact(contactId ?? "");
   const [draft, setDraft] = useState("");
   // Issue #2718 — tom escolhido ANTES do "+": a etiqueta nasce colorida.
   const [cor, setCor] = useState<string | null>(null);
-  const mutation = useUpdateConversationTags();
+  const mutationDaConversa = useUpdateConversationTags();
+  // `pendente` junta as duas gravações; `mutation.isPending` segue sendo o que o resto do arquivo lê.
+  const mutation = { isPending: mutationDaConversa.isPending || daPessoa.isPending };
   const { definirCor } = useDefinirCorDaEtiqueta();
   const { data: vocabulary, isError: erroNoVocabulario } = useConversationTagVocabulary(orgId);
   // #2855 — com texto, pergunta também ao vocabulário inteiro (curado + em uso).
@@ -53,7 +70,9 @@ export function ConversationTagsEditor({ conversationId, orgId, tags }: Props) {
 
   // Normalização espelha o Zod do PATCH (trim+lowercase); dedup no set.
   function apply(next: string[]) {
-    mutation.mutate({ conversation_id: conversationId, tags: next });
+    mutationDaConversa.mutate({ conversation_id: conversationId, tags: next });
+    // A mesma lista na outra caixa: adicionar e remover valem para o contato também.
+    if (unificada) daPessoa.mutate({ tags: next });
   }
 
   /** Grava a etiqueta com o tom escolhido. Devolve a tag gravada, ou `null` se recusada (duplicada/cheia). */
@@ -95,7 +114,7 @@ export function ConversationTagsEditor({ conversationId, orgId, tags }: Props) {
   return (
     <section>
       <h3 className="text-xs font-semibold text-text">
-        {t("Tags da conversa")}
+        {unificada ? t("Etiquetas") : t("Tags da conversa")}
       </h3>
 
       <div className="mt-2 flex flex-wrap gap-1">
