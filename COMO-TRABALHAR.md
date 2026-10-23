@@ -42,3 +42,8 @@ O GitHub é o ponto de encontro. Ninguém mexe direto na VPS: tudo passa por ele
 Cada versão oficial nova ganha antes um `ANALISE-DA-X.Y.Z.md` (conflitos, sobreposições com as nossas
 personalizações e decisão por item) e só depois o merge. Modelo: `ANALISE-DA-1.88.0.md`. Enquanto uma análise
 ou merge estiver em andamento na VPS, o PC não deve mexer nos mesmos arquivos (avisar o assunto, regra 3).
+
+## Quando a mudança foi feita por outro agente no PC
+
+O Claude da VPS segue o roteiro de `ANALISE-DE-BRANCH.md`: lê o diff, testa, relata se está tudo certo e o que falta
+para atualizar o zap, e só instala depois do "pode" do Glauco.
