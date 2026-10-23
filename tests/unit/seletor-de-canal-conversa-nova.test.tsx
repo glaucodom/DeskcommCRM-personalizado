@@ -146,8 +146,8 @@ describe("Seletor de canal ao iniciar conversa nova (#2382)", () => {
     expect(vendas).toBeInTheDocument();
     expect(screen.getByText("WAHA (QR Code)")).toBeInTheDocument();
     expect(screen.getByText("Meta Cloud API")).toBeInTheDocument();
-    expect(screen.getByRole("radio", { name: /999990001/ })).toBeInTheDocument();
-    expect(screen.getByRole("radio", { name: /999990002/ })).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: /99999-0001/ })).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: /99999-0002/ })).toBeInTheDocument();
     // Estado de cada canal, na própria opção.
     expect(screen.getAllByText("Conectado")).toHaveLength(2);
 

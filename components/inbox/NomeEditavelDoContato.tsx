@@ -53,7 +53,7 @@ export function NomeEditavelDoContato({
           onClick={abrir}
           aria-label={t("Editar nome")}
           title={t("Editar nome")}
-          className="shrink-0 rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+          className="shrink-0 rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
         >
           <PencilSimple className="h-3.5 w-3.5" />
         </button>
@@ -75,10 +75,10 @@ export function NomeEditavelDoContato({
           if (e.key === "Escape") setEditando(false);
         }}
       />
-      <button type="button" onClick={confirmar} disabled={salvar.isPending} aria-label={t("Salvar")} title={t("Salvar")} className="shrink-0 rounded p-1 text-primary hover:bg-muted">
+      <button type="button" onClick={confirmar} disabled={salvar.isPending} aria-label={t("Salvar")} title={t("Salvar")} className="shrink-0 rounded-md p-1 text-primary hover:bg-muted">
         <Check className="h-4 w-4" />
       </button>
-      <button type="button" onClick={() => setEditando(false)} aria-label={t("Cancelar")} title={t("Cancelar")} className="shrink-0 rounded p-1 text-muted-foreground hover:bg-muted">
+      <button type="button" onClick={() => setEditando(false)} aria-label={t("Cancelar")} title={t("Cancelar")} className="shrink-0 rounded-md p-1 text-muted-foreground hover:bg-muted">
         <X className="h-4 w-4" />
       </button>
     </div>

@@ -162,7 +162,7 @@ describe("Painel Iniciar conversa no Inbox (#2813)", () => {
     await abrirComTelefone("(11) 99999-0001");
 
     // O painel confirma que é contato NOVO, e já mostra o número normalizado.
-    expect(screen.getByText(/Novo contato/)).toHaveTextContent("+5511999990001");
+    expect(screen.getByText(/Novo contato/)).toHaveTextContent("+55 (11) 99999-0001");
 
     fireEvent.click(screen.getByRole("button", { name: "Criar conversa" }));
 

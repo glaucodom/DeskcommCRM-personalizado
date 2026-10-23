@@ -150,7 +150,7 @@ describe("ContatoDoNegocio — as abas do dossiê", () => {
     comQuery(<ContatoDoNegocio contactId="c-1" pipelineId="p-1" />);
 
     expect(screen.getByText("Ana Souza")).toBeInTheDocument();
-    expect(screen.getByText("+5511999998888")).toBeInTheDocument();
+    expect(screen.getByText("+55 (11) 99999-8888")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Abrir no WhatsApp" })).toHaveAttribute(
       "href",
       "https://wa.me/5511999998888",
