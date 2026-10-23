@@ -9,6 +9,7 @@
  */
 
 import { phoneLookupVariants } from "@/lib/channels/phone-variants";
+import { nomeProprio } from "@/lib/personalizacoes/nome-proprio";
 import { ehIdentificadorTecnico, nomeDoContato } from "@/lib/contacts/rotulo-do-contato";
 
 /** Quanto esperar para perguntar de novo a quem continuou sem nome. */
@@ -107,7 +108,28 @@ export function patchDoNome(
   achado: NomeAchado,
 ): { address_book_name?: string; display_name?: string } {
   if ((atual.name ?? "").trim() !== "") return {};
-  if (achado.agenda) return { address_book_name: achado.agenda };
+  if (achado.agenda) {
+    // Fork #27: contato sem nome nenhum na tela recebe o nome da agenda como nome
+    // (editável depois), desde que pareça nome de gente e não apelido interno.
+    const semNome = !nomeDoContato(atual);
+    if (semNome && pareceNomeDePessoa(achado.agenda)) {
+      return { address_book_name: achado.agenda, display_name: nomeProprio(achado.agenda) };
+    }
+    if (semNome && achado.perfil) return { address_book_name: achado.agenda, display_name: achado.perfil };
+    return { address_book_name: achado.agenda };
+  }
   if (!nomeDoContato(atual) && achado.perfil) return { display_name: achado.perfil };
   return {};
+}
+
+const PALAVRAS_DE_APELIDO_INTERNO =
+  /\b(cliente|clientes|lead|obra|fornecedor|parceiro|vendedor|comercial|suporte|financeiro|contador|contabilidade|empresa|ltda|me|eireli|sa|crti|xged|zap|whats|whatsapp|novo|antigo|teste|spam|n[aã]o atender|caloteiro|caloteira)\b/i;
+
+/** Nome de gente (só letras, 1 a 6 palavras) e sem cara de rótulo interno. */
+export function pareceNomeDePessoa(bruto: string): boolean {
+  const v = bruto.trim();
+  if (!/^[\p{L}][\p{L}'’. -]*$/u.test(v)) return false;
+  const palavras = v.split(/\s+/);
+  if (palavras.length > 6) return false;
+  return !PALAVRAS_DE_APELIDO_INTERNO.test(v);
 }

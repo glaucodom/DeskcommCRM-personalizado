@@ -77,6 +77,23 @@ describe("o que gravar", () => {
     );
   });
 
+  it("fork #27: contato sem nome recebe o nome da agenda como nome, com a máscara", () => {
+    expect(patchDoNome({ name: null, display_name: null }, { agenda: "maria DA silva", perfil: null })).toEqual({
+      address_book_name: "maria DA silva",
+      display_name: "Maria da Silva",
+    });
+  });
+
+  it("fork #27: apelido interno da agenda não vira nome do contato", () => {
+    expect(patchDoNome({ name: null, display_name: null }, { agenda: "João obra", perfil: "Joao" })).toEqual({
+      address_book_name: "João obra",
+      display_name: "Joao",
+    });
+    expect(patchDoNome({ name: null, display_name: null }, { agenda: "Cliente 12", perfil: null })).toEqual({
+      address_book_name: "Cliente 12",
+    });
+  });
+
   it("nome já digitado no CRM não é substituído", () => {
     expect(
       patchDoNome({ name: "Nome da ficha", display_name: null }, { agenda: "Agenda", perfil: "Perfil" }),

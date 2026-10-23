@@ -526,8 +526,8 @@ export async function createContactHandler(
   const insertRow: Record<string, unknown> = {
     organization_id: ctx.organization_id,
     created_by_user_id: ctx.actor.type === "user" ? ctx.actor.id : null,
-    name: nomeProprioOpcional(input.name) ?? null,
-    display_name: nomeProprioOpcional(input.display_name) ?? null,
+    name: input.name ?? null,
+    display_name: input.display_name ?? null,
     email: input.email ?? null,
     phone_number: input.phone_number ? canonicalPhoneBR(input.phone_number) : null,
     birthdate: input.birthdate ?? null,
@@ -540,6 +540,9 @@ export async function createContactHandler(
     segmentos: [...new Set(input.segmentos ?? [])],
     consent: input.consent ?? {},
   };
+  // Fork #26: nome de pessoa com a primeira letra de cada palavra maiúscula.
+  insertRow.name = nomeProprioOpcional(insertRow.name as string | null);
+  insertRow.display_name = nomeProprioOpcional(insertRow.display_name as string | null);
 
   if (input.cpf) {
     // #2522: os DOIS campos ou NENHUM — o CHECK `contacts_cpf_consistency`
