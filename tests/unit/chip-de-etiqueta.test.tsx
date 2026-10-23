@@ -62,7 +62,7 @@ describe("ChipDeEtiqueta", () => {
     // produção (aquela rota devolve strings).
     await waitFor(() => expect(get).toHaveBeenCalledWith("/api/v1/tags/cores"));
 
-    const chip = screen.getByText("VIP");
+    const chip = screen.getByText("VIP").parentElement!;
     await waitFor(() => expect(pintado(chip)).toContain("background-color"));
     // O texto sai da régua, não do gosto de quem escolheu: sobre #0091ff o preto
     // ganha (6,5 contra 3,0 do branco) — medido, e é por isso que este caso não
@@ -74,15 +74,15 @@ describe("ChipDeEtiqueta", () => {
     get.mockResolvedValue({ data: [{ tag: "vip", cor: "#3e63dd" }] });
     montar(<ChipDeEtiqueta tag="vip" />);
     await waitFor(() => expect(get).toHaveBeenCalled());
-    await waitFor(() => expect(pintado(screen.getByText("vip"))).toContain("background-color"));
-    expect(pintado(screen.getByText("vip"))).toContain("color:rgb(255,255,255)");
+    await waitFor(() => expect(pintado(screen.getByText("vip").parentElement!)).toContain("background-color"));
+    expect(pintado(screen.getByText("vip").parentElement!)).toContain("color:rgb(255,255,255)");
   });
 
   it("etiqueta sem cor sai exatamente como saía antes: cinza, sem estilo inline", async () => {
     get.mockResolvedValue({ data: [{ tag: "vip", cor: "#0091ff" }] });
     montar(<ChipDeEtiqueta tag="obra" />);
 
-    const chip = screen.getByText("obra");
+    const chip = screen.getByText("obra").parentElement!;
     await waitFor(() => expect(get).toHaveBeenCalled());
     expect(chip.getAttribute("style")).toBeNull();
   });
@@ -92,19 +92,19 @@ describe("ChipDeEtiqueta", () => {
     // diz seria a tela discordando de si mesma por alguns segundos.
     get.mockResolvedValue({ data: [] });
     montar(<ChipDeEtiqueta tag="obra" cor="#e54d2e" />);
-    expect(pintado(screen.getByText("obra"))).toContain("background-color");
+    expect(pintado(screen.getByText("obra").parentElement!)).toContain("background-color");
   });
 
   it("fora do provider o chip não quebra — só não tem cor", () => {
     render(<ChipDeEtiqueta tag="vip" />);
-    expect(screen.getByText("vip").getAttribute("style")).toBeNull();
+    expect(screen.getByText("vip").parentElement!.getAttribute("style")).toBeNull();
   });
 
   it("a falha da leitura não vira erro na tela: o chip fica cinza", async () => {
     get.mockRejectedValue(new Error("500"));
     montar(<ChipDeEtiqueta tag="vip" />);
     await waitFor(() => expect(get).toHaveBeenCalled());
-    expect(screen.getByText("vip").getAttribute("style")).toBeNull();
+    expect(screen.getByText("vip").parentElement!.getAttribute("style")).toBeNull();
   });
 });
 

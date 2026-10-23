@@ -117,7 +117,7 @@ describe("paleta ao lado da tag presente (#2771)", () => {
     // o `staleTime` de 5 min — o "escolhi e não repintou".
     await waitFor(() => expect(leiturasDeCores()).toBeGreaterThan(1), { timeout: 4000 });
     await waitFor(
-      () => expect(screen.getAllByText("vip").some((el) => pintado(el).match(/rgb\(255,\s*178,\s*36\)|#ffb224/i))).toBe(true),
+      () => expect(screen.getAllByText("vip").some((el) => pintado(el.parentElement!).match(/rgb\(255,\s*178,\s*36\)|#ffb224/i))).toBe(true),
       { timeout: 4000 },
     );
   });

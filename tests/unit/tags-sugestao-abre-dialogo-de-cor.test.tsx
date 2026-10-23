@@ -165,9 +165,9 @@ describe("sugestão de etiqueta — caixa de diálogo antes de enviar", () => {
     montar();
     await userEvent.click(await screen.findByRole("button", { name: "+ google" }, { timeout: 5000 }));
     const caixa = dialogo();
-    expect(within(caixa).getByText("google").style.backgroundColor).not.toBe("");
+    expect(within(caixa).getByText("google").parentElement!.style.backgroundColor).not.toBe("");
     await userEvent.click(within(caixa).getByRole("button", { name: "Sem cor" }));
-    expect(within(caixa).getByText("google").style.backgroundColor).toBe("");
+    expect(within(caixa).getByText("google").parentElement!.style.backgroundColor).toBe("");
   });
 
   it("confirmar o tom já marcado grava a tag sem regravar a cor", async () => {
@@ -224,26 +224,44 @@ describe("sugestão de etiqueta — caixa de diálogo antes de enviar", () => {
   });
 });
 
-describe("sugestão de etiqueta no editor da CONVERSA", () => {
-  it("abre o diálogo, não grava no clique, e confirmar grava com o tom escolhido", async () => {
+/**
+ * Fork — no editor da CONVERSA (Inbox) clicar na sugestão ADICIONA DIRETO, sem o diálogo de cor.
+ *
+ * A sugestão vem do vocabulário da empresa, e a cor da etiqueta já foi escolhida no cadastro (Configurações ›
+ * Tags): perguntar a cor de novo, a cada clique, é ruído. O diálogo da #2789 continua valendo para o editor do
+ * contato/negócio (primeira parte deste arquivo). O nome DIGITADO segue com o gatilho de cor ao lado do campo.
+ */
+describe("sugestão de etiqueta no editor da CONVERSA — adiciona direto", () => {
+  function montarConversa(papel: string, extra: Record<string, unknown> = {}) {
+    estado.papel = papel;
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     render(
       <QueryClientProvider client={client}>
         <ProvedorDeCoresDasEtiquetas>
-          <ConversationTagsEditor conversationId="conv-1" orgId={ORG} tags={["vip"]} />
+          <ConversationTagsEditor conversationId="conv-1" orgId={ORG} tags={["vip"]} {...extra} />
         </ProvedorDeCoresDasEtiquetas>
       </QueryClientProvider>,
     );
+  }
+
+  it.each(["manager", "agent"])("clicar na sugestão grava na hora, sem diálogo (%s)", async (papel) => {
+    montarConversa(papel);
 
     await userEvent.click(await screen.findByRole("button", { name: "+ google" }, { timeout: 5000 }));
-    expect(mutateConversa).not.toHaveBeenCalled();
 
-    const caixa = dialogo();
-    await userEvent.click(within(caixa).getByRole("button", { name: "Índigo" }));
-    await userEvent.click(within(caixa).getByRole("button", { name: "Adicionar tag" }));
-
-    expect(mutateConversa).toHaveBeenCalledWith({ conversation_id: "conv-1", tags: ["vip", "google"] });
-    expect(definirCor).toHaveBeenCalledWith("google", "#3e63dd");
     expect(screen.queryByRole("dialog")).toBeNull();
+    expect(mutateConversa).toHaveBeenCalledWith({ conversation_id: "conv-1", tags: ["vip", "google"] });
+    // A cor é do cadastro: o clique não a regrava.
+    expect(definirCor).not.toHaveBeenCalled();
+  });
+
+  it("com o contato junto (lista única), a sugestão grava nas duas caixas", async () => {
+    montarConversa("manager", { contactId: "c-1", contactTags: [] });
+
+    await userEvent.click(await screen.findByRole("button", { name: "+ google" }, { timeout: 5000 }));
+
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(mutateConversa).toHaveBeenCalledWith({ conversation_id: "conv-1", tags: ["vip", "google"] });
+    expect(mutate).toHaveBeenCalledWith({ tags: ["vip", "google"] });
   });
 });
