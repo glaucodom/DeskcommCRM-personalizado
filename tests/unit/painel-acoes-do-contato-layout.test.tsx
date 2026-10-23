@@ -71,4 +71,13 @@ describe("painel do inbox — ações do cartão do contato", () => {
     // vem ANTES do Novo Lead na ordem do documento
     expect(compromisso.compareDocumentPosition(novoLead) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
+
+  it("a seção Etiquetas vem logo abaixo do cartão do contato, ANTES de Dados da empresa", async () => {
+    await montar();
+    const etiquetas = await screen.findByRole("heading", { name: "Etiquetas" });
+    const empresa = await screen.findByRole("heading", { name: "Dados da empresa" });
+    const contato = screen.getByRole("heading", { name: "Contato" });
+    expect(contato.compareDocumentPosition(etiquetas) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(etiquetas.compareDocumentPosition(empresa) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
 });

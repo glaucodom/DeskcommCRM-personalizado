@@ -1004,6 +1004,20 @@ export function CRMSidePanel({ conversation, recolhido = false, onAlternarRecolh
         </Card>
       </section>
 
+      {/* Etiquetas logo abaixo do cartão do contato, antes de "Dados da empresa" (pedido do Glauco). */}
+      {!readonly && (
+        <>
+          <ConversationTagsEditor
+            conversationId={conversation.id}
+            orgId={conversation.organization_id}
+            tags={conversation.tags ?? []}
+            contactId={contactId}
+            contactTags={tags}
+          />
+          <Separator />
+        </>
+      )}
+
       {contactId && !contact?.is_anonymized && !pessoasNoPainel && (
         <DadosDaEmpresaDoContato
           key={`${contactId}|${contact?.empresa ?? ""}|${contact?.cnpj ?? ""}|${(contact?.segmentos ?? []).join(",")}|${String(contact?.custom_fields?.como_conheceu ?? "")}`}
@@ -1060,16 +1074,6 @@ export function CRMSidePanel({ conversation, recolhido = false, onAlternarRecolh
           }}
         />
       )}
-
-      <Separator />
-
-      {!readonly && <ConversationTagsEditor
-        conversationId={conversation.id}
-        orgId={conversation.organization_id}
-        tags={conversation.tags ?? []}
-        contactId={contactId}
-        contactTags={tags}
-      />}
 
       <Separator />
 
