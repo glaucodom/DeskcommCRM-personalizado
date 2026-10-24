@@ -128,7 +128,7 @@ describe("renomear uma etiqueta colorida (#2771)", () => {
     // passaria antes de existir mapa nenhum (verde vácuo).
     await waitFor(() => expect(leiturasDeCores()).toBe(1));
 
-    const chip = screen.getByText("obra-nova");
+    const chip = screen.getByText("obra-nova").parentElement!;
     expect(pintado(chip)).not.toContain("background-color");
 
     renomearPara("obra-nova");
@@ -137,7 +137,7 @@ describe("renomear uma etiqueta colorida (#2771)", () => {
     // O mapa é invalidado, BUSCADO DE NOVO e o chip volta a exibir o mesmo tom.
     await waitFor(() => expect(leiturasDeCores()).toBeGreaterThan(1), { timeout: 4000 });
     await waitFor(
-      () => expect(pintado(screen.getByText("obra-nova"))).toMatch(/rgb\(0,\s*145,\s*255\)|#0091ff/i),
+      () => expect(pintado(screen.getByText("obra-nova").parentElement!)).toMatch(/rgb\(0,\s*145,\s*255\)|#0091ff/i),
       { timeout: 4000 },
     );
   });

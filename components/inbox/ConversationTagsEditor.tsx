@@ -4,11 +4,8 @@ import { useT } from "@/hooks/i18n/useT";
 import { ChipDeEtiqueta } from "@/components/tags/ChipDeEtiqueta";
 import { PontoDaEtiqueta } from "@/components/tags/PontoDaEtiqueta";
 import { SeletorDeCorDaEtiqueta } from "@/components/tags/SeletorDeCorDaEtiqueta";
-import { DialogoDeNovaEtiqueta } from "@/components/tags/DialogoDeNovaEtiqueta";
 import { useCoresDasEtiquetas } from "@/components/tags/CoresDasEtiquetas";
 import { chaveDaEtiqueta } from "@/lib/tags/cor-da-etiqueta";
-import { useAuth } from "@/hooks/auth/AuthProvider";
-import { ROLE_RANK } from "@/lib/auth/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { X, Plus } from "@/lib/ui/icons";
@@ -18,20 +15,37 @@ import {
 } from "@/hooks/inbox/useConversationTags";
 import { useDefinirCorDaEtiqueta } from "@/hooks/tags/useDefinirCorDaEtiqueta";
 import { sugestoesDeEtiqueta } from "@/lib/contacts/etiquetas";
+import { useUpdateContact } from "@/hooks/contacts/useUpdateContact";
+import { normalizarTags } from "@/lib/contacts/tag-normalizada";
 
 interface Props {
   conversationId: string;
   orgId: string;
+  /** As etiquetas da CONVERSA, como o servidor as devolveu. */
   tags: string[];
+  /**
+   * Fork — uma lista só para conversa e contato. Com `contactId`, o editor mostra a UNIÃO de
+   * `contactTags` e `tags` e grava a lista inteira nas DUAS caixas (`conversations.tags` e
+   * `contacts.tags`): as regras que leem a etiqueta do contato (`cliente` → Clara 2, contato
+   * interno) continuam vendo o que o operador marcou. Sem `contactId`, é o editor de sempre.
+   */
+  contactId?: string | null;
+  contactTags?: string[];
 }
 
 /** G3-05: aplica/remove tags de atendimento na conversa, com sugestão canônica. */
-export function ConversationTagsEditor({ conversationId, orgId, tags }: Props) {
+export function ConversationTagsEditor({ conversationId, orgId, tags: tagsDaConversa, contactId, contactTags }: Props) {
   const t = useT();
+  const unificada = !!contactId;
+  // A união, sem repetir (a mesma régua de normalização dos dois lados); a ordem é a da 1ª aparição.
+  const tags = unificada ? normalizarTags([...(contactTags ?? []), ...tagsDaConversa]) : tagsDaConversa;
+  const daPessoa = useUpdateContact(contactId ?? "");
   const [draft, setDraft] = useState("");
   // Issue #2718 — tom escolhido ANTES do "+": a etiqueta nasce colorida.
   const [cor, setCor] = useState<string | null>(null);
-  const mutation = useUpdateConversationTags();
+  const mutationDaConversa = useUpdateConversationTags();
+  // `pendente` junta as duas gravações; `mutation.isPending` segue sendo o que o resto do arquivo lê.
+  const mutation = { isPending: mutationDaConversa.isPending || daPessoa.isPending };
   const { definirCor } = useDefinirCorDaEtiqueta();
   const { data: vocabulary, isError: erroNoVocabulario } = useConversationTagVocabulary(orgId);
   // #2855 — com texto, pergunta também ao vocabulário inteiro (curado + em uso).
@@ -41,19 +55,12 @@ export function ConversationTagsEditor({ conversationId, orgId, tags }: Props) {
   // A cor de quem JÁ está na conversa vem do MESMO mapa que o chip usa (#2771):
   // uma leitura só, e o gatilho abre já com o tom atual marcado.
   const cores = useCoresDasEtiquetas();
-  // #2789 — a sugestão escolhida, enquanto o diálogo está aberto. `null` = fechado.
-  // `corInicial` é o tom que o diálogo MOSTROU ao abrir: confirmar compara com
-  // ele, não com o mapa ao vivo, que pode chegar depois e não foi visto.
-  const [sugestao, setSugestao] = useState<{ tag: string; corInicial: string | null } | null>(null);
-  const { activeOrg } = useAuth();
-  // A mesma régua do SeletorDeCorDaEtiqueta: a rota exige manager + MFA, então
-  // para quem ela recusaria o clique continua DIRETO (#2718).
-  const podeDefinirCor =
-    !!activeOrg && ROLE_RANK[activeOrg.role] >= ROLE_RANK.manager;
 
   // Normalização espelha o Zod do PATCH (trim+lowercase); dedup no set.
   function apply(next: string[]) {
-    mutation.mutate({ conversation_id: conversationId, tags: next });
+    mutationDaConversa.mutate({ conversation_id: conversationId, tags: next });
+    // A mesma lista na outra caixa: adicionar e remover valem para o contato também.
+    if (unificada) daPessoa.mutate({ tags: next });
   }
 
   /** Grava a etiqueta com o tom escolhido. Devolve a tag gravada, ou `null` se recusada (duplicada/cheia). */
@@ -95,7 +102,7 @@ export function ConversationTagsEditor({ conversationId, orgId, tags }: Props) {
   return (
     <section>
       <h3 className="text-xs font-semibold text-text">
-        {t("Tags da conversa")}
+        {unificada ? t("Etiquetas") : t("Tags da conversa")}
       </h3>
 
       <div className="mt-2 flex flex-wrap gap-1">
@@ -169,40 +176,20 @@ export function ConversationTagsEditor({ conversationId, orgId, tags }: Props) {
             <button
               key={tag}
               type="button"
-              // #2789 — passa pela caixa de diálogo para escolher a cor antes de
-              // enviar; sem permissão o clique continua direto (a rota recusaria).
-              onClick={() =>
-                podeDefinirCor
-                  ? setSugestao({ tag, corInicial: cores[chaveDaEtiqueta(tag)] ?? null })
-                  : add(tag)
-              }
+              // Fork: a sugestão vem do vocabulário e a cor já foi escolhida no cadastro de Tags;
+              // perguntar a cor a cada clique é ruído. Adiciona direto (o nome DIGITADO segue com o
+              // gatilho de cor ao lado do campo). O diálogo da #2789 continua no editor do contato/negócio.
+              onClick={() => add(tag)}
               disabled={mutation.isPending || tags.length >= 20}
               className="inline-flex items-center gap-1 rounded-full border border-dashed border-border px-2 py-0.5 text-[10px] text-muted-foreground hover:border-solid hover:text-foreground disabled:opacity-50"
             >
               <PontoDaEtiqueta tag={tag} />
-              + {tag}
+              + <span className="first-letter:uppercase">{tag}</span>
             </button>
           ))}
         </div>
       )}
 
-      {/* Montado só com a sugestão escolhida: cada abertura nasce com o tom do
-          vocabulário pré-marcado, sem estado herdado da abertura anterior. */}
-      {sugestao ? (
-        <DialogoDeNovaEtiqueta
-          tag={sugestao.tag}
-          corInicial={sugestao.corInicial}
-          onFechar={() => setSugestao(null)}
-          onConfirmar={(tom) => {
-            // No diálogo, `null` é "Sem cor" escolhido de propósito: a cor do
-            // vocabulário só é regravada quando a escolha difere da que foi mostrada.
-            const gravada = criar(sugestao.tag, null);
-            if (gravada && tom !== sugestao.corInicial) void definirCor(gravada, tom);
-            setSugestao(null);
-          }}
-          disabled={mutation.isPending}
-        />
-      ) : null}
     </section>
   );
 }

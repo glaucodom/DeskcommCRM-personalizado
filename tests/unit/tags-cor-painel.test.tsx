@@ -112,7 +112,7 @@ describe("painel de Tags — a cor (issue #1271)", () => {
 
     // A linha de "obra" chega com `cor` do servidor: pinta sem esperar nenhuma
     // leitura de cache (é a tela concordando com o dado que ela acabou de ler).
-    const chipDaLista = screen.getAllByText("obra")[0]!;
+    const chipDaLista = screen.getAllByText("obra")[0]!.parentElement!;
     expect(pintado(chipDaLista)).toContain("background-color");
 
     fireEvent.click(screen.getAllByRole("button", { name: "Cor" })[0]!);
@@ -120,7 +120,7 @@ describe("painel de Tags — a cor (issue #1271)", () => {
 
     // A prévia é o chip do próprio "vip" com o tom ESCOLHIDO: escolher por
     // paleta sem ver o resultado seria adivinhação.
-    const previa = screen.getAllByText("vip").at(-1)!;
+    const previa = screen.getAllByText("vip").at(-1)!.parentElement!;
     await waitFor(() => expect(pintado(previa)).toContain("background-color"));
   });
 

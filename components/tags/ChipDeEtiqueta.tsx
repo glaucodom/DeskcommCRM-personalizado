@@ -54,7 +54,9 @@ export function ChipDeEtiqueta({ tag, cor, className, children, ...props }: Prop
   const efetiva = cor === undefined ? corDoProvider : cor;
   return (
     <Badge variant="secondary" className={cn(className)} style={estiloDoChip(efetiva)} {...props}>
-      {tag}
+      {/* Fork: a primeira letra sai maiúscula (padrão de cadastro) SÓ NA TELA: o dado segue minúsculo,
+          como as buscas, os filtros e as regras esperam. `first-letter` só vale em bloco, por isso o span. */}
+      <span className="first-letter:uppercase">{tag}</span>
       {children}
     </Badge>
   );

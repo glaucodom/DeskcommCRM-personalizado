@@ -602,7 +602,7 @@ export function InboxFilters({ value, onChange }: Props) {
                           de quem já conhece o vocabulário da operação. */}
                       <span className="inline-flex items-center gap-2">
                         <PontoDaEtiqueta tag={tag} />
-                        {tag}
+                        <span className="first-letter:uppercase">{tag}</span>
                       </span>
                     </DropdownMenuCheckboxItem>
                   ))}

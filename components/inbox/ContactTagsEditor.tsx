@@ -265,7 +265,7 @@ export function ContactTagsEditor(props: Props) {
               className="inline-flex items-center gap-1 rounded-full border border-dashed border-border px-2 py-0.5 text-[10px] text-muted-foreground hover:border-solid hover:text-foreground disabled:opacity-50"
             >
               <PontoDaEtiqueta tag={tag} />
-              + {tag}
+              + <span className="first-letter:uppercase">{tag}</span>
             </button>
           ))}
         </div>
