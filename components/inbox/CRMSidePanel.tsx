@@ -981,7 +981,7 @@ export function CRMSidePanel({ conversation, recolhido = false, onAlternarRecolh
             </div>
           )}
           <div className="flex flex-wrap gap-2 pt-1">
-            {contactId&&conversation?<Link className="underline" href={`/app/agenda?contato=${contactId}&conversa=${conversation.id}`}>{t("Marcar compromisso")}</Link>:null}
+            {contactId&&conversation?<Link className="basis-full underline" href={`/app/agenda?contato=${contactId}&conversa=${conversation.id}`}>{t("Marcar compromisso")}</Link>:null}
             <Button
               size="sm"
               variant="outline"
@@ -1003,6 +1003,20 @@ export function CRMSidePanel({ conversation, recolhido = false, onAlternarRecolh
           </div>
         </Card>
       </section>
+
+      {/* Etiquetas logo abaixo do cartão do contato, antes de "Dados da empresa" (pedido do Glauco). */}
+      {!readonly && (
+        <>
+          <ConversationTagsEditor
+            conversationId={conversation.id}
+            orgId={conversation.organization_id}
+            tags={conversation.tags ?? []}
+            contactId={contactId}
+            contactTags={tags}
+          />
+          <Separator />
+        </>
+      )}
 
       {contactId && !contact?.is_anonymized && !pessoasNoPainel && (
         <DadosDaEmpresaDoContato
@@ -1060,16 +1074,6 @@ export function CRMSidePanel({ conversation, recolhido = false, onAlternarRecolh
           }}
         />
       )}
-
-      <Separator />
-
-      {!readonly && <ConversationTagsEditor
-        conversationId={conversation.id}
-        orgId={conversation.organization_id}
-        tags={conversation.tags ?? []}
-        contactId={contactId}
-        contactTags={tags}
-      />}
 
       <Separator />
 
