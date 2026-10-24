@@ -8,6 +8,7 @@ import { useUser } from "@/hooks/auth/AuthProvider";
 import { useTagDeIdioma } from "@/hooks/i18n/useLocaleDeData";
 import { useT } from "@/hooks/i18n/useT";
 import { useAssignableMembers } from "@/hooks/inbox/useAssignableMembers";
+import { descricaoPedeVerTudo } from "@/lib/personalizacoes/descricao-da-tarefa";
 import {
   agrupaPorPrazo,
   estaAtrasada,
@@ -16,7 +17,7 @@ import {
   type PrioridadeDaTarefa,
   type Tarefa,
 } from "@/lib/tarefas/tipos";
-import { Check, Kanban, PencilSimple, Trash, UserCircle } from "@/lib/ui/icons";
+import { CalendarDots, Check, Kanban, PencilSimple, Trash, UserCircle } from "@/lib/ui/icons";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -63,6 +64,7 @@ function Linha({
   const tag = useTagDeIdioma();
   const [ocupada, setOcupada] = useState(false);
   const [confirmando, setConfirmando] = useState(false);
+  const [descricaoAberta, setDescricaoAberta] = useState(false);
 
   const encerrada = estaEncerrada(tarefa);
   const atrasada = estaAtrasada(tarefa);
@@ -108,16 +110,67 @@ function Linha({
       </button>
 
       <div className="min-w-0 flex-1">
+        {/*
+          O prazo abre a linha, num balão como o da etiqueta de prioridade: a cor conta a
+          situação (atrasada no vermelho do tema, no prazo neutra, sem prazo tracejada).
+          Data e hora são pedaços separados por um traço vertical fino — coladas
+          ("23/10, 09:00") pareciam um número só. `data-prazo*` são os ganchos do teste.
+        */}
+        <span
+          data-prazo={!tarefa.due_date ? "sem_prazo" : atrasada ? "atrasada" : "no_prazo"}
+          className={cn(
+            "mb-1 inline-flex items-center gap-2 rounded-full border px-2.5 py-0.5 text-[11px] font-medium tabular-nums",
+            !tarefa.due_date
+              ? "border-dashed border-border text-muted-foreground"
+              : atrasada
+                ? "border-destructive/30 bg-destructive/10 text-destructive"
+                : "border-border bg-muted/50 text-foreground/80",
+          )}
+        >
+          <CalendarDots size={12} aria-hidden />
+          {tarefa.due_date ? (
+            <>
+              <span data-prazo-data>
+                {new Date(tarefa.due_date).toLocaleDateString(tag, { day: "2-digit", month: "2-digit" })}
+              </span>
+              <span data-prazo-divisor aria-hidden className="h-3 w-px bg-current opacity-30" />
+              <span data-prazo-hora>
+                {new Date(tarefa.due_date).toLocaleTimeString(tag, { hour: "2-digit", minute: "2-digit" })}
+              </span>
+            </>
+          ) : (
+            t("Sem prazo")
+          )}
+        </span>
         <p
           className={cn(
-            "text-sm font-medium",
+            "text-sm font-bold",
             encerrada && "text-muted-foreground line-through",
           )}
         >
           {tarefa.title}
         </p>
         {tarefa.description ? (
-          <p className="mt-0.5 truncate text-xs text-muted-foreground">{tarefa.description}</p>
+          <>
+            <p
+              className={cn(
+                "mt-0.5 text-xs text-muted-foreground",
+                descricaoAberta ? "whitespace-pre-wrap break-words" : "truncate",
+              )}
+            >
+              {tarefa.description}
+            </p>
+            {descricaoPedeVerTudo(tarefa.description) ? (
+              <button
+                type="button"
+                aria-expanded={descricaoAberta}
+                onClick={() => setDescricaoAberta((aberta) => !aberta)}
+                className="mt-0.5 text-[11px] font-medium text-primary hover:underline"
+              >
+                {descricaoAberta ? t("Ver menos") : t("Ver tudo")}
+              </button>
+            ) : null}
+          </>
         ) : null}
 
         <div className="mt-1.5 flex flex-wrap items-center gap-2 text-[11px]">
@@ -128,16 +181,6 @@ function Linha({
             )}
           >
             {rotuloDaPrioridade[tarefa.priority]}
-          </span>
-          <span className={cn("text-muted-foreground", atrasada && "font-semibold text-destructive")}>
-            {tarefa.due_date
-              ? new Date(tarefa.due_date).toLocaleString(tag, {
-                  day: "2-digit",
-                  month: "2-digit",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })
-              : t("Sem prazo")}
           </span>
           {nomeDoResponsavel ? (
             <span className="flex items-center gap-1 text-muted-foreground">
