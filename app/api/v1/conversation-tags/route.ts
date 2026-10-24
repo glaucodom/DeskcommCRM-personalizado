@@ -112,9 +112,30 @@ export async function GET(_req: NextRequest): Promise<Response> {
       contagem.set(tag, (contagem.get(tag) ?? 0) + 1);
     }
   }
+  // ─── E AS CADASTRADAS NO VOCABULÁRIO (fork) ─────────────────────────────────
+  //
+  // "Nova etiqueta" (Configurações › Tags) grava no vocabulário da organização, que não é nem a lista
+  // canônica nem "em uso": a etiqueta recém-cadastrada (uso zero) não aparecia para escolher no Inbox.
+  // Entra aqui, depois das em uso. Falha na leitura NÃO derruba a rota: a lista de sempre segue inteira.
+  const { data: paginaDoVocabulario, error: erroDoVocabulario } = await supabase.rpc(
+    "fn_vocabulario_de_tags_pagina",
+    { p_org: activeOrg.orgId, p_busca: "", p_offset: 0, p_limit: 200 },
+  );
+  if (erroDoVocabulario) {
+    logger.warn("conversation-tags: vocabulário cadastrado não lido; só canônicas e em uso", {
+      requestId,
+      orgId: activeOrg.orgId,
+      cause: erroDoVocabulario.message,
+    });
+  }
+  const doVocabulario = tagsPageResultSchema.safeParse(paginaDoVocabulario);
+  const cadastradas = doVocabulario.success
+    ? doVocabulario.data.items.map((l) => l.tag.trim().toLowerCase().slice(0, 40))
+    : [];
+
   // O desempate é alfabético: as SEMENTES da organização (uso zero) descem
   // juntas, em ordem estável, e duas respostas iguais saem na mesma ordem.
-  const tags = [...new Set([...canonicas, ...usadas])].sort(
+  const tags = [...new Set([...canonicas, ...usadas, ...cadastradas])].sort(
     (a, b) => (contagem.get(b) ?? 0) - (contagem.get(a) ?? 0) || a.localeCompare(b, "pt-BR"),
   );
   return ok(tags, { requestId });
