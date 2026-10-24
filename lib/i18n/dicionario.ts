@@ -17692,6 +17692,7 @@ export const DICIONARIO: Traducoes = {
   "Não foi possível ligar agora. Confira a sua permissão de administrador da plataforma.": { es: "No se pudo activar ahora. Revise su permiso de administrador de la plataforma." },
   "Peça a quem administra o servidor para ligar.": { es: "Pida a quien administra el servidor que lo active." },
   "Ligar agora": { es: "Activar ahora" },
+  "Selecione o segmento": { es: "Seleccione el segmento" },
 };
 
 /**
