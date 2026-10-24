@@ -104,7 +104,15 @@ export async function POST(req: NextRequest): Promise<Response> {
 
   const parsed = vocabularioDeTagsSchema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) {
-    return fail("validation_failed", "Confira a etiqueta, o novo nome e a cor.", 422, {
+    // Fork: cada motivo conhecido diz o que houve. Antes, QUALQUER recusa dizia "…e a cor", e quem só
+    // trocava a maiúscula ("negociando" → "Negociando") achava que faltava uma cor.
+    const motivos = new Set(parsed.error.issues.map((i) => i.message));
+    const mensagem = motivos.has("destino_igual_a_tag")
+      ? "O novo nome é igual ao atual: maiúscula e minúscula não contam como nome diferente. Escolha outro nome."
+      : motivos.has("destino_obrigatorio")
+        ? "Digite o novo nome da etiqueta."
+        : "Confira a etiqueta, o novo nome e a cor.";
+    return fail("validation_failed", mensagem, 422, {
       requestId,
       details: parsed.error.issues.map((i) => ({ path: i.path.join("."), message: i.message })),
     });
