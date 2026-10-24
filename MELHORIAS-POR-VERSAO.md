@@ -5,6 +5,13 @@ acrescente uma seção NO TOPO** (mais nova primeiro) no formato abaixo e rode `
 na VPS. Linha de item: `- #número **Título**: o que muda para quem usa`. Use `#-` quando não for um item da
 lista de personalizações (ex.: junção com o oficial). Nada aqui é do projeto original.
 
+## v1.88.0-glauco.3 · 2026-10-23
+- #33 **Etiquetas do Inbox numa lista só**: conversa e contato passam a ter uma lista única de etiquetas, logo abaixo do cartão do contato (o botão Novo Lead fica ao lado de Ver contato). Clicar numa sugestão adiciona direto, sem perguntar a cor. As etiquetas cadastradas em Configurações › Tags aparecem nas sugestões. A primeira letra sai maiúscula na tela (o dado continua minúsculo). Se a recusa de renomear for só de maiúscula, a mensagem diz o motivo.
+- #34 **Ligar Empresas, Pessoas e Segmentos com um clique**: em Configurações › Organização, o cartão "Tipo de cliente" diz se o módulo está ligado e, para o administrador da plataforma, tem o botão "Ligar agora". Em Recursos opcionais, o módulo desligado ganha o botão "Ajustar".
+- #35 **Segmento do contato em lista suspensa**: escolha única, a partir da lista cadastrada em CRM › Segmentos.
+- #36 **Margem das telas igual à do Funil**: Hub, Tarefas, Propostas e Segmentos usam a mesma largura de conteúdo (documentada no design system).
+- #37 **Tarefas mais legíveis**: prazo num balão com data e hora separadas, título em negrito e descrição longa que abre inteira com "Ver tudo".
+
 ## v1.88.0-glauco.2 · 2026-10-23
 - #32 **Segmentos cadastrados por empresa**: em CRM › Segmentos (só B2B) cada empresa cadastra a própria lista; o Inbox, o Novo contato, o Editar contato e o Novo lead escolhem dela. Renomear atualiza também os contatos; tirar da lista não apaga o segmento dos contatos que já o têm.
 
