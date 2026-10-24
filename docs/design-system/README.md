@@ -21,6 +21,7 @@ Esta pasta é a **fonte canônica** da linguagem visual do DeskcommCRM. Toda dec
 | 07 | [Motion Language](./07-motion-language.md) | 4 tipos canônicos, curvas, durations |
 | 08 | [Voz e Tom](./08-voice-and-tone.md) | PT-BR profissional calmo, microcopy |
 | 09 | [Anti-patterns](./09-anti-patterns.md) | O que não fazer, com alternativas |
+| 10 | [Margem das telas](./10-margem-das-telas.md) | Largura e margem do conteúdo, igual à do Funil (regra do fork) |
 
 ## Mapa decisão → source of truth
 

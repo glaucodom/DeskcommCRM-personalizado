@@ -47,7 +47,7 @@ export function SegmentosClient() {
 
   const lista = data?.data ?? [];
   return (
-    <div className="mx-auto w-full max-w-2xl space-y-4 p-4">
+    <div className="w-full space-y-4">
       <header>
         <h1 className="text-lg font-semibold">{t("Segmentos")}</h1>
         <p className="text-sm text-muted-foreground">

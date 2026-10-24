@@ -73,7 +73,7 @@ export function ProposalsClient({ podeCriar }: { podeCriar: boolean }) {
   }, [tentativa]);
 
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-4 p-6">
+    <div className="w-full space-y-4">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold">{t("Propostas")}</h1>
         {podeCriar ? (
